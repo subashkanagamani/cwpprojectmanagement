@@ -11,9 +11,12 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
-  Filter
+  Filter,
+  Zap
 } from 'lucide-react';
 import { format, isToday, isPast, parseISO } from 'date-fns';
+import { MeetingUrgencyBadge } from '../MeetingUrgencyBadge';
+import { UpcomingMeetingsPriority } from './UpcomingMeetingsPriority';
 
 interface Task {
   id: string;
@@ -21,12 +24,18 @@ interface Task {
   description?: string;
   assigned_to: string;
   client_id?: string;
+  client_name?: string;
   priority: 'low' | 'medium' | 'high';
   due_date: string;
   status: 'pending' | 'completed';
   completed_at?: string;
   remarks?: string;
   created_at: string;
+  days_until_meeting?: number;
+  meeting_priority_score?: number;
+  meeting_urgency_label?: string;
+  weekly_meeting_day?: number;
+  meeting_time?: string;
   clients?: {
     name: string;
   };
@@ -51,13 +60,9 @@ export function DailyTasksPage() {
   const loadTasks = async () => {
     try {
       const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          clients(name)
-        `)
-        .eq('assigned_to', user!.id)
-        .order('due_date', { ascending: true });
+        .rpc('get_prioritized_tasks_for_employee', {
+          p_employee_id: user!.id
+        });
 
       if (error) throw error;
       setTasks(data || []);
@@ -159,22 +164,9 @@ export function DailyTasksPage() {
     return true;
   });
 
-  // Sort tasks: overdue on top, then by due date
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    const aOverdue = isOverdue(a);
-    const bOverdue = isOverdue(b);
-
-    if (aOverdue && !bOverdue) return -1;
-    if (!aOverdue && bOverdue) return 1;
-
-    // If both overdue or both not overdue, sort by priority then date
-    if (a.priority !== b.priority) {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    }
-
-    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-  });
+  // Tasks are already sorted by meeting priority from the database
+  // We only need to filter them here, not re-sort
+  const sortedTasks = filteredTasks;
 
   const pendingTasks = tasks.filter(t => t.status === 'pending');
   const completedTasks = tasks.filter(t => t.status === 'completed');
@@ -196,6 +188,8 @@ export function DailyTasksPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Daily Tasks</h1>
         <p className="text-gray-600">Manage your tasks and track your daily progress</p>
       </div>
+
+      <UpcomingMeetingsPriority />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
@@ -347,11 +341,19 @@ export function DailyTasksPage() {
                               </span>
                             </div>
 
-                            {task.clients && (
+                            {(task.clients || task.client_name) && (
                               <div className="flex items-center gap-1 text-sm text-gray-600">
                                 <Building2 className="h-4 w-4" />
-                                <span>{task.clients.name}</span>
+                                <span>{task.clients?.name || task.client_name}</span>
                               </div>
+                            )}
+
+                            {task.meeting_urgency_label && task.days_until_meeting !== undefined && (
+                              <MeetingUrgencyBadge
+                                daysUntilMeeting={task.days_until_meeting}
+                                urgencyLabel={task.meeting_urgency_label}
+                                size="sm"
+                              />
                             )}
 
                             {task.status === 'completed' && task.completed_at && (

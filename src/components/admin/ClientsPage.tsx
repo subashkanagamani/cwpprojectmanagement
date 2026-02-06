@@ -38,6 +38,8 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
     contact_email: '',
     contact_phone: '',
     website: '',
+    weekly_meeting_day: '' as string,
+    meeting_time: '10:00',
     selectedServices: [] as string[],
     selectedEmployees: [] as { employee_id: string, service_id: string }[],
   });
@@ -108,6 +110,8 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
         contact_email: client.contact_email || '',
         contact_phone: client.contact_phone || '',
         website: client.website || '',
+        weekly_meeting_day: client.weekly_meeting_day?.toString() || '',
+        meeting_time: client.meeting_time || '10:00',
         selectedServices: clientServices?.map((cs) => cs.service_id) || [],
         selectedEmployees: clientAssignments || [],
       });
@@ -125,6 +129,8 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
         contact_email: '',
         contact_phone: '',
         website: '',
+        weekly_meeting_day: '',
+        meeting_time: '10:00',
         selectedServices: [],
         selectedEmployees: [],
       });
@@ -160,6 +166,8 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
         contact_email: formData.contact_email || null,
         contact_phone: formData.contact_phone || null,
         website: formData.website || null,
+        weekly_meeting_day: formData.weekly_meeting_day ? parseInt(formData.weekly_meeting_day) : null,
+        meeting_time: formData.meeting_time || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -620,6 +628,41 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Weekly Meeting Schedule</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Meeting Day</label>
+                    <select
+                      value={formData.weekly_meeting_day}
+                      onChange={(e) => setFormData({ ...formData, weekly_meeting_day: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">No recurring meeting</option>
+                      <option value="0">Sunday</option>
+                      <option value="1">Monday</option>
+                      <option value="2">Tuesday</option>
+                      <option value="3">Wednesday</option>
+                      <option value="4">Thursday</option>
+                      <option value="5">Friday</option>
+                      <option value="6">Saturday</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Meeting Time</label>
+                    <input
+                      type="time"
+                      value={formData.meeting_time}
+                      onChange={(e) => setFormData({ ...formData, meeting_time: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Set a weekly meeting day to automatically prioritize related tasks for assigned employees.
+                </p>
               </div>
 
               <div>
