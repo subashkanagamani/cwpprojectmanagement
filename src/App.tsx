@@ -34,9 +34,10 @@ import { PerformanceBenchmarksPage } from './components/admin/PerformanceBenchma
 import { CustomMetricsPage } from './components/admin/CustomMetricsPage';
 import { TasksPage } from './components/admin/TasksPage';
 import { SettingsPage } from './components/admin/SettingsPage';
+import { ClientPortalView } from './components/ClientPortalView';
 
 function AppContent() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, isPortalUser } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
@@ -61,7 +62,15 @@ function AppContent() {
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  if (isPortalUser) {
+    return <ClientPortalView />;
+  }
+
+  if (!profile) {
     return <LoginPage />;
   }
 

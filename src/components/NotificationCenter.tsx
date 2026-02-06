@@ -4,18 +4,26 @@ import { useAuth } from '../contexts/AuthContext';
 import { Bell, X, Check } from 'lucide-react';
 import { Notification } from '../lib/database.types';
 import { format } from 'date-fns';
+import { useRealtimeNotifications } from '../hooks/useRealtimeSubscription';
+import { useToast } from '../contexts/ToastContext';
 
 export function NotificationCenter() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  useRealtimeNotifications(user?.id || '', (newNotification) => {
+    setNotifications((prev) => [newNotification, ...prev]);
+    setUnreadCount((prev) => prev + 1);
+
+    showToast(newNotification.title, newNotification.type || 'info');
+  });
+
   useEffect(() => {
     if (user) {
       loadNotifications();
-      const interval = setInterval(loadNotifications, 30000);
-      return () => clearInterval(interval);
     }
   }, [user]);
 

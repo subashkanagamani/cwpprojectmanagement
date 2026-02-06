@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  isPortalUser: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -20,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPortalUser, setIsPortalUser] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,21 +58,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error loading profile:', error);
-        throw error;
       }
 
       if (!data) {
-        console.error('No profile found for user:', userId);
-        // Profile doesn't exist, sign out the user
-        await supabase.auth.signOut();
-        setProfile(null);
+        const { data: portalData, error: portalError } = await supabase
+          .from('client_portal_users')
+          .select('*')
+          .eq('auth_user_id', userId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (portalError) {
+          console.error('Error loading portal user:', portalError);
+        }
+
+        if (portalData) {
+          setIsPortalUser(true);
+          setProfile(null);
+        } else {
+          console.error('No profile or portal user found for user:', userId);
+          await supabase.auth.signOut();
+          setProfile(null);
+          setIsPortalUser(false);
+        }
       } else {
         setProfile(data);
+        setIsPortalUser(false);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
       setProfile(null);
-      // Sign out if profile can't be loaded
+      setIsPortalUser(false);
       await supabase.auth.signOut();
     } finally {
       setLoading(false);
@@ -133,6 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     profile,
     loading,
+    isPortalUser,
     signIn,
     signUp,
     signOut,

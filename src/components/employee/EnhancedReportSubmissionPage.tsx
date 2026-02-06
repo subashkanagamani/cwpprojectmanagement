@@ -5,6 +5,7 @@ import { Client, Service, ClientAssignment, WeeklyReport, ActivityMetrics } from
 import { CheckCircle, ArrowLeft, Save, Clock, FileText, Plus, X, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
+import { ReportAttachments } from '../ReportAttachments';
 
 interface AssignmentWithDetails extends ClientAssignment {
   client?: Client;
@@ -27,6 +28,7 @@ export function EnhancedReportSubmissionPage() {
   const [success, setSuccess] = useState(false);
   const [lastReport, setLastReport] = useState<WeeklyReport | null>(null);
   const [meetingDates, setMeetingDates] = useState<MeetingDate[]>([]);
+  const [draftReportId, setDraftReportId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     week_start_date: getWeekStart(new Date()),
@@ -99,6 +101,44 @@ export function EnhancedReportSubmissionPage() {
     if (!selectedAssignment) return;
 
     try {
+      const { data: existingDraft, error } = await supabase
+        .from('weekly_reports')
+        .select('*')
+        .eq('employee_id', user!.id)
+        .eq('client_id', selectedAssignment.client_id)
+        .eq('service_id', selectedAssignment.service_id)
+        .eq('is_draft', true)
+        .eq('week_start_date', formData.week_start_date)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (existingDraft) {
+        setDraftReportId(existingDraft.id);
+        setFormData({
+          week_start_date: existingDraft.week_start_date,
+          work_summary: existingDraft.work_summary || '',
+          status: existingDraft.status || 'on_track',
+          key_wins: existingDraft.key_wins || '',
+          challenges: existingDraft.challenges || '',
+          next_week_plan: existingDraft.next_week_plan || '',
+          connections_sent: 0,
+          connections_accepted: 0,
+          responses_received: 0,
+          positive_responses: 0,
+          meetings_booked: 0,
+          metrics: {},
+        });
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+    }
+  };
+
+  const loadDraftOld = async () => {
+    if (!selectedAssignment) return;
+
+    try {
       const { data, error } = await supabase
         .from('report_drafts')
         .select('*')
@@ -146,6 +186,47 @@ export function EnhancedReportSubmissionPage() {
   };
 
   const autoSaveDraft = useCallback(async () => {
+    if (!selectedAssignment) return;
+
+    try {
+      if (draftReportId) {
+        await supabase
+          .from('weekly_reports')
+          .update({
+            work_summary: formData.work_summary,
+            status: formData.status,
+            key_wins: formData.key_wins,
+            challenges: formData.challenges,
+            next_week_plan: formData.next_week_plan,
+          })
+          .eq('id', draftReportId);
+      } else {
+        const { data, error } = await supabase
+          .from('weekly_reports')
+          .insert({
+            client_id: selectedAssignment.client_id,
+            employee_id: user!.id,
+            service_id: selectedAssignment.service_id,
+            week_start_date: formData.week_start_date,
+            work_summary: formData.work_summary,
+            status: formData.status,
+            key_wins: formData.key_wins,
+            challenges: formData.challenges,
+            next_week_plan: formData.next_week_plan,
+            is_draft: true,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        if (data) setDraftReportId(data.id);
+      }
+    } catch (error) {
+      console.error('Error auto-saving draft:', error);
+    }
+  }, [selectedAssignment, formData, user, draftReportId]);
+
+  const autoSaveDraftOld = useCallback(async () => {
     if (!selectedAssignment) return;
 
     try {
@@ -202,22 +283,49 @@ export function EnhancedReportSubmissionPage() {
     setSubmitting(true);
 
     try {
-      const { data: reportData, error: reportError } = await supabase
-        .from('weekly_reports')
-        .insert({
-          client_id: selectedAssignment.client_id,
-          employee_id: user!.id,
-          service_id: selectedAssignment.service_id,
-          week_start_date: formData.week_start_date,
-          work_summary: formData.work_summary,
-          status: formData.status,
-          key_wins: formData.key_wins,
-          challenges: formData.challenges,
-          next_week_plan: formData.next_week_plan,
-          is_draft: false,
-        })
-        .select()
-        .single();
+      let reportData;
+      let reportError;
+
+      if (draftReportId) {
+        const result = await supabase
+          .from('weekly_reports')
+          .update({
+            work_summary: formData.work_summary,
+            status: formData.status,
+            key_wins: formData.key_wins,
+            challenges: formData.challenges,
+            next_week_plan: formData.next_week_plan,
+            is_draft: false,
+            approval_status: 'submitted',
+          })
+          .eq('id', draftReportId)
+          .select()
+          .single();
+
+        reportData = result.data;
+        reportError = result.error;
+      } else {
+        const result = await supabase
+          .from('weekly_reports')
+          .insert({
+            client_id: selectedAssignment.client_id,
+            employee_id: user!.id,
+            service_id: selectedAssignment.service_id,
+            week_start_date: formData.week_start_date,
+            work_summary: formData.work_summary,
+            status: formData.status,
+            key_wins: formData.key_wins,
+            challenges: formData.challenges,
+            next_week_plan: formData.next_week_plan,
+            is_draft: false,
+            approval_status: 'submitted',
+          })
+          .select()
+          .single();
+
+        reportData = result.data;
+        reportError = result.error;
+      }
 
       if (reportError) throw reportError;
 
@@ -1073,6 +1181,18 @@ export function EnhancedReportSubmissionPage() {
                   placeholder="What are you planning for next week?"
                 />
               </div>
+
+              {draftReportId ? (
+                <div className="border-t border-gray-200 pt-6">
+                  <ReportAttachments reportId={draftReportId} canUpload={true} canDelete={true} />
+                </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    Save as draft first to attach files to this report.
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <button

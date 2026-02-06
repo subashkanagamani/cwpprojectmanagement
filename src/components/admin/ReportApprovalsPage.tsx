@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { CheckCircle, XCircle, Clock, MessageSquare, Eye, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
+import { ReportViewModal } from '../ReportViewModal';
 
 interface ReportApproval {
   id: string;
@@ -35,6 +36,7 @@ export function ReportApprovalsPage() {
   const [feedback, setFeedback] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'revise'>('approve');
   const [loading, setLoading] = useState(true);
+  const [viewingReportId, setViewingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     loadApprovals();
@@ -263,6 +265,7 @@ export function ReportApprovalsPage() {
 
             <div className="flex gap-3">
               <button
+                onClick={() => setViewingReportId(approval.report_id)}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
               >
                 <Eye className="h-4 w-4" />
@@ -360,6 +363,28 @@ export function ReportApprovalsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {viewingReportId && (
+        <ReportViewModal
+          reportId={viewingReportId}
+          onClose={() => setViewingReportId(null)}
+          canApprove={true}
+          onApprove={() => {
+            const approval = approvals.find(a => a.report_id === viewingReportId);
+            if (approval) {
+              openFeedbackModal(approval, 'approve');
+              setViewingReportId(null);
+            }
+          }}
+          onRequestRevision={() => {
+            const approval = approvals.find(a => a.report_id === viewingReportId);
+            if (approval) {
+              openFeedbackModal(approval, 'revise');
+              setViewingReportId(null);
+            }
+          }}
+        />
       )}
     </div>
   );
