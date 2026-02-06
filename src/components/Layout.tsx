@@ -75,6 +75,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   const employeeNav = [
     { id: 'dashboard', label: 'My Clients', icon: Briefcase },
     { id: 'reports', label: 'Submit Report', icon: FileText },
+    { id: 'tasks', label: 'My Tasks', icon: CheckSquare },
   ];
 
   const navigation = isAdmin ? adminNav : employeeNav;

@@ -20,6 +20,7 @@ import { ClientPortalPage } from './components/admin/ClientPortalPage';
 import { ActivityLogsPage } from './components/admin/ActivityLogsPage';
 import { EnhancedEmployeeDashboard } from './components/employee/EnhancedEmployeeDashboard';
 import { EnhancedReportSubmissionPage } from './components/employee/EnhancedReportSubmissionPage';
+import { DailyTasksPage } from './components/employee/DailyTasksPage';
 import { ClientDetailPage } from './components/admin/ClientDetailPage';
 import { CalendarPage } from './components/admin/CalendarPage';
 import { GoalsPage } from './components/admin/GoalsPage';
@@ -150,6 +151,8 @@ function AppContent() {
           return <EnhancedEmployeeDashboard />;
         case 'reports':
           return <EnhancedReportSubmissionPage />;
+        case 'tasks':
+          return <DailyTasksPage />;
         default:
           return <EnhancedEmployeeDashboard />;
       }
