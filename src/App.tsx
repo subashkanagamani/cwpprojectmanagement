@@ -37,6 +37,7 @@ import { TasksPage } from './components/admin/TasksPage';
 import { SettingsPage } from './components/admin/SettingsPage';
 import { ClientPortalView } from './components/ClientPortalView';
 import { ClientHealthDashboard } from './components/admin/ClientHealthDashboard';
+import { EmployeeWorkloadDashboard } from './components/admin/EmployeeWorkloadDashboard';
 
 function AppContent() {
   const { user, profile, loading, isPortalUser } = useAuth();
@@ -145,6 +146,8 @@ function AppContent() {
           return <SettingsPage />;
         case 'client-health':
           return <ClientHealthDashboard />;
+        case 'workload':
+          return <EmployeeWorkloadDashboard />;
         default:
           return <EnhancedDashboardPage />;
       }

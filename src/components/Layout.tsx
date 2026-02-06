@@ -28,7 +28,8 @@ import {
   Upload,
   TrendingUp,
   Sliders,
-  CheckSquare
+  CheckSquare,
+  Scale
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -52,6 +53,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'clients', label: 'Clients', icon: Briefcase },
     { id: 'client-health', label: 'Client Health', icon: Activity },
     { id: 'employees', label: 'Employees', icon: Users },
+    { id: 'workload', label: 'Team Workload', icon: Scale },
     { id: 'assignments', label: 'Assignments', icon: UserCog },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
