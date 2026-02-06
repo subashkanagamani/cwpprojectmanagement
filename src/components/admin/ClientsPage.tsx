@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Client, Service, Profile, ClientAssignment } from '../../lib/database.types';
 import { Plus, Edit2, Trash2, X, Users, Search, DollarSign, AlertCircle, Eye } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { ClientHealthIndicator } from '../ClientHealthIndicator';
 
 interface ClientWithDetails extends Client {
   assignmentCount?: number;
@@ -426,12 +427,12 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <AlertCircle className={`h-4 w-4 ${getHealthColor(client.health_status)}`} />
-                      <span className={`text-xs font-medium ${getHealthColor(client.health_status)}`}>
-                        {client.health_status.replace('_', ' ')}
-                      </span>
-                    </div>
+                    <ClientHealthIndicator
+                      healthStatus={client.health_status}
+                      healthScore={client.health_score}
+                      showScore={true}
+                      size="sm"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <button

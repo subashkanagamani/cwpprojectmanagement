@@ -36,6 +36,7 @@ import { CustomMetricsPage } from './components/admin/CustomMetricsPage';
 import { TasksPage } from './components/admin/TasksPage';
 import { SettingsPage } from './components/admin/SettingsPage';
 import { ClientPortalView } from './components/ClientPortalView';
+import { ClientHealthDashboard } from './components/admin/ClientHealthDashboard';
 
 function AppContent() {
   const { user, profile, loading, isPortalUser } = useAuth();
@@ -142,6 +143,8 @@ function AppContent() {
           return <TasksPage />;
         case 'settings':
           return <SettingsPage />;
+        case 'client-health':
+          return <ClientHealthDashboard />;
         default:
           return <EnhancedDashboardPage />;
       }

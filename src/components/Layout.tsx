@@ -50,6 +50,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'clients', label: 'Clients', icon: Briefcase },
+    { id: 'client-health', label: 'Client Health', icon: Activity },
     { id: 'employees', label: 'Employees', icon: Users },
     { id: 'assignments', label: 'Assignments', icon: UserCog },
     { id: 'reports', label: 'Reports', icon: FileText },
