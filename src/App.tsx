@@ -38,6 +38,8 @@ import { SettingsPage } from './components/admin/SettingsPage';
 import { ClientPortalView } from './components/ClientPortalView';
 import { ClientHealthDashboard } from './components/admin/ClientHealthDashboard';
 import { EmployeeWorkloadDashboard } from './components/admin/EmployeeWorkloadDashboard';
+import { AccountManagerDailyView } from './components/admin/AccountManagerDailyView';
+import { ClientCredentialsPage } from './components/admin/ClientCredentialsPage';
 
 function AppContent() {
   const { user, profile, loading, isPortalUser } = useAuth();
@@ -148,6 +150,10 @@ function AppContent() {
           return <ClientHealthDashboard />;
         case 'workload':
           return <EmployeeWorkloadDashboard />;
+        case 'account-manager':
+          return <AccountManagerDailyView />;
+        case 'credentials':
+          return <ClientCredentialsPage />;
         default:
           return <EnhancedDashboardPage />;
       }
@@ -159,6 +165,8 @@ function AppContent() {
           return <EnhancedReportSubmissionPage />;
         case 'tasks':
           return <DailyTasksPage />;
+        case 'credentials':
+          return <ClientCredentialsPage />;
         default:
           return <EnhancedEmployeeDashboard />;
       }

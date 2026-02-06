@@ -29,7 +29,9 @@ import {
   TrendingUp,
   Sliders,
   CheckSquare,
-  Scale
+  Scale,
+  Key,
+  ClipboardList
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -54,6 +56,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'client-health', label: 'Client Health', icon: Activity },
     { id: 'employees', label: 'Employees', icon: Users },
     { id: 'workload', label: 'Team Workload', icon: Scale },
+    { id: 'account-manager', label: 'Daily View', icon: ClipboardList },
     { id: 'assignments', label: 'Assignments', icon: UserCog },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
@@ -71,6 +74,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'import', label: 'Bulk Import', icon: Upload },
     { id: 'bulk', label: 'Bulk Operations', icon: Layers },
     { id: 'portal', label: 'Client Portal', icon: Globe },
+    { id: 'credentials', label: 'Client Credentials', icon: Key },
     { id: 'logs', label: 'Activity Logs', icon: Activity },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -79,6 +83,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
     { id: 'dashboard', label: 'My Clients', icon: Briefcase },
     { id: 'reports', label: 'Submit Report', icon: FileText },
     { id: 'tasks', label: 'My Tasks', icon: CheckSquare },
+    { id: 'credentials', label: 'Client Credentials', icon: Key },
   ];
 
   const navigation = isAdmin ? adminNav : employeeNav;
