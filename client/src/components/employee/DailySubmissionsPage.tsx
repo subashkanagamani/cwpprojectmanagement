@@ -333,9 +333,21 @@ export function DailySubmissionsPage() {
   const draftCount = assignments.filter(a => dailyLogs[a.id]?.status === 'pending').length;
   const pendingCount = assignments.length - submittedCount - draftCount;
 
+  const clientGroups = assignments.reduce((acc, assignment) => {
+    const clientId = assignment.client_id;
+    const clientName = assignment.clients?.name || 'Unknown Client';
+    if (!acc[clientId]) {
+      acc[clientId] = { clientId, clientName, assignments: [] };
+    }
+    acc[clientId].assignments.push(assignment);
+    return acc;
+  }, {} as Record<string, { clientId: string; clientName: string; assignments: Assignment[] }>);
+
+  const clientGroupsArray = Object.values(clientGroups);
+
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <div>
           <Skeleton className="h-8 w-56 mb-2" />
           <Skeleton className="h-4 w-80" />
@@ -343,13 +355,13 @@ export function DailySubmissionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28" />)}
         </div>
-        {[1, 2].map((i) => <Skeleton key={i} className="h-64" />)}
+        {[1, 2].map((i) => <Skeleton key={i} className="h-96" />)}
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-start gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-daily-submissions-title">Daily Submissions</h1>
@@ -420,125 +432,155 @@ export function DailySubmissionsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {assignments.map((assignment) => {
-            const slug = assignment.services?.slug || '';
-            const log = dailyLogs[assignment.id];
-            const isSubmitted = log?.status === 'submitted';
-            const isDraft = log?.status === 'pending';
-            const fields = getMetricFields(slug);
-            const metrics = localMetrics[assignment.id] || {};
-            const notes = localNotes[assignment.id] || '';
-            const isSaving = savingIds.has(assignment.id);
-            const isSubmitting = submittingIds.has(assignment.id);
+        <div className="space-y-6">
+          {clientGroupsArray.map((group) => {
+            const clientSubmitted = group.assignments.filter(a => dailyLogs[a.id]?.status === 'submitted').length;
+            const clientTotal = group.assignments.length;
 
             return (
-              <Card key={assignment.id} data-testid={`card-assignment-${assignment.id}`}>
-                <CardHeader className="pb-4">
+              <Card key={group.clientId} className="overflow-hidden border-2">
+                <CardHeader className="bg-muted/30 pb-4">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3">
-                      <div className={`rounded-lg p-2.5 ${getServiceIconColor(slug)}`}>
-                        <Briefcase className="h-5 w-5 text-foreground" />
+                      <div className="rounded-lg p-3 bg-primary/10">
+                        <Building2 className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-base">{assignment.services?.name || 'Unknown Service'}</CardTitle>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{assignment.clients?.name || 'Unknown Client'}</span>
-                        </div>
+                        <CardTitle className="text-lg">{group.clientName}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          {clientTotal} {clientTotal === 1 ? 'service' : 'services'}
+                        </p>
                       </div>
                     </div>
-                    {isSubmitted ? (
-                      <Badge variant="default" className="bg-green-600 dark:bg-green-700">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Submitted
+                    <div className="flex items-center gap-2">
+                      <Badge variant={clientSubmitted === clientTotal ? 'default' : 'secondary'} className={clientSubmitted === clientTotal ? 'bg-green-600 dark:bg-green-700' : ''}>
+                        {clientSubmitted} / {clientTotal} completed
                       </Badge>
-                    ) : isDraft ? (
-                      <Badge variant="secondary">
-                        <FileText className="h-3 w-3 mr-1" />
-                        Draft
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Not Started
-                      </Badge>
-                    )}
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  {fields.length > 0 ? (
-                    <div className="space-y-4">
-                      <div className={`rounded-lg p-4 ${getServiceColor(slug)}`}>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                          {fields.map((field) => (
-                            <div key={field.key}>
-                              <Label className="text-xs font-medium mb-1 block">{field.label}</Label>
-                              <Input
-                                type="number"
-                                step={field.step || '1'}
-                                min="0"
-                                value={metrics[field.key] ?? 0}
-                                onChange={(e) => {
-                                  const val = field.type === 'decimal' ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0;
-                                  updateMetric(assignment.id, field.key, val);
-                                }}
-                                disabled={isSubmitted}
-                                className="bg-background"
-                                data-testid={`input-${slug}-${field.key}-${assignment.id}`}
-                              />
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {group.assignments.map((assignment) => {
+                      const slug = assignment.services?.slug || '';
+                      const log = dailyLogs[assignment.id];
+                      const isSubmitted = log?.status === 'submitted';
+                      const isDraft = log?.status === 'pending';
+                      const fields = getMetricFields(slug);
+                      const metrics = localMetrics[assignment.id] || {};
+                      const notes = localNotes[assignment.id] || '';
+                      const isSaving = savingIds.has(assignment.id);
+                      const isSubmitting = submittingIds.has(assignment.id);
+
+                      return (
+                        <div key={assignment.id} className="border rounded-lg bg-card" data-testid={`card-assignment-${assignment.id}`}>
+                          <div className="p-4 border-b bg-muted/20">
+                            <div className="flex items-center justify-between gap-4 flex-wrap">
+                              <div className="flex items-center gap-3">
+                                <div className={`rounded-lg p-2 ${getServiceIconColor(slug)}`}>
+                                  <Briefcase className="h-4 w-4 text-foreground" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm">{assignment.services?.name || 'Unknown Service'}</h4>
+                                </div>
+                              </div>
+                              {isSubmitted ? (
+                                <Badge variant="default" className="bg-green-600 dark:bg-green-700" size="sm">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Submitted
+                                </Badge>
+                              ) : isDraft ? (
+                                <Badge variant="secondary" size="sm">
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Draft
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" size="sm">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Not Started
+                                </Badge>
+                              )}
                             </div>
-                          ))}
+                          </div>
+                          <div className="p-4">
+                            {fields.length > 0 ? (
+                              <div className="space-y-4">
+                                <div className={`rounded-lg p-4 ${getServiceColor(slug)}`}>
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    {fields.map((field) => (
+                                      <div key={field.key}>
+                                        <Label className="text-xs font-medium mb-1 block">{field.label}</Label>
+                                        <Input
+                                          type="number"
+                                          step={field.step || '1'}
+                                          min="0"
+                                          value={metrics[field.key] ?? 0}
+                                          onChange={(e) => {
+                                            const val = field.type === 'decimal' ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0;
+                                            updateMetric(assignment.id, field.key, val);
+                                          }}
+                                          disabled={isSubmitted}
+                                          className="bg-background h-8 text-sm"
+                                          data-testid={`input-${slug}-${field.key}-${assignment.id}`}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
+                                  <Textarea
+                                    placeholder="Add any notes about today's work..."
+                                    value={notes}
+                                    onChange={(e) => updateNotes(assignment.id, e.target.value)}
+                                    disabled={isSubmitted}
+                                    rows={2}
+                                    className="text-sm"
+                                    data-testid={`textarea-notes-${assignment.id}`}
+                                  />
+                                </div>
+
+                                {!isSubmitted && (
+                                  <div className="flex items-center gap-2 justify-end flex-wrap">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => saveDraft(assignment)}
+                                      disabled={isSaving || isSubmitting}
+                                      data-testid={`button-save-draft-${assignment.id}`}
+                                    >
+                                      {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
+                                      Save Draft
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => submitLog(assignment)}
+                                      disabled={isSaving || isSubmitting}
+                                      data-testid={`button-submit-${assignment.id}`}
+                                    >
+                                      {isSubmitting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+                                      Submit
+                                    </Button>
+                                  </div>
+                                )}
+
+                                {isSubmitted && log?.submitted_at && (
+                                  <p className="text-xs text-muted-foreground text-right">
+                                    Submitted at {format(new Date(log.submitted_at), 'h:mm a')}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="p-6 text-center text-muted-foreground">
+                                <p className="text-sm">No metric fields configured for this service type.</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-
-                      <div>
-                        <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
-                        <Textarea
-                          placeholder="Add any notes about today's work..."
-                          value={notes}
-                          onChange={(e) => updateNotes(assignment.id, e.target.value)}
-                          disabled={isSubmitted}
-                          rows={2}
-                          data-testid={`textarea-notes-${assignment.id}`}
-                        />
-                      </div>
-
-                      {!isSubmitted && (
-                        <div className="flex items-center gap-2 justify-end flex-wrap">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => saveDraft(assignment)}
-                            disabled={isSaving || isSubmitting}
-                            data-testid={`button-save-draft-${assignment.id}`}
-                          >
-                            {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
-                            Save Draft
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => submitLog(assignment)}
-                            disabled={isSaving || isSubmitting}
-                            data-testid={`button-submit-${assignment.id}`}
-                          >
-                            {isSubmitting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
-                            Submit
-                          </Button>
-                        </div>
-                      )}
-
-                      {isSubmitted && log?.submitted_at && (
-                        <p className="text-xs text-muted-foreground text-right">
-                          Submitted at {format(new Date(log.submitted_at), 'h:mm a')}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-6 text-center text-muted-foreground">
-                      <p className="text-sm">No metric fields configured for this service type.</p>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             );
