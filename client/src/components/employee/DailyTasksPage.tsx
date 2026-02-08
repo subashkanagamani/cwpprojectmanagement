@@ -168,6 +168,18 @@ export function DailyTasksPage() {
   const overdueTasks = tasks.filter(isOverdue);
   const todayTasks = tasks.filter(t => isToday(parseISO(t.due_date)));
 
+  const clientGroups = sortedTasks.reduce((acc, task) => {
+    const clientId = task.client_id || 'no-client';
+    const clientName = task.clients?.name || task.client_name || 'General Tasks';
+    if (!acc[clientId]) {
+      acc[clientId] = { clientId, clientName, tasks: [] };
+    }
+    acc[clientId].tasks.push(task);
+    return acc;
+  }, {} as Record<string, { clientId: string; clientName: string; tasks: Task[] }>);
+
+  const clientGroupsArray = Object.values(clientGroups);
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto space-y-6">
@@ -183,7 +195,7 @@ export function DailyTasksPage() {
         <Skeleton className="h-16" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-96" />
           ))}
         </div>
       </div>
@@ -299,193 +311,230 @@ export function DailyTasksPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {sortedTasks.map((task) => {
-            const overdue = isOverdue(task);
-            const today = isToday(parseISO(task.due_date));
-            const expanded = expandedTasks.has(task.id);
+        <div className="space-y-6">
+          {clientGroupsArray.map((group) => {
+            const clientCompleted = group.tasks.filter(t => t.status === 'completed').length;
+            const clientTotal = group.tasks.length;
+            const clientOverdue = group.tasks.filter(isOverdue).length;
 
             return (
-              <Card
-                key={task.id}
-                data-testid={`task-card-${task.id}`}
-                className={`border-2 ${
-                  overdue && task.status === 'pending'
-                    ? 'border-destructive/50 bg-destructive/5'
-                    : task.status === 'completed'
-                    ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 opacity-75'
-                    : today
-                    ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-border'
-                }`}
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-4">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleTaskComplete(task)}
-                      className={`mt-1 flex-shrink-0 ${
-                        task.status === 'completed' ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
-                      }`}
-                      data-testid={`button-toggle-task-${task.id}`}
-                    >
-                      {task.status === 'completed' ? (
-                        <CheckCircle2 className="h-7 w-7" />
-                      ) : (
-                        <Circle className="h-7 w-7" />
-                      )}
-                    </Button>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
-                        <div className="flex-1">
-                          <h3
-                            className={`text-lg font-semibold mb-2 ${
-                              task.status === 'completed'
-                                ? 'text-muted-foreground line-through'
-                                : 'text-foreground'
-                            }`}
-                          >
-                            {task.title}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-3">
-                            <Badge variant={getPriorityVariant(task.priority)} className="text-xs">
-                              {task.priority.toUpperCase()}
-                            </Badge>
-
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              <span className={overdue && task.status === 'pending' ? 'text-destructive font-semibold' : ''}>
-                                {format(parseISO(task.due_date), 'MMM d, yyyy')}
-                                {today && ' (Today)'}
-                                {overdue && task.status === 'pending' && ' - OVERDUE'}
-                              </span>
-                            </div>
-
-                            {(task.clients || task.client_name) && (
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Building2 className="h-4 w-4" />
-                                <span>{task.clients?.name || task.client_name}</span>
-                              </div>
-                            )}
-
-                            {task.meeting_urgency_label && task.days_until_meeting !== undefined && (
-                              <MeetingUrgencyBadge
-                                daysUntilMeeting={task.days_until_meeting}
-                                urgencyLabel={task.meeting_urgency_label}
-                                size="sm"
-                              />
-                            )}
-
-                            {task.status === 'completed' && task.completed_at && (
-                              <span className="text-xs text-green-700 dark:text-green-400 font-medium">
-                                Completed {format(parseISO(task.completed_at), 'MMM d, h:mm a')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {overdue && task.status === 'pending' && (
-                          <div className="flex-shrink-0">
-                            <Badge variant="destructive" className="text-xs font-bold">
-                              <AlertTriangle className="h-3 w-3 mr-1" />
-                              OVERDUE
-                            </Badge>
-                          </div>
-                        )}
+              <Card key={group.clientId} className="overflow-hidden border-2">
+                <CardHeader className="bg-muted/30 pb-4">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg p-3 bg-primary/10">
+                        <Building2 className="h-6 w-6 text-primary" />
                       </div>
-
-                      {task.description && (
-                        <p className="text-muted-foreground mb-3 text-sm">{task.description}</p>
+                      <div>
+                        <CardTitle className="text-lg">{group.clientName}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          {clientTotal} {clientTotal === 1 ? 'task' : 'tasks'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {clientOverdue > 0 && (
+                        <Badge variant="destructive" className="text-xs">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          {clientOverdue} overdue
+                        </Badge>
                       )}
+                      <Badge
+                        variant={clientCompleted === clientTotal ? 'default' : 'secondary'}
+                        className={clientCompleted === clientTotal ? 'bg-green-600 dark:bg-green-700' : ''}
+                      >
+                        {clientCompleted} / {clientTotal} completed
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {group.tasks.map((task) => {
+                      const overdue = isOverdue(task);
+                      const today = isToday(parseISO(task.due_date));
+                      const expanded = expandedTasks.has(task.id);
 
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="p-0 h-auto"
-                          onClick={() => toggleExpanded(task.id)}
-                          data-testid={`button-toggle-details-${task.id}`}
+                      return (
+                        <div
+                          key={task.id}
+                          data-testid={`task-card-${task.id}`}
+                          className={`border-2 rounded-lg ${
+                            overdue && task.status === 'pending'
+                              ? 'border-destructive/50 bg-destructive/5'
+                              : task.status === 'completed'
+                              ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 opacity-75'
+                              : today
+                              ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20'
+                              : 'border-border bg-card'
+                          }`}
                         >
-                          {expanded ? (
-                            <>
-                              <ChevronUp className="h-4 w-4 mr-1" />
-                              Hide Details
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-4 w-4 mr-1" />
-                              Show Details
-                            </>
-                          )}
-                        </Button>
-
-                        {task.status === 'pending' && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="p-0 h-auto text-muted-foreground"
-                            onClick={() => startEditingRemarks(task)}
-                            data-testid={`button-edit-remarks-${task.id}`}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            {task.remarks ? 'Edit Remarks' : 'Add Remarks'}
-                          </Button>
-                        )}
-                      </div>
-
-                      {expanded && (
-                        <div className="mt-4 pt-4 border-t border-border">
-                          <div className="bg-muted rounded-md p-4">
-                            <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                              <MessageSquare className="h-4 w-4" />
-                              Task Remarks
-                            </h4>
-
-                            {editingRemarks === task.id ? (
-                              <div className="space-y-3">
-                                <Textarea
-                                  value={remarksText}
-                                  onChange={(e) => setRemarksText(e.target.value)}
-                                  placeholder="Add your remarks about this task..."
-                                  rows={4}
-                                  data-testid={`textarea-remarks-${task.id}`}
-                                />
-                                <div className="flex gap-2 flex-wrap">
-                                  <Button
-                                    size="sm"
-                                    onClick={() => saveRemarks(task.id)}
-                                    data-testid={`button-save-remarks-${task.id}`}
-                                  >
-                                    Save Remarks
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => {
-                                      setEditingRemarks(null);
-                                      setRemarksText('');
-                                    }}
-                                    data-testid={`button-cancel-remarks-${task.id}`}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                {task.remarks ? (
-                                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{task.remarks}</p>
+                          <div className="p-4">
+                            <div className="flex items-start gap-4">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleTaskComplete(task)}
+                                className={`mt-1 flex-shrink-0 ${
+                                  task.status === 'completed' ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+                                }`}
+                                data-testid={`button-toggle-task-${task.id}`}
+                              >
+                                {task.status === 'completed' ? (
+                                  <CheckCircle2 className="h-6 w-6" />
                                 ) : (
-                                  <p className="text-sm text-muted-foreground italic">No remarks added yet</p>
+                                  <Circle className="h-6 w-6" />
+                                )}
+                              </Button>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
+                                  <div className="flex-1">
+                                    <h3
+                                      className={`text-base font-semibold mb-2 ${
+                                        task.status === 'completed'
+                                          ? 'text-muted-foreground line-through'
+                                          : 'text-foreground'
+                                      }`}
+                                    >
+                                      {task.title}
+                                    </h3>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <Badge variant={getPriorityVariant(task.priority)} className="text-xs">
+                                        {task.priority.toUpperCase()}
+                                      </Badge>
+
+                                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                        <Calendar className="h-3.5 w-3.5" />
+                                        <span className={overdue && task.status === 'pending' ? 'text-destructive font-semibold' : ''}>
+                                          {format(parseISO(task.due_date), 'MMM d, yyyy')}
+                                          {today && ' (Today)'}
+                                          {overdue && task.status === 'pending' && ' - OVERDUE'}
+                                        </span>
+                                      </div>
+
+                                      {task.meeting_urgency_label && task.days_until_meeting !== undefined && (
+                                        <MeetingUrgencyBadge
+                                          daysUntilMeeting={task.days_until_meeting}
+                                          urgencyLabel={task.meeting_urgency_label}
+                                          size="sm"
+                                        />
+                                      )}
+
+                                      {task.status === 'completed' && task.completed_at && (
+                                        <span className="text-xs text-green-700 dark:text-green-400 font-medium">
+                                          Completed {format(parseISO(task.completed_at), 'MMM d, h:mm a')}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {overdue && task.status === 'pending' && (
+                                    <div className="flex-shrink-0">
+                                      <Badge variant="destructive" className="text-xs font-bold">
+                                        <AlertTriangle className="h-3 w-3 mr-1" />
+                                        OVERDUE
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {task.description && (
+                                  <p className="text-muted-foreground mb-3 text-sm">{task.description}</p>
+                                )}
+
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    className="p-0 h-auto text-xs"
+                                    onClick={() => toggleExpanded(task.id)}
+                                    data-testid={`button-toggle-details-${task.id}`}
+                                  >
+                                    {expanded ? (
+                                      <>
+                                        <ChevronUp className="h-3.5 w-3.5 mr-1" />
+                                        Hide Details
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ChevronDown className="h-3.5 w-3.5 mr-1" />
+                                        Show Details
+                                      </>
+                                    )}
+                                  </Button>
+
+                                  {task.status === 'pending' && (
+                                    <Button
+                                      variant="link"
+                                      size="sm"
+                                      className="p-0 h-auto text-xs text-muted-foreground"
+                                      onClick={() => startEditingRemarks(task)}
+                                      data-testid={`button-edit-remarks-${task.id}`}
+                                    >
+                                      <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                                      {task.remarks ? 'Edit Remarks' : 'Add Remarks'}
+                                    </Button>
+                                  )}
+                                </div>
+
+                                {expanded && (
+                                  <div className="mt-4 pt-4 border-t border-border">
+                                    <div className="bg-muted rounded-md p-3">
+                                      <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                                        <MessageSquare className="h-4 w-4" />
+                                        Task Remarks
+                                      </h4>
+
+                                      {editingRemarks === task.id ? (
+                                        <div className="space-y-3">
+                                          <Textarea
+                                            value={remarksText}
+                                            onChange={(e) => setRemarksText(e.target.value)}
+                                            placeholder="Add your remarks about this task..."
+                                            rows={3}
+                                            className="text-sm"
+                                            data-testid={`textarea-remarks-${task.id}`}
+                                          />
+                                          <div className="flex gap-2 flex-wrap">
+                                            <Button
+                                              size="sm"
+                                              onClick={() => saveRemarks(task.id)}
+                                              data-testid={`button-save-remarks-${task.id}`}
+                                            >
+                                              Save Remarks
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="secondary"
+                                              onClick={() => {
+                                                setEditingRemarks(null);
+                                                setRemarksText('');
+                                              }}
+                                              data-testid={`button-cancel-remarks-${task.id}`}
+                                            >
+                                              Cancel
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div>
+                                          {task.remarks ? (
+                                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{task.remarks}</p>
+                                          ) : (
+                                            <p className="text-sm text-muted-foreground italic">No remarks added yet</p>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 )}
                               </div>
-                            )}
+                            </div>
                           </div>
                         </div>
-                      )}
-                    </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
