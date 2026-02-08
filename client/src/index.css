@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 224 30% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 30% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 30% 16%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 224 30% 16%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 94%;
+    --accent-foreground: 224 30% 16%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.625rem;
+    --chart-1: 221 83% 53%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 224 30% 16%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 224 30% 16%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  .dark {
+    --background: 224 30% 8%;
+    --foreground: 210 40% 96%;
+    --card: 224 28% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 224 28% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 224 30% 8%;
+    --secondary: 220 20% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 220 20% 16%;
+    --muted-foreground: 215 16% 57%;
+    --accent: 220 20% 16%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 224 76% 48%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 224 28% 10%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 224 30% 8%;
+    --sidebar-accent: 220 20% 16%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 224 76% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+@layer utilities {
+  .hover-elevate {
+    position: relative;
+    isolation: isolate;
+    transition: transform 0.15s ease;
+  }
+  .hover-elevate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    transition: background-color 0.15s ease;
+    background-color: transparent;
+  }
+  .hover-elevate:hover::after {
+    background-color: hsl(var(--foreground) / 0.05);
+  }
+
+  .active-elevate-2 {
+    position: relative;
+    isolation: isolate;
+  }
+  .active-elevate-2::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
+    transition: background-color 0.1s ease;
+    background-color: transparent;
+  }
+  .active-elevate-2:active::before {
+    background-color: hsl(var(--foreground) / 0.08);
+  }
+
+  .no-default-hover-elevate::after {
+    display: none !important;
+  }
+  .no-default-active-elevate::before {
+    display: none !important;
+  }
+
+  .toggle-elevate {
+    position: relative;
+    isolation: isolate;
+  }
+  .toggle-elevate.toggle-elevated {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+  .toggle-elevate.toggle-elevated::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background-color: hsl(var(--foreground) / 0.03);
+  }
+}
