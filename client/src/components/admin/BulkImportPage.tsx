@@ -124,33 +124,73 @@ export function BulkImportPage() {
       if (row.length === 0 || row[0] === '') continue;
 
       try {
-        const { data: existingUser, error: signUpError } = await supabase.auth.signUp({
-          email: row[headers.indexOf('email')],
-          password: Math.random().toString(36).slice(-12),
-        });
+        const email = row[headers.indexOf('email')];
 
-        if (signUpError) throw signUpError;
+        if (!email || !email.includes('@')) {
+          throw new Error('Invalid email address');
+        }
+
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+
+        let userId = existingProfile?.id;
+
+        if (!existingProfile) {
+          const tempPassword = `Temp${Math.random().toString(36).slice(-8)}!${Date.now().toString(36)}`;
+
+          const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email: email,
+            password: tempPassword,
+          });
+
+          if (signUpError) {
+            if (signUpError.message.includes('already registered')) {
+              throw new Error(`User ${email} already exists in auth system`);
+            }
+            throw signUpError;
+          }
+
+          if (!authData.user) {
+            throw new Error('Failed to create user account');
+          }
+
+          userId = authData.user.id;
+        }
 
         const profileData: any = {
-          id: existingUser.user?.id,
+          id: userId,
         };
+
         headers.forEach((header, index) => {
-          if (header !== 'email') {
-            profileData[header] = row[index] || null;
-          } else {
-            profileData['email'] = row[index];
+          if (header !== 'email' && row[index]) {
+            if (header === 'max_capacity') {
+              profileData[header] = parseInt(row[index]) || 5;
+            } else if (header === 'skills') {
+              profileData[header] = row[index].split(',').map((s: string) => s.trim());
+            } else {
+              profileData[header] = row[index];
+            }
+          } else if (header === 'email') {
+            profileData['email'] = email;
           }
         });
 
+        if (!profileData.full_name) {
+          throw new Error('Full name is required');
+        }
+
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert(profileData);
+          .upsert(profileData, { onConflict: 'id' });
 
         if (profileError) throw profileError;
         result.success++;
       } catch (error: any) {
         result.failed++;
-        result.errors.push({ row: i + 1, error: error.message });
+        result.errors.push({ row: i + 1, error: error.message || 'Unknown error' });
       }
     }
 

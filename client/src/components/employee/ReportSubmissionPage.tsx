@@ -59,20 +59,17 @@ export function ReportSubmissionPage() {
       if (error) throw error;
 
       if (assignmentsData) {
-        const assignmentsWithDetails = await Promise.all(
-          assignmentsData.map(async (assignment) => {
-            const [clientRes, serviceRes] = await Promise.all([
-              supabase.from('clients').select('*').eq('id', assignment.client_id).single(),
-              supabase.from('services').select('*').eq('id', assignment.service_id).single(),
-            ]);
+        const { data: assignmentsWithRelations } = await supabase
+          .from('client_assignments')
+          .select('*, clients(*), services(*)')
+          .eq('employee_id', user!.id);
 
-            return {
-              ...assignment,
-              client: clientRes.data || undefined,
-              service: serviceRes.data || undefined,
-            };
-          })
-        );
+        const assignmentsWithDetails = (assignmentsWithRelations || []).map((assignment: any) => ({
+          ...assignment,
+          client: assignment.clients,
+          service: assignment.services,
+        }));
+
         setAssignments(assignmentsWithDetails);
       }
     } catch (error) {
@@ -108,12 +105,29 @@ export function ReportSubmissionPage() {
       if (reportError) throw reportError;
 
       if (reportData) {
-        const { error: metricsError } = await supabase.from('service_metrics').insert({
-          weekly_report_id: reportData.id,
-          metric_data: formData.metrics,
-        });
+        const { data: existingMetrics } = await supabase
+          .from('service_metrics')
+          .select('id')
+          .eq('weekly_report_id', reportData.id)
+          .maybeSingle();
 
-        if (metricsError) throw metricsError;
+        if (existingMetrics) {
+          const { error: metricsError } = await supabase
+            .from('service_metrics')
+            .update({ metric_data: formData.metrics, updated_at: new Date().toISOString() })
+            .eq('id', existingMetrics.id);
+
+          if (metricsError) throw metricsError;
+        } else {
+          const { error: metricsError } = await supabase
+            .from('service_metrics')
+            .insert({
+              weekly_report_id: reportData.id,
+              metric_data: formData.metrics,
+            });
+
+          if (metricsError) throw metricsError;
+        }
       }
 
       setSuccess(true);

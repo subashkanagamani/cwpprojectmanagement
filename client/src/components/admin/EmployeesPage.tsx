@@ -74,6 +74,7 @@ export function EmployeesPage() {
     phone: '',
     max_capacity: '5',
     skills: [] as string[],
+    manager_id: null as string | null,
   });
   const [assignFormData, setAssignFormData] = useState({
     client_id: '',
@@ -130,6 +131,7 @@ export function EmployeesPage() {
         phone: employee.phone || '',
         max_capacity: employee.max_capacity?.toString() || '5',
         skills: skillsArray,
+        manager_id: employee.manager_id || null,
       });
     } else {
       setEditingEmployee(null);
@@ -142,6 +144,7 @@ export function EmployeesPage() {
         phone: '',
         max_capacity: '5',
         skills: [],
+        manager_id: null,
       });
     }
     setShowModal(true);
@@ -168,6 +171,7 @@ export function EmployeesPage() {
             phone: formData.phone || null,
             max_capacity: parseInt(formData.max_capacity),
             skills: formData.skills,
+            manager_id: formData.manager_id || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingEmployee.id);
@@ -191,6 +195,7 @@ export function EmployeesPage() {
             phone: formData.phone || null,
             max_capacity: parseInt(formData.max_capacity),
             skills: formData.skills,
+            manager_id: formData.manager_id || null,
           });
 
           if (profileError) throw profileError;
@@ -750,6 +755,30 @@ export function EmployeesPage() {
                   data-testid="input-employee-capacity"
                 />
               </div>
+            </div>
+
+            <div>
+              <Label>Manager (Optional)</Label>
+              <Select
+                value={formData.manager_id || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, manager_id: value === 'none' ? null : value })}
+              >
+                <SelectTrigger data-testid="select-employee-manager">
+                  <SelectValue placeholder="No manager" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No manager</SelectItem>
+                  {employees
+                    .filter(emp => emp.role === 'admin' || emp.role === 'employee')
+                    .filter(emp => emp.id !== editingEmployee?.id)
+                    .map(emp => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.full_name} ({emp.role})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Assign a manager to this employee for reporting hierarchy</p>
             </div>
 
             <div>

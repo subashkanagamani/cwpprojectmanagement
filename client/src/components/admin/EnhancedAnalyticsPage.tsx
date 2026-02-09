@@ -120,15 +120,34 @@ export function EnhancedAnalyticsPage() {
 
       setServicePerformance(servicePerf);
 
-      const last8Weeks = Array.from({ length: 8 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (i * 7));
-        return {
-          week: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          reports: Math.floor(Math.random() * 20) + 10,
-          clients: currentActiveClients - i,
-        };
-      }).reverse();
+      const weeklyData = await Promise.all(
+        Array.from({ length: 8 }, async (_, i) => {
+          const weekEnd = new Date();
+          weekEnd.setDate(weekEnd.getDate() - (i * 7));
+          const weekStart = new Date(weekEnd);
+          weekStart.setDate(weekStart.getDate() - 7);
+
+          const { data: weekReports } = await supabase
+            .from('weekly_reports')
+            .select('id')
+            .gte('created_at', weekStart.toISOString())
+            .lt('created_at', weekEnd.toISOString());
+
+          const { data: weekClients } = await supabase
+            .from('clients')
+            .select('id')
+            .eq('status', 'active')
+            .lte('created_at', weekEnd.toISOString());
+
+          return {
+            week: weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            reports: weekReports?.length || 0,
+            clients: weekClients?.length || 0,
+          };
+        })
+      );
+
+      const last8Weeks = weeklyData.reverse();
 
       setWeeklyTrend(last8Weeks);
 
