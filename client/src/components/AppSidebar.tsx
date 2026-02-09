@@ -44,6 +44,7 @@ import {
   Key,
   LogOut,
   ClipboardCheck,
+  UsersRound,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -72,6 +73,7 @@ const adminNavGroups = [
       { id: "employees", label: "Employees", icon: Users, path: "/employees" },
       { id: "workload", label: "Workload", icon: Scale, path: "/workload" },
       { id: "daily-view", label: "Daily View", icon: ClipboardList, path: "/daily-view" },
+      { id: "team-monitoring", label: "Team Monitoring", icon: UsersRound, path: "/team-monitoring" },
       { id: "daily-submissions", label: "Daily Submissions", icon: ClipboardCheck, path: "/daily-submissions" },
       { id: "assignments", label: "Assignments", icon: UserCog, path: "/assignments" },
       { id: "resources", label: "Resources", icon: UserCheck, path: "/resources" },

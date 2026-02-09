@@ -53,6 +53,7 @@ import { SettingsPage } from "./components/admin/SettingsPage";
 import { ClientHealthDashboard } from "./components/admin/ClientHealthDashboard";
 import { EmployeeWorkloadDashboard } from "./components/admin/EmployeeWorkloadDashboard";
 import { AccountManagerDailyView } from "./components/admin/AccountManagerDailyView";
+import { TeamMonitoringPage } from "./components/admin/TeamMonitoringPage";
 import { ClientCredentialsPage } from "./components/admin/ClientCredentialsPage";
 import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmployeeDashboard";
 import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
@@ -91,6 +92,7 @@ function AdminRoutes() {
       <Route path="/employees" component={EmployeesPage} />
       <Route path="/workload" component={EmployeeWorkloadDashboard} />
       <Route path="/daily-view" component={AccountManagerDailyView} />
+      <Route path="/team-monitoring" component={TeamMonitoringPage} />
       <Route path="/daily-submissions" component={AdminDailySubmissionsPage} />
       <Route path="/assignments" component={AssignmentsPage} />
       <Route path="/reports" component={ReportsPage} />
