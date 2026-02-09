@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Client, Profile, Service, ClientAssignment } from '../../lib/database.types';
-import { Plus, X, Trash2, Users, Building2, Briefcase, UserCheck, Filter, Search } from 'lucide-react';
+import { Plus, X, Trash2, Users, Building2, Briefcase, UserCheck, Filter, Search, Crown } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,6 +61,7 @@ export function AssignmentsPage() {
     client_id: '',
     employee_ids: [] as string[],
     service_id: '',
+    account_manager_id: '' as string,
   });
   const [selectedClient, setSelectedClient] = useState<string>('all');
   const [selectedEmployee, setSelectedEmployee] = useState<string>('all');
@@ -129,6 +130,7 @@ export function AssignmentsPage() {
         client_id: formData.client_id,
         employee_id: employee_id,
         service_id: formData.service_id,
+        is_account_manager: employee_id === formData.account_manager_id,
       }));
 
       const { error } = await supabase.from('client_assignments').insert(newAssignments as any);
@@ -143,7 +145,7 @@ export function AssignmentsPage() {
       }
 
       setShowModal(false);
-      setFormData({ client_id: '', employee_ids: [], service_id: '' });
+      setFormData({ client_id: '', employee_ids: [], service_id: '', account_manager_id: '' });
       loadData();
     } catch (error) {
       console.error('Error creating assignment:', error);
@@ -160,6 +162,23 @@ export function AssignmentsPage() {
       loadData();
     } catch (error) {
       console.error('Error deleting assignment:', error);
+    }
+  };
+
+  const toggleAccountManager = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('client_assignments')
+        .update({ is_account_manager: !currentStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      showToast(!currentStatus ? 'Set as account manager' : 'Removed as account manager', 'success');
+      loadData();
+    } catch (error) {
+      console.error('Error toggling account manager:', error);
+      showToast('Failed to update account manager status', 'error');
     }
   };
 
@@ -396,29 +415,48 @@ export function AssignmentsPage() {
                             className="flex items-center justify-between gap-3 p-3 rounded-md border border-border"
                             data-testid={`row-assignment-${assignment.id}`}
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
                               <Avatar className="h-8 w-8 flex-shrink-0">
                                 <AvatarFallback className={`text-xs font-medium ${getAvatarColor(assignment.employee?.full_name)}`}>
                                   {getInitials(assignment.employee?.full_name)}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-foreground truncate" data-testid={`text-employee-name-${assignment.id}`}>
-                                  {assignment.employee?.full_name}
-                                </p>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium text-foreground truncate" data-testid={`text-employee-name-${assignment.id}`}>
+                                    {assignment.employee?.full_name}
+                                  </p>
+                                  {assignment.is_account_manager && (
+                                    <Badge variant="default" className="bg-amber-600 dark:bg-amber-700 text-xs px-1.5 py-0">
+                                      <Crown className="h-3 w-3 mr-0.5" />
+                                      Manager
+                                    </Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-muted-foreground truncate">
                                   {assignment.employee?.email}
                                 </p>
                               </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(assignment.id)}
-                              data-testid={`button-delete-assignment-${assignment.id}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => toggleAccountManager(assignment.id, assignment.is_account_manager || false)}
+                                title={assignment.is_account_manager ? 'Remove as account manager' : 'Set as account manager'}
+                                data-testid={`button-toggle-manager-${assignment.id}`}
+                              >
+                                <Crown className={`h-4 w-4 ${assignment.is_account_manager ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(assignment.id)}
+                                data-testid={`button-delete-assignment-${assignment.id}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -551,6 +589,34 @@ export function AssignmentsPage() {
                 </div>
               )}
             </div>
+
+            {formData.employee_ids.length > 0 && (
+              <div className="space-y-2">
+                <Label>Account Manager (Optional)</Label>
+                <Select
+                  value={formData.account_manager_id}
+                  onValueChange={(value) => setFormData({ ...formData, account_manager_id: value })}
+                >
+                  <SelectTrigger data-testid="select-account-manager">
+                    <SelectValue placeholder="Select account manager" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {formData.employee_ids.map((employeeId) => {
+                      const employee = employees.find(e => e.id === employeeId);
+                      return (
+                        <SelectItem key={employeeId} value={employeeId}>
+                          {employee?.full_name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Account managers can track progress of all team members on this client
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Service / Role</Label>

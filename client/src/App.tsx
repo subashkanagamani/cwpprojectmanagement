@@ -58,6 +58,7 @@ import { ClientCredentialsPage } from "./components/admin/ClientCredentialsPage"
 import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmployeeDashboard";
 import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
 import { MyTasksPage } from "./components/employee/MyTasksPage";
+import { TeamProgressTracker } from "./components/employee/TeamProgressTracker";
 import { AdminDailySubmissionsPage } from "./components/admin/AdminDailySubmissionsPage";
 import { FeedbackPage } from "./components/admin/FeedbackPage";
 import { TimeOffPage } from "./components/admin/TimeOffPage";
@@ -132,6 +133,7 @@ function EmployeeRoutes() {
       <Route path="/dashboard" component={EnhancedEmployeeDashboard} />
       <Route path="/reports" component={EnhancedReportSubmissionPage} />
       <Route path="/tasks" component={MyTasksPage} />
+      <Route path="/team-progress" component={TeamProgressTracker} />
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/time-off" component={TimeOffPage} />
       <Route path="/credentials" component={ClientCredentialsPage} />

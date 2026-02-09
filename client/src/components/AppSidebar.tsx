@@ -126,6 +126,7 @@ const employeeNavGroups = [
       { id: "dashboard", label: "My Clients", icon: Briefcase, path: "/dashboard" },
       { id: "reports", label: "Submit Report", icon: FileText, path: "/reports" },
       { id: "tasks", label: "My Tasks", icon: CheckSquare, path: "/tasks" },
+      { id: "team-progress", label: "Team Progress", icon: UsersRound, path: "/team-progress" },
       { id: "feedback", label: "Feedback", icon: MessageSquare, path: "/feedback" },
       { id: "time-off", label: "Time Off", icon: Calendar, path: "/time-off" },
       { id: "credentials", label: "Credentials", icon: Key, path: "/credentials" },
