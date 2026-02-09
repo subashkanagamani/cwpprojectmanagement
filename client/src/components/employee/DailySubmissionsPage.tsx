@@ -14,7 +14,10 @@ import {
   CheckCircle2,
   Clock,
   FileText,
-  Loader2
+  Loader2,
+  PlayCircle,
+  PauseCircle,
+  Circle as CircleIcon
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +26,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Assignment {
   id: string;
@@ -43,6 +53,7 @@ interface DailyLog {
   metrics: Record<string, any>;
   notes: string | null;
   status: 'pending' | 'submitted';
+  work_status: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'review';
   submitted_at: string | null;
 }
 
@@ -175,6 +186,7 @@ export function DailySubmissionsPage() {
   const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
   const [localMetrics, setLocalMetrics] = useState<Record<string, Record<string, any>>>({});
   const [localNotes, setLocalNotes] = useState<Record<string, string>>({});
+  const [localWorkStatus, setLocalWorkStatus] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
@@ -204,11 +216,13 @@ export function DailySubmissionsPage() {
         const logsMap: Record<string, DailyLog> = {};
         const metricsMap: Record<string, Record<string, any>> = {};
         const notesMap: Record<string, string> = {};
+        const workStatusMap: Record<string, string> = {};
 
         (logsData || []).forEach((log: any) => {
           logsMap[log.assignment_id] = log;
           metricsMap[log.assignment_id] = log.metrics || {};
           notesMap[log.assignment_id] = log.notes || '';
+          workStatusMap[log.assignment_id] = log.work_status || 'not_started';
         });
 
         (assignData || []).forEach((a: any) => {
@@ -218,15 +232,20 @@ export function DailySubmissionsPage() {
           if (notesMap[a.id] === undefined) {
             notesMap[a.id] = '';
           }
+          if (workStatusMap[a.id] === undefined) {
+            workStatusMap[a.id] = 'not_started';
+          }
         });
 
         setDailyLogs(logsMap);
         setLocalMetrics(metricsMap);
         setLocalNotes(notesMap);
+        setLocalWorkStatus(workStatusMap);
       } else {
         setDailyLogs({});
         setLocalMetrics({});
         setLocalNotes({});
+        setLocalWorkStatus({});
       }
     } catch (error: any) {
       showToast('error', error.message || 'Failed to load data');
@@ -250,6 +269,10 @@ export function DailySubmissionsPage() {
     setLocalNotes(prev => ({ ...prev, [assignmentId]: value }));
   };
 
+  const updateWorkStatus = (assignmentId: string, value: string) => {
+    setLocalWorkStatus(prev => ({ ...prev, [assignmentId]: value }));
+  };
+
   const saveDraft = async (assignment: Assignment) => {
     setSavingIds(prev => new Set(prev).add(assignment.id));
     try {
@@ -262,13 +285,14 @@ export function DailySubmissionsPage() {
         log_date: selectedDate,
         metrics: localMetrics[assignment.id] || {},
         notes: localNotes[assignment.id] || null,
+        work_status: localWorkStatus[assignment.id] || 'not_started',
         status: 'pending' as const,
       };
 
       const dtl = supabase.from('daily_task_logs');
       if (existing) {
         const { error } = await (dtl as any)
-          .update({ metrics: payload.metrics, notes: payload.notes, updated_at: new Date().toISOString() })
+          .update({ metrics: payload.metrics, notes: payload.notes, work_status: payload.work_status, updated_at: new Date().toISOString() })
           .eq('id', existing.id);
         if (error) throw error;
       } else {
@@ -298,6 +322,7 @@ export function DailySubmissionsPage() {
         log_date: selectedDate,
         metrics: localMetrics[assignment.id] || {},
         notes: localNotes[assignment.id] || null,
+        work_status: localWorkStatus[assignment.id] || 'not_started',
         status: 'submitted' as const,
         submitted_at: new Date().toISOString(),
       };
@@ -305,7 +330,7 @@ export function DailySubmissionsPage() {
       const dtl = supabase.from('daily_task_logs');
       if (existing) {
         const { error } = await (dtl as any)
-          .update({ metrics: payload.metrics, notes: payload.notes, status: 'submitted', submitted_at: payload.submitted_at, updated_at: new Date().toISOString() })
+          .update({ metrics: payload.metrics, notes: payload.notes, work_status: payload.work_status, status: 'submitted', submitted_at: payload.submitted_at, updated_at: new Date().toISOString() })
           .eq('id', existing.id);
         if (error) throw error;
       } else {
@@ -476,35 +501,84 @@ export function DailySubmissionsPage() {
                         <div key={assignment.id} className="border rounded-lg bg-card" data-testid={`card-assignment-${assignment.id}`}>
                           <div className="p-4 border-b bg-muted/20">
                             <div className="flex items-center justify-between gap-4 flex-wrap">
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className={`rounded-lg p-2 ${getServiceIconColor(slug)}`}>
                                   <Briefcase className="h-4 w-4 text-foreground" />
                                 </div>
-                                <div>
+                                <div className="flex-1 min-w-0">
                                   <h4 className="font-semibold text-sm">{assignment.services?.name || 'Unknown Service'}</h4>
                                 </div>
                               </div>
-                              {isSubmitted ? (
-                                <Badge variant="default" className="bg-green-600 dark:bg-green-700" size="sm">
-                                  <CheckCircle2 className="h-3 w-3 mr-1" />
-                                  Submitted
-                                </Badge>
-                              ) : isDraft ? (
-                                <Badge variant="secondary" size="sm">
-                                  <FileText className="h-3 w-3 mr-1" />
-                                  Draft
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" size="sm">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  Not Started
-                                </Badge>
-                              )}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {isSubmitted ? (
+                                  <Badge variant="default" className="bg-green-600 dark:bg-green-700" size="sm">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Submitted
+                                  </Badge>
+                                ) : isDraft ? (
+                                  <Badge variant="secondary" size="sm">
+                                    <FileText className="h-3 w-3 mr-1" />
+                                    Draft
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" size="sm">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Not Started
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div className="p-4">
-                            {fields.length > 0 ? (
-                              <div className="space-y-4">
+                            <div className="space-y-4">
+                              {/* Status Dropdown */}
+                              <div>
+                                <Label className="text-sm font-medium mb-1.5 block">Task Status</Label>
+                                <Select
+                                  value={localWorkStatus[assignment.id] || 'not_started'}
+                                  onValueChange={(val) => updateWorkStatus(assignment.id, val)}
+                                  disabled={isSubmitted}
+                                >
+                                  <SelectTrigger data-testid={`select-status-${assignment.id}`}>
+                                    <SelectValue placeholder="Select status" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="not_started">
+                                      <div className="flex items-center gap-2">
+                                        <CircleIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                        <span>Not Started</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="in_progress">
+                                      <div className="flex items-center gap-2">
+                                        <PlayCircle className="h-3.5 w-3.5 text-blue-600" />
+                                        <span>In Progress</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="on_hold">
+                                      <div className="flex items-center gap-2">
+                                        <PauseCircle className="h-3.5 w-3.5 text-amber-600" />
+                                        <span>On Hold</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="review">
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="h-3.5 w-3.5 text-violet-600" />
+                                        <span>In Review</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="completed">
+                                      <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                                        <span>Completed</span>
+                                      </div>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Metrics Section (if configured) */}
+                              {fields.length > 0 && (
                                 <div className={`rounded-lg p-4 ${getServiceColor(slug)}`}>
                                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                                     {fields.map((field) => (
@@ -527,55 +601,53 @@ export function DailySubmissionsPage() {
                                     ))}
                                   </div>
                                 </div>
+                              )}
 
-                                <div>
-                                  <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
-                                  <Textarea
-                                    placeholder="Add any notes about today's work..."
-                                    value={notes}
-                                    onChange={(e) => updateNotes(assignment.id, e.target.value)}
-                                    disabled={isSubmitted}
-                                    rows={2}
-                                    className="text-sm"
-                                    data-testid={`textarea-notes-${assignment.id}`}
-                                  />
+                              {/* Notes Section */}
+                              <div>
+                                <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
+                                <Textarea
+                                  placeholder="Add any notes about today's work..."
+                                  value={notes}
+                                  onChange={(e) => updateNotes(assignment.id, e.target.value)}
+                                  disabled={isSubmitted}
+                                  rows={fields.length > 0 ? 2 : 4}
+                                  className="text-sm"
+                                  data-testid={`textarea-notes-${assignment.id}`}
+                                />
+                              </div>
+
+                              {/* Action Buttons */}
+                              {!isSubmitted && (
+                                <div className="flex items-center gap-2 justify-end flex-wrap">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => saveDraft(assignment)}
+                                    disabled={isSaving || isSubmitting}
+                                    data-testid={`button-save-draft-${assignment.id}`}
+                                  >
+                                    {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
+                                    Save Draft
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => submitLog(assignment)}
+                                    disabled={isSaving || isSubmitting}
+                                    data-testid={`button-submit-${assignment.id}`}
+                                  >
+                                    {isSubmitting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+                                    Submit
+                                  </Button>
                                 </div>
+                              )}
 
-                                {!isSubmitted && (
-                                  <div className="flex items-center gap-2 justify-end flex-wrap">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => saveDraft(assignment)}
-                                      disabled={isSaving || isSubmitting}
-                                      data-testid={`button-save-draft-${assignment.id}`}
-                                    >
-                                      {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
-                                      Save Draft
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      onClick={() => submitLog(assignment)}
-                                      disabled={isSaving || isSubmitting}
-                                      data-testid={`button-submit-${assignment.id}`}
-                                    >
-                                      {isSubmitting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
-                                      Submit
-                                    </Button>
-                                  </div>
-                                )}
-
-                                {isSubmitted && log?.submitted_at && (
-                                  <p className="text-xs text-muted-foreground text-right">
-                                    Submitted at {format(new Date(log.submitted_at), 'h:mm a')}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="p-6 text-center text-muted-foreground">
-                                <p className="text-sm">No metric fields configured for this service type.</p>
-                              </div>
-                            )}
+                              {isSubmitted && log?.submitted_at && (
+                                <p className="text-xs text-muted-foreground text-right">
+                                  Submitted at {format(new Date(log.submitted_at), 'h:mm a')}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
