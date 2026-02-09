@@ -59,6 +59,8 @@ import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmploye
 import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
 import { MyTasksPage } from "./components/employee/MyTasksPage";
 import { AdminDailySubmissionsPage } from "./components/admin/AdminDailySubmissionsPage";
+import { FeedbackPage } from "./components/admin/FeedbackPage";
+import { TimeOffPage } from "./components/admin/TimeOffPage";
 import { GlobalSearch } from "./components/GlobalSearch";
 
 function AdminRoutes() {
@@ -99,6 +101,8 @@ function AdminRoutes() {
       <Route path="/calendar" component={CalendarPage} />
       <Route path="/goals" component={GoalsPage} />
       <Route path="/tasks" component={TasksPage} />
+      <Route path="/feedback" component={FeedbackPage} />
+      <Route path="/time-off" component={TimeOffPage} />
       <Route path="/time-tracking" component={TimeTrackingPage} />
       <Route path="/communications" component={CommunicationHubPage} />
       <Route path="/resources" component={ResourceManagementPage} />
@@ -128,6 +132,8 @@ function EmployeeRoutes() {
       <Route path="/dashboard" component={EnhancedEmployeeDashboard} />
       <Route path="/reports" component={EnhancedReportSubmissionPage} />
       <Route path="/tasks" component={MyTasksPage} />
+      <Route path="/feedback" component={FeedbackPage} />
+      <Route path="/time-off" component={TimeOffPage} />
       <Route path="/credentials" component={ClientCredentialsPage} />
       <Route>
         <Redirect to="/dashboard" />

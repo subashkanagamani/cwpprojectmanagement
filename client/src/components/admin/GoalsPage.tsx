@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Target, Plus, TrendingUp, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Target, Plus, TrendingUp, CheckCircle, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { GoalProgressModal } from './GoalProgressModal';
+import { GoalProgressHistory } from './GoalProgressHistory';
 
 interface Goal {
   id: string;
@@ -37,6 +39,8 @@ export function GoalsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [progressGoal, setProgressGoal] = useState<Goal | null>(null);
+  const [expandedGoalId, setExpandedGoalId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     client_id: '',
     service_id: '',
@@ -234,13 +238,27 @@ export function GoalsPage() {
                     <span>- {format(new Date(goal.start_date), 'MMM d')} - {format(new Date(goal.target_date), 'MMM d, yyyy')}</span>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  onClick={() => openModal(goal)}
-                  data-testid={`button-edit-goal-${goal.id}`}
-                >
-                  Edit
-                </Button>
+                <div className="flex gap-2">
+                  {goal.status === 'active' && goal.target_value && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setProgressGoal(goal)}
+                      data-testid={`button-record-progress-${goal.id}`}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Record Progress
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openModal(goal)}
+                    data-testid={`button-edit-goal-${goal.id}`}
+                  >
+                    Edit
+                  </Button>
+                </div>
               </div>
 
               {goal.description && (
@@ -256,9 +274,35 @@ export function GoalsPage() {
                     </span>
                   </div>
                   <Progress value={getProgress(goal)} className="h-3" />
-                  <div className="text-right text-sm text-muted-foreground mt-1" data-testid={`text-goal-progress-${goal.id}`}>
-                    {getProgress(goal).toFixed(0)}% complete
+                  <div className="flex justify-between items-center mt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpandedGoalId(expandedGoalId === goal.id ? null : goal.id)}
+                      className="text-xs h-auto p-1"
+                    >
+                      {expandedGoalId === goal.id ? (
+                        <>
+                          <ChevronUp className="w-3 h-3 mr-1" />
+                          Hide History
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-3 h-3 mr-1" />
+                          View History
+                        </>
+                      )}
+                    </Button>
+                    <span className="text-sm text-muted-foreground" data-testid={`text-goal-progress-${goal.id}`}>
+                      {getProgress(goal).toFixed(0)}% complete
+                    </span>
                   </div>
+                </div>
+              )}
+
+              {expandedGoalId === goal.id && goal.target_value && (
+                <div className="mt-6 pt-6 border-t">
+                  <GoalProgressHistory goalId={goal.id} unit={goal.unit || ''} />
                 </div>
               )}
             </CardContent>
@@ -451,6 +495,20 @@ export function GoalsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {progressGoal && (
+        <GoalProgressModal
+          goal={progressGoal}
+          onClose={() => setProgressGoal(null)}
+          onSuccess={() => {
+            loadGoals();
+            if (expandedGoalId === progressGoal.id) {
+              setExpandedGoalId(null);
+              setTimeout(() => setExpandedGoalId(progressGoal.id), 100);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ interface BudgetAlert {
   created_at: string;
   budget?: {
     client_id: string;
-    allocated_budget: number;
+    monthly_budget: number;
     actual_spending: number;
     client?: {
       name: string;
@@ -43,9 +43,9 @@ export function BudgetAlerts({ showOnlyActive = true, clientId }: BudgetAlertsPr
         .from('budget_alerts')
         .select(`
           *,
-          budget:client_budgets!budget_id(
+          budget:client_budgets!client_budget_id(
             client_id,
-            allocated_budget,
+            monthly_budget,
             actual_spending,
             client:clients!client_id(name)
           )
@@ -130,7 +130,7 @@ export function BudgetAlerts({ showOnlyActive = true, clientId }: BudgetAlertsPr
       {alerts.map((alert) => {
         const budget = alert.budget;
         const utilization = budget
-          ? ((budget.actual_spending / budget.allocated_budget) * 100).toFixed(0)
+          ? ((budget.actual_spending / budget.monthly_budget) * 100).toFixed(0)
           : 0;
 
         return (
@@ -149,7 +149,7 @@ export function BudgetAlerts({ showOnlyActive = true, clientId }: BudgetAlertsPr
                     <p className="text-sm mt-1">{alert.message}</p>
                     <div className="flex items-center gap-4 mt-2 text-xs">
                       <span>
-                        Budget: ${budget?.allocated_budget.toLocaleString()}
+                        Budget: ${budget?.monthly_budget.toLocaleString()}
                       </span>
                       <span>
                         Spent: ${budget?.actual_spending.toLocaleString()}
