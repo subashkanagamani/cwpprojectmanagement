@@ -44,7 +44,7 @@ export function registerRoutes(app: Express) {
       const { data: profile, error } = await (supabaseAdmin
         .from("profiles") as any)
         .select("*")
-        .eq("user_id", userId)
+        .eq("id", userId)
         .maybeSingle();
 
       if (error) throw error;
