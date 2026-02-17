@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NotificationCenter } from './NotificationCenter';
+import { DemoModeBanner } from './DemoModeBanner';
 import {
   Building2,
   Users,
@@ -177,6 +178,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
       </div>
 
       <main className="flex-1 overflow-auto">
+        <DemoModeBanner />
         <div className="p-4 lg:p-8">
           {children}
         </div>
