@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { NotificationCenter } from './NotificationCenter';
+import { GlobalSearch } from './GlobalSearch';
 import {
   Building2,
   Users,
@@ -31,7 +32,11 @@ import {
   CheckSquare,
   Scale,
   Key,
-  ClipboardList
+  ClipboardList,
+  ChevronLeft,
+  Menu,
+  Bell,
+  Search
 } from 'lucide-react';
 
 interface LayoutProps {

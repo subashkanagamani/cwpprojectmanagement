@@ -23,7 +23,7 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 221 83% 53%;
-    --radius: 0.625rem;
+    --radius: 0.75rem;
     --chart-1: 221 83% 53%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -37,6 +37,18 @@
     --sidebar-accent-foreground: 224 30% 16%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 221 83% 53%;
+    --success: 160 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 30 80% 55%;
+    --warning-foreground: 224 30% 16%;
+    --info: 221 83% 53%;
+    --info-foreground: 210 40% 98%;
+    --orange: 25 95% 53%;
+    --orange-foreground: 0 0% 100%;
+    --green: 142 71% 45%;
+    --green-foreground: 0 0% 100%;
+    --purple: 262 83% 58%;
+    --purple-foreground: 0 0% 100%;
   }
 
   .dark {

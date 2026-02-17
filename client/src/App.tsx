@@ -27,6 +27,7 @@ import { LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { EnhancedDashboardPage } from "./components/admin/EnhancedDashboardPage";
+import { ModernProjectsPage } from "./components/admin/ModernProjectsPage";
 import { EnhancedAnalyticsPage } from "./components/admin/EnhancedAnalyticsPage";
 import { ClientsPage } from "./components/admin/ClientsPage";
 import { ClientDetailPage } from "./components/admin/ClientDetailPage";
@@ -84,8 +85,9 @@ function AdminRoutes() {
 
   return (
     <Switch>
-      <Route path="/" component={EnhancedDashboardPage} />
-      <Route path="/dashboard" component={EnhancedDashboardPage} />
+      <Route path="/" component={ModernProjectsPage} />
+      <Route path="/dashboard" component={ModernProjectsPage} />
+      <Route path="/overview" component={EnhancedDashboardPage} />
       <Route path="/analytics" component={EnhancedAnalyticsPage} />
       <Route path="/clients">
         <ClientsPage onViewClient={handleViewClient} />
@@ -263,9 +265,9 @@ function AppContent() {
         <AppSidebar isAdmin={isAdmin} />
         <div className="flex flex-col flex-1 min-w-0">
           <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b bg-card/80 backdrop-blur-sm px-6 h-14">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
-              <GlobalSearch />
+              <GlobalSearch compact />
             </div>
             <div className="flex items-center gap-1">
               <NotificationCenter />

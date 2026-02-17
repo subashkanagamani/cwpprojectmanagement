@@ -57,7 +57,8 @@ const adminNavGroups = [
   {
     label: "Overview",
     items: [
-      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+      { id: "dashboard", label: "Projects", icon: LayoutDashboard, path: "/dashboard" },
+      { id: "overview", label: "Overview", icon: BarChart3, path: "/overview" },
       { id: "analytics", label: "Analytics", icon: BarChart3, path: "/analytics" },
     ],
   },

@@ -40,7 +40,7 @@ interface SearchResults {
   tasks: Task[];
 }
 
-export function GlobalSearch() {
+export function GlobalSearch({ compact = false }: { compact?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResults>({
@@ -146,24 +146,23 @@ export function GlobalSearch() {
       <button
         onClick={() => setIsOpen(true)}
         data-testid="button-global-search-open"
-        className="hidden md:flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground hover-elevate"
+        className={`${compact ? 'w-full max-w-md' : 'hidden md:flex'} flex items-center gap-2 rounded-lg border border-border bg-background/50 px-4 py-2 text-sm text-muted-foreground hover:bg-background transition-colors`}
         title="Open global search (Cmd+K)"
       >
         <Search className="h-4 w-4" />
-        <span>Search...</span>
-        <kbd className="ml-auto rounded border border-border bg-background px-1.5 py-0.5 text-xs font-semibold">
-          <Command className="inline h-3 w-3 mr-1" />K
-        </kbd>
+        <span className="flex-1 text-left">Search for anything...</span>
       </button>
 
       {/* Mobile search button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        data-testid="button-global-search-mobile"
-        className="md:hidden p-1 hover-elevate"
-      >
-        <Search className="h-5 w-5 text-foreground" />
-      </button>
+      {!compact && (
+        <button
+          onClick={() => setIsOpen(true)}
+          data-testid="button-global-search-mobile"
+          className="md:hidden p-1 hover-elevate"
+        >
+          <Search className="h-5 w-5 text-foreground" />
+        </button>
+      )}
 
       {/* Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
