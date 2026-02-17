@@ -32,7 +32,10 @@ import { ClientsPage } from "./components/admin/ClientsPage";
 import { ClientDetailPage } from "./components/admin/ClientDetailPage";
 import { EmployeesPage } from "./components/admin/EmployeesPage";
 import { AssignmentsPage } from "./components/admin/AssignmentsPage";
+import EnhancedAssignmentsPage from "./components/admin/EnhancedAssignmentsPage";
 import { ReportsPage } from "./components/admin/ReportsPage";
+import ConsolidatedReportsPage from "./components/admin/ConsolidatedReportsPage";
+import DealsPage from "./components/admin/DealsPage";
 import { BudgetTrackingPage } from "./components/admin/BudgetTrackingPage";
 import { BulkOperationsPage } from "./components/admin/BulkOperationsPage";
 import { ClientPortalPage } from "./components/admin/ClientPortalPage";
@@ -53,13 +56,14 @@ import { SettingsPage } from "./components/admin/SettingsPage";
 import { ClientHealthDashboard } from "./components/admin/ClientHealthDashboard";
 import { EmployeeWorkloadDashboard } from "./components/admin/EmployeeWorkloadDashboard";
 import { AccountManagerDailyView } from "./components/admin/AccountManagerDailyView";
+import EnhancedDailyViewPage from "./components/admin/EnhancedDailyViewPage";
 import { TeamMonitoringPage } from "./components/admin/TeamMonitoringPage";
 import { ClientCredentialsPage } from "./components/admin/ClientCredentialsPage";
 import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmployeeDashboard";
 import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
 import { MyTasksPage } from "./components/employee/MyTasksPage";
+import UnifiedTasksPage from "./components/employee/UnifiedTasksPage";
 import { TeamProgressTracker } from "./components/employee/TeamProgressTracker";
-import { AdminDailySubmissionsPage } from "./components/admin/AdminDailySubmissionsPage";
 import { FeedbackPage } from "./components/admin/FeedbackPage";
 import { TimeOffPage } from "./components/admin/TimeOffPage";
 import { GlobalSearch } from "./components/GlobalSearch";
@@ -92,13 +96,14 @@ function AdminRoutes() {
         )}
       </Route>
       <Route path="/client-health" component={ClientHealthDashboard} />
+      <Route path="/deals" component={DealsPage} />
       <Route path="/employees" component={EmployeesPage} />
       <Route path="/workload" component={EmployeeWorkloadDashboard} />
-      <Route path="/daily-view" component={AccountManagerDailyView} />
+      <Route path="/daily-view" component={EnhancedDailyViewPage} />
       <Route path="/team-monitoring" component={TeamMonitoringPage} />
-      <Route path="/daily-submissions" component={AdminDailySubmissionsPage} />
-      <Route path="/assignments" component={AssignmentsPage} />
+      <Route path="/assignments" component={EnhancedAssignmentsPage} />
       <Route path="/reports" component={ReportsPage} />
+      <Route path="/consolidated-reports" component={ConsolidatedReportsPage} />
       <Route path="/calendar" component={CalendarPage} />
       <Route path="/goals" component={GoalsPage} />
       <Route path="/tasks" component={TasksPage} />
@@ -132,7 +137,8 @@ function EmployeeRoutes() {
       <Route path="/" component={EnhancedEmployeeDashboard} />
       <Route path="/dashboard" component={EnhancedEmployeeDashboard} />
       <Route path="/reports" component={EnhancedReportSubmissionPage} />
-      <Route path="/tasks" component={MyTasksPage} />
+      <Route path="/tasks" component={UnifiedTasksPage} />
+      <Route path="/account-manager" component={AccountManagerDailyView} />
       <Route path="/team-progress" component={TeamProgressTracker} />
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/time-off" component={TimeOffPage} />

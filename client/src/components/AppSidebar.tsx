@@ -1,5 +1,7 @@
+import React from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import {
   Sidebar,
   SidebarContent,
@@ -43,8 +45,8 @@ import {
   Globe,
   Key,
   LogOut,
-  ClipboardCheck,
   UsersRound,
+  Handshake,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -64,6 +66,7 @@ const adminNavGroups = [
     items: [
       { id: "clients", label: "Clients", icon: Briefcase, path: "/clients" },
       { id: "client-health", label: "Client Health", icon: Activity, path: "/client-health" },
+      { id: "deals", label: "Deals", icon: Handshake, path: "/deals" },
       { id: "credentials", label: "Credentials", icon: Key, path: "/credentials" },
     ],
   },
@@ -74,7 +77,6 @@ const adminNavGroups = [
       { id: "workload", label: "Workload", icon: Scale, path: "/workload" },
       { id: "daily-view", label: "Daily View", icon: ClipboardList, path: "/daily-view" },
       { id: "team-monitoring", label: "Team Monitoring", icon: UsersRound, path: "/team-monitoring" },
-      { id: "daily-submissions", label: "Daily Submissions", icon: ClipboardCheck, path: "/daily-submissions" },
       { id: "assignments", label: "Assignments", icon: UserCog, path: "/assignments" },
       { id: "resources", label: "Resources", icon: UserCheck, path: "/resources" },
     ],
@@ -83,6 +85,7 @@ const adminNavGroups = [
     label: "Work",
     items: [
       { id: "reports", label: "Reports", icon: FileText, path: "/reports" },
+      { id: "consolidated-reports", label: "Client Reports", icon: FileText, path: "/consolidated-reports" },
       { id: "tasks", label: "Tasks", icon: CheckSquare, path: "/tasks" },
       { id: "calendar", label: "Calendar", icon: Calendar, path: "/calendar" },
       { id: "goals", label: "Goals", icon: Target, path: "/goals" },
@@ -119,13 +122,14 @@ const adminNavGroups = [
   },
 ];
 
-const employeeNavGroups = [
+const getEmployeeNavGroups = (isAccountManager: boolean) => [
   {
     label: "My Work",
     items: [
       { id: "dashboard", label: "My Clients", icon: Briefcase, path: "/dashboard" },
       { id: "reports", label: "Submit Report", icon: FileText, path: "/reports" },
       { id: "tasks", label: "My Tasks", icon: CheckSquare, path: "/tasks" },
+      ...(isAccountManager ? [{ id: "account-manager", label: "Account Manager", icon: UsersRound, path: "/account-manager" }] : []),
       { id: "team-progress", label: "Team Progress", icon: UsersRound, path: "/team-progress" },
       { id: "feedback", label: "Feedback", icon: MessageSquare, path: "/feedback" },
       { id: "time-off", label: "Time Off", icon: Calendar, path: "/time-off" },
@@ -137,7 +141,22 @@ const employeeNavGroups = [
 export function AppSidebar({ isAdmin }: AppSidebarProps) {
   const [location, setLocation] = useLocation();
   const { profile, signOut } = useAuth();
-  const navGroups = isAdmin ? adminNavGroups : employeeNavGroups;
+  const [isAccountManager, setIsAccountManager] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!isAdmin && profile?.id) {
+      supabase
+        .from("client_assignments")
+        .select("id", { count: "exact", head: true })
+        .eq("employee_id", profile.id)
+        .eq("is_account_manager", true)
+        .then(({ count }) => {
+          setIsAccountManager((count || 0) > 0);
+        });
+    }
+  }, [isAdmin, profile?.id]);
+
+  const navGroups = isAdmin ? adminNavGroups : getEmployeeNavGroups(isAccountManager);
 
   const isActive = (path: string) => {
     if (path === "/dashboard" && (location === "/" || location === "/dashboard")) return true;
