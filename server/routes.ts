@@ -44,7 +44,7 @@ export function registerRoutes(app: Express) {
       const { data: profile, error } = await (supabaseAdmin
         .from("profiles") as any)
         .select("*")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (error) throw error;
@@ -65,38 +65,8 @@ export function registerRoutes(app: Express) {
         return res.json({ _portalUser: true, ...portalUser });
       }
 
-      // Auto-create profile for new users
-      const { data: { user: authUser } } = await supabaseAdmin.auth.getUser(
-        req.headers.authorization!.split(' ')[1]
-      );
-
-      if (authUser) {
-        const newProfile = {
-          id: authUser.id,
-          email: authUser.email || '',
-          full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
-          role: 'admin',
-          status: 'active',
-          skills: [],
-          max_capacity: 40,
-          phone: null,
-          custom_fields: {},
-        };
-
-        const { data: created, error: createErr } = await (supabaseAdmin
-          .from("profiles") as any)
-          .insert(newProfile)
-          .select()
-          .single();
-
-        if (createErr) {
-          console.error("Error creating profile:", createErr.message);
-          return res.json(newProfile);
-        }
-        return res.json(created);
-      }
-
-      return res.status(404).json({ error: "No profile found" });
+      // Profile should have been auto-created by trigger, but if not, return error
+      return res.status(404).json({ error: "No profile found. Please contact administrator." });
     } catch (error: any) {
       console.error("Profile endpoint error:", error.message);
       res.status(500).json({ error: error.message });
