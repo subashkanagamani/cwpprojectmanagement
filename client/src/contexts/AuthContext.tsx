@@ -75,12 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state using onAuthStateChange only (getSession can hang with stale tokens)
   useEffect(() => {
     let mounted = true;
+    let hasInitialized = false;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
+      console.log('Auth event:', event, 'session:', !!session);
+
       try {
         if (event === 'INITIAL_SESSION') {
+          hasInitialized = true;
           if (session?.user && session?.access_token) {
             setUser(session.user);
             await loadProfile(session.access_token);
@@ -89,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
           }
         } else if (event === 'SIGNED_IN') {
+          hasInitialized = true;
           setUser(session?.user ?? null);
           if (session?.user && session?.access_token) {
             await loadProfile(session.access_token);
@@ -115,15 +120,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Safety timeout - if INITIAL_SESSION never fires within 4 seconds, stop loading
+    // Safety timeout - if INITIAL_SESSION never fires within 3 seconds, stop loading
     const timeout = setTimeout(() => {
-      if (mounted) {
-        setLoading(prev => {
-          if (prev) console.warn('Auth initialization timed out - showing login');
-          return false;
-        });
+      if (mounted && !hasInitialized) {
+        console.warn('Auth initialization timed out - forcing load end');
+        setLoading(false);
       }
-    }, 4000);
+    }, 3000);
 
     return () => {
       mounted = false;
@@ -134,6 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadProfile = async (accessToken: string) => {
     try {
+      console.log('Loading profile with token...');
+
       // Use our server endpoint which bypasses RLS
       const response = await fetch('/api/profile', {
         headers: {
@@ -141,6 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json',
         },
       });
+
+      console.log('Profile response status:', response.status);
 
       if (response.status === 401) {
         setSessionExpired(true);
@@ -153,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const profileData = await response.json();
+      console.log('Profile loaded:', profileData);
 
       if (profileData._portalUser) {
         setIsPortalUser(true);
@@ -170,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { await supabase.auth.signOut(); } catch {}
       }
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
