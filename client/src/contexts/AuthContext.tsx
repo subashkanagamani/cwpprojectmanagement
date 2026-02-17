@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
-import { supabase, isDemoMode } from '../lib/supabase';
-import { demoAuth } from '../lib/demoAuth';
+import { supabase } from '../lib/supabase';
 import { Profile } from '../lib/database.types';
 
 interface AuthContextType {
@@ -76,19 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state using onAuthStateChange only (getSession can hang with stale tokens)
   useEffect(() => {
     let mounted = true;
-
-    // Check for demo mode
-    if (isDemoMode) {
-      console.log('Running in DEMO MODE - using mock authentication');
-      const { user, profile } = demoAuth.getSession();
-      if (user && profile) {
-        setUser(user);
-        setProfile(profile);
-        setIsPortalUser(false);
-      }
-      setLoading(false);
-      return;
-    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
@@ -192,23 +178,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
 
-      // Use demo auth in demo mode
-      if (isDemoMode) {
-        const { user, profile, error } = await demoAuth.signIn(email, password);
-        if (error) {
-          setLoading(false);
-          return { error };
-        }
-        if (user && profile) {
-          setUser(user);
-          setProfile(profile);
-          setIsPortalUser(false);
-          setSessionExpired(false);
-        }
-        setLoading(false);
-        return { error: null };
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -236,16 +205,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      // Use demo auth in demo mode
-      if (isDemoMode) {
-        const { user, error } = await demoAuth.signUp(email, password);
-        if (error) {
-          return { error };
-        }
-        // Auto sign in after signup in demo mode
-        return await signIn(email, password);
-      }
-
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -269,11 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      if (isDemoMode) {
-        await demoAuth.signOut();
-      } else {
-        await supabase.auth.signOut();
-      }
+      await supabase.auth.signOut();
       setProfile(null);
       setUser(null);
       setIsPortalUser(false);
