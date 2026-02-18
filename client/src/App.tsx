@@ -27,9 +27,11 @@ import { LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { EnhancedDashboardPage } from "./components/admin/EnhancedDashboardPage";
+import { ModernDashboard } from "./components/admin/ModernDashboard";
 import { ModernProjectsPage } from "./components/admin/ModernProjectsPage";
 import { EnhancedAnalyticsPage } from "./components/admin/EnhancedAnalyticsPage";
 import { ClientsPage } from "./components/admin/ClientsPage";
+import { ModernClientsPage } from "./components/admin/ModernClientsPage";
 import { ClientDetailPage } from "./components/admin/ClientDetailPage";
 import { EmployeesPage } from "./components/admin/EmployeesPage";
 import { AssignmentsPage } from "./components/admin/AssignmentsPage";
@@ -61,6 +63,7 @@ import EnhancedDailyViewPage from "./components/admin/EnhancedDailyViewPage";
 import { TeamMonitoringPage } from "./components/admin/TeamMonitoringPage";
 import { ClientCredentialsPage } from "./components/admin/ClientCredentialsPage";
 import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmployeeDashboard";
+import { ModernEmployeeDashboard } from "./components/employee/ModernEmployeeDashboard";
 import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
 import { MyTasksPage } from "./components/employee/MyTasksPage";
 import UnifiedTasksPage from "./components/employee/UnifiedTasksPage";
@@ -85,12 +88,13 @@ function AdminRoutes() {
 
   return (
     <Switch>
-      <Route path="/" component={ModernProjectsPage} />
-      <Route path="/dashboard" component={ModernProjectsPage} />
+      <Route path="/" component={ModernDashboard} />
+      <Route path="/dashboard" component={ModernDashboard} />
+      <Route path="/projects" component={ModernProjectsPage} />
       <Route path="/overview" component={EnhancedDashboardPage} />
       <Route path="/analytics" component={EnhancedAnalyticsPage} />
       <Route path="/clients">
-        <ClientsPage onViewClient={handleViewClient} />
+        <ModernClientsPage />
       </Route>
       <Route path="/clients/:id">
         {(params) => (
@@ -136,8 +140,8 @@ function AdminRoutes() {
 function EmployeeRoutes() {
   return (
     <Switch>
-      <Route path="/" component={EnhancedEmployeeDashboard} />
-      <Route path="/dashboard" component={EnhancedEmployeeDashboard} />
+      <Route path="/" component={ModernEmployeeDashboard} />
+      <Route path="/dashboard" component={ModernEmployeeDashboard} />
       <Route path="/reports" component={EnhancedReportSubmissionPage} />
       <Route path="/tasks" component={UnifiedTasksPage} />
       <Route path="/account-manager" component={AccountManagerDailyView} />
