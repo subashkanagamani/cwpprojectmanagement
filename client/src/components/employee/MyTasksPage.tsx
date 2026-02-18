@@ -24,7 +24,9 @@ import {
   Loader2,
   ClipboardCheck,
   User,
-  SendHorizonal
+  SendHorizonal,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { format, isToday, isPast, parseISO } from 'date-fns';
 import { MeetingUrgencyBadge } from '../MeetingUrgencyBadge';
@@ -229,6 +231,7 @@ export function MyTasksPage() {
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [editingRemarks, setEditingRemarks] = useState<string | null>(null);
   const [remarksText, setRemarksText] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
   const [showRaiseTaskDialog, setShowRaiseTaskDialog] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -674,18 +677,40 @@ export function MyTasksPage() {
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Filter className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">Filter:</span>
-                <div className="flex gap-2 flex-wrap">
-                  <Button variant={filter === 'all' ? 'default' : 'secondary'} size="sm" onClick={() => setFilter('all')} data-testid="filter-all">
-                    All Tasks ({tasks.length})
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Filter className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Filter:</span>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button variant={filter === 'all' ? 'default' : 'secondary'} size="sm" onClick={() => setFilter('all')} data-testid="filter-all">
+                      All Tasks ({tasks.length})
+                    </Button>
+                    <Button variant={filter === 'today' ? 'default' : 'secondary'} size="sm" onClick={() => setFilter('today')} data-testid="filter-today">
+                      Today ({todayTasks.length})
+                    </Button>
+                    <Button variant={filter === 'overdue' ? 'destructive' : 'secondary'} size="sm" onClick={() => setFilter('overdue')} data-testid="filter-overdue">
+                      Overdue ({overdueTasks.length})
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    data-testid="view-mode-list"
+                  >
+                    <List className="h-4 w-4 mr-1.5" />
+                    List
                   </Button>
-                  <Button variant={filter === 'today' ? 'default' : 'secondary'} size="sm" onClick={() => setFilter('today')} data-testid="filter-today">
-                    Today ({todayTasks.length})
-                  </Button>
-                  <Button variant={filter === 'overdue' ? 'destructive' : 'secondary'} size="sm" onClick={() => setFilter('overdue')} data-testid="filter-overdue">
-                    Overdue ({overdueTasks.length})
+                  <Button
+                    variant={viewMode === 'kanban' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('kanban')}
+                    data-testid="view-mode-kanban"
+                  >
+                    <LayoutGrid className="h-4 w-4 mr-1.5" />
+                    Board
                   </Button>
                 </div>
               </div>
@@ -702,7 +727,7 @@ export function MyTasksPage() {
                 </p>
               </CardContent>
             </Card>
-          ) : (
+          ) : viewMode === 'list' ? (
             <div className="space-y-3">
               {filteredTasks.map((task) => {
                 const overdue = isOverdue(task);
@@ -861,6 +886,291 @@ export function MyTasksPage() {
                   </Card>
                 );
               })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* To Do Column */}
+              <Card className="bg-muted/30">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                      <Circle className="h-4 w-4 text-amber-600" />
+                      To Do
+                    </CardTitle>
+                    <Badge variant="secondary" className="text-xs">
+                      {filteredTasks.filter(t => t.status === 'pending' && !isOverdue(t)).length}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {filteredTasks
+                    .filter(t => t.status === 'pending' && !isOverdue(t))
+                    .map((task) => {
+                      const today = isToday(parseISO(task.due_date));
+                      const isRaisedByOther = task.created_by && task.created_by !== task.assigned_to;
+
+                      return (
+                        <Card
+                          key={task.id}
+                          data-testid={`kanban-card-todo-${task.id}`}
+                          className={`border-2 cursor-pointer hover:shadow-md transition-all ${
+                            today
+                              ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20'
+                              : 'border-border'
+                          }`}
+                        >
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <h4 className="text-sm font-semibold text-foreground line-clamp-2">{task.title}</h4>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => toggleTaskComplete(task)}
+                                  className="h-6 w-6 flex-shrink-0 text-muted-foreground"
+                                >
+                                  <Circle className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              {task.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+                              )}
+
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant={getPriorityVariant(task.priority)} className="text-xs">
+                                  {task.priority.toUpperCase()}
+                                </Badge>
+
+                                {task.meeting_urgency_label && task.days_until_meeting !== undefined && (
+                                  <MeetingUrgencyBadge
+                                    daysUntilMeeting={task.days_until_meeting}
+                                    urgencyLabel={task.meeting_urgency_label}
+                                    size="sm"
+                                  />
+                                )}
+                              </div>
+
+                              <div className="space-y-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span className={today ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}>
+                                    {format(parseISO(task.due_date), 'MMM d, yyyy')}
+                                    {today && ' (Today)'}
+                                  </span>
+                                </div>
+
+                                {(task.clients || task.client_name) && (
+                                  <div className="flex items-center gap-1">
+                                    <Building2 className="h-3 w-3" />
+                                    <span className="truncate">{task.clients?.name || task.client_name}</span>
+                                  </div>
+                                )}
+
+                                {isRaisedByOther && task.creator_profile && (
+                                  <div className="flex items-center gap-1">
+                                    <SendHorizonal className="h-3 w-3" />
+                                    <span className="truncate">From: {task.creator_profile.full_name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  {filteredTasks.filter(t => t.status === 'pending' && !isOverdue(t)).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      No tasks to do
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Overdue Column */}
+              <Card className="bg-destructive/5 border-destructive/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      Overdue
+                    </CardTitle>
+                    <Badge variant="destructive" className="text-xs">
+                      {filteredTasks.filter(t => t.status === 'pending' && isOverdue(t)).length}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {filteredTasks
+                    .filter(t => t.status === 'pending' && isOverdue(t))
+                    .map((task) => {
+                      const isRaisedByOther = task.created_by && task.created_by !== task.assigned_to;
+
+                      return (
+                        <Card
+                          key={task.id}
+                          data-testid={`kanban-card-overdue-${task.id}`}
+                          className="border-2 border-destructive/50 bg-destructive/10 cursor-pointer hover:shadow-md transition-all"
+                        >
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <h4 className="text-sm font-semibold text-foreground line-clamp-2">{task.title}</h4>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => toggleTaskComplete(task)}
+                                  className="h-6 w-6 flex-shrink-0 text-muted-foreground"
+                                >
+                                  <Circle className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              {task.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+                              )}
+
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant={getPriorityVariant(task.priority)} className="text-xs">
+                                  {task.priority.toUpperCase()}
+                                </Badge>
+                                <Badge variant="destructive" className="text-xs">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  OVERDUE
+                                </Badge>
+
+                                {task.meeting_urgency_label && task.days_until_meeting !== undefined && (
+                                  <MeetingUrgencyBadge
+                                    daysUntilMeeting={task.days_until_meeting}
+                                    urgencyLabel={task.meeting_urgency_label}
+                                    size="sm"
+                                  />
+                                )}
+                              </div>
+
+                              <div className="space-y-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span className="text-destructive font-semibold">
+                                    {format(parseISO(task.due_date), 'MMM d, yyyy')}
+                                  </span>
+                                </div>
+
+                                {(task.clients || task.client_name) && (
+                                  <div className="flex items-center gap-1">
+                                    <Building2 className="h-3 w-3" />
+                                    <span className="truncate">{task.clients?.name || task.client_name}</span>
+                                  </div>
+                                )}
+
+                                {isRaisedByOther && task.creator_profile && (
+                                  <div className="flex items-center gap-1">
+                                    <SendHorizonal className="h-3 w-3" />
+                                    <span className="truncate">From: {task.creator_profile.full_name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  {filteredTasks.filter(t => t.status === 'pending' && isOverdue(t)).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      No overdue tasks
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Completed Column */}
+              <Card className="bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      Completed
+                    </CardTitle>
+                    <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300">
+                      {filteredTasks.filter(t => t.status === 'completed').length}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {filteredTasks
+                    .filter(t => t.status === 'completed')
+                    .map((task) => {
+                      const isRaisedByOther = task.created_by && task.created_by !== task.assigned_to;
+
+                      return (
+                        <Card
+                          key={task.id}
+                          data-testid={`kanban-card-completed-${task.id}`}
+                          className="border-2 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 opacity-75 cursor-pointer hover:shadow-md transition-all"
+                        >
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <h4 className="text-sm font-semibold text-muted-foreground line-through line-clamp-2">{task.title}</h4>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => toggleTaskComplete(task)}
+                                  className="h-6 w-6 flex-shrink-0 text-green-600 dark:text-green-400"
+                                >
+                                  <CheckCircle2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+
+                              {task.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+                              )}
+
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant={getPriorityVariant(task.priority)} className="text-xs opacity-75">
+                                  {task.priority.toUpperCase()}
+                                </Badge>
+                              </div>
+
+                              <div className="space-y-2 text-xs text-muted-foreground">
+                                {task.completed_at && (
+                                  <div className="flex items-center gap-1 text-green-700 dark:text-green-400 font-medium">
+                                    <CheckCircle2 className="h-3 w-3" />
+                                    <span>{format(parseISO(task.completed_at), 'MMM d, h:mm a')}</span>
+                                  </div>
+                                )}
+
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{format(parseISO(task.due_date), 'MMM d, yyyy')}</span>
+                                </div>
+
+                                {(task.clients || task.client_name) && (
+                                  <div className="flex items-center gap-1">
+                                    <Building2 className="h-3 w-3" />
+                                    <span className="truncate">{task.clients?.name || task.client_name}</span>
+                                  </div>
+                                )}
+
+                                {isRaisedByOther && task.creator_profile && (
+                                  <div className="flex items-center gap-1">
+                                    <SendHorizonal className="h-3 w-3" />
+                                    <span className="truncate">From: {task.creator_profile.full_name}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  {filteredTasks.filter(t => t.status === 'completed').length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      No completed tasks
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
         </TabsContent>
