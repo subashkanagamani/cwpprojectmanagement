@@ -191,9 +191,9 @@ export function ModernEmployeeDashboard() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${assignment.client.name}`}
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${assignment.client.name}`}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
                       {getInitials(assignment.client.name)}
                     </AvatarFallback>
                   </Avatar>

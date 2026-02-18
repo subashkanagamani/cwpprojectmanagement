@@ -215,32 +215,36 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter className="p-3">
-        <div className="flex items-center gap-2.5">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium truncate" data-testid="text-sidebar-user">
-              {profile?.full_name || "User"}
-            </p>
-            <p className="text-[11px] text-muted-foreground capitalize">
-              {profile?.role || "employee"}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={signOut}
-            data-testid="button-sidebar-logout"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </SidebarFooter>
+      {!isAdmin && (
+        <>
+          <SidebarSeparator />
+          <SidebarFooter className="p-3">
+            <div className="flex items-center gap-2.5">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-medium truncate" data-testid="text-sidebar-user">
+                  {profile?.full_name || "User"}
+                </p>
+                <p className="text-[11px] text-muted-foreground capitalize">
+                  {profile?.role || "employee"}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={signOut}
+                data-testid="button-sidebar-logout"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </SidebarFooter>
+        </>
+      )}
     </Sidebar>
   );
 }

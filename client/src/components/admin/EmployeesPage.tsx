@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 
 interface EmployeeWithDetails extends Profile {
@@ -543,6 +543,10 @@ export function EmployeesPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar data-testid={`avatar-employee-${employee.id}`}>
+                          <AvatarImage
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.email}`}
+                            alt={employee.full_name}
+                          />
                           <AvatarFallback className={`${avatarColor} text-white text-xs font-medium`}>
                             {getInitials(employee.full_name)}
                           </AvatarFallback>
