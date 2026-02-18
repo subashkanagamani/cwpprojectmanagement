@@ -69,8 +69,13 @@ import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedRepo
 import { MyTasksPage } from "./components/employee/MyTasksPage";
 import UnifiedTasksPage from "./components/employee/UnifiedTasksPage";
 import { TeamProgressTracker } from "./components/employee/TeamProgressTracker";
+import TimeEntryPage from "./components/employee/TimeEntryPage";
 import { FeedbackPage } from "./components/admin/FeedbackPage";
 import { TimeOffPage } from "./components/admin/TimeOffPage";
+import TimesheetsManagementPage from "./components/admin/TimesheetsManagementPage";
+import SharedDocumentsPage from "./components/admin/SharedDocumentsPage";
+import EmailLogsPage from "./components/admin/EmailLogsPage";
+import ReportTemplatesPage from "./components/admin/ReportTemplatesPage";
 import { GlobalSearch } from "./components/GlobalSearch";
 
 function AdminRoutes() {
@@ -116,7 +121,11 @@ function AdminRoutes() {
       <Route path="/tasks" component={TasksPage} />
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/time-off" component={TimeOffPage} />
+      <Route path="/timesheets" component={TimesheetsManagementPage} />
       <Route path="/time-tracking" component={TimeTrackingPage} />
+      <Route path="/documents" component={SharedDocumentsPage} />
+      <Route path="/email-logs" component={EmailLogsPage} />
+      <Route path="/report-templates" component={ReportTemplatesPage} />
       <Route path="/communications" component={CommunicationHubPage} />
       <Route path="/resources" component={ResourceManagementPage} />
       <Route path="/budget" component={BudgetTrackingPage} />
@@ -146,6 +155,7 @@ function EmployeeRoutes() {
       <Route path="/dashboard" component={ModernEmployeeDashboard} />
       <Route path="/reports" component={EnhancedReportSubmissionPage} />
       <Route path="/tasks" component={UnifiedTasksPage} />
+      <Route path="/time-entry" component={TimeEntryPage} />
       <Route path="/account-manager" component={AccountManagerDailyView} />
       <Route path="/team-progress" component={TeamProgressTracker} />
       <Route path="/feedback" component={FeedbackPage} />
