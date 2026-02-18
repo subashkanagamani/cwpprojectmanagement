@@ -189,6 +189,25 @@ export function TasksPage() {
     }
   };
 
+  const handleToggleComplete = async (task: Task) => {
+    try {
+      const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          status: newStatus,
+          completed_at: newStatus === 'completed' ? new Date().toISOString() : null,
+        })
+        .eq('id', task.id);
+
+      if (error) throw error;
+      showToast(`Task marked as ${newStatus}`, 'success');
+      loadData();
+    } catch (error: any) {
+      showToast(error.message, 'error');
+    }
+  };
+
   const isOverdue = (task: Task) => {
     return task.status === 'pending' && isPast(parseISO(task.due_date)) && !isToday(parseISO(task.due_date));
   };
@@ -377,6 +396,19 @@ export function TasksPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 flex-wrap">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleComplete(task)}
+                            data-testid={`button-toggle-task-${task.id}`}
+                            title={task.status === 'completed' ? 'Mark as pending' : 'Mark as completed'}
+                          >
+                            {task.status === 'completed' ? (
+                              <Circle className="h-4 w-4" />
+                            ) : (
+                              <CheckCircle2 className="h-4 w-4" />
+                            )}
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"

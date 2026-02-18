@@ -67,24 +67,26 @@ export function ClientPortalPage() {
     e.preventDefault();
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+      // Create portal user via server endpoint
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch('/api/portal-users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.full_name,
+          client_id: formData.client_id,
+        })
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { error: portalError } = await supabase.from('client_portal_users').insert({
-          client_id: formData.client_id,
-          email: formData.email,
-          full_name: formData.full_name,
-          auth_user_id: authData.user.id,
-          is_active: true,
-        });
-
-        if (portalError) throw portalError;
-      }
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to create portal user');
 
       setShowModal(false);
       setFormData({ client_id: '', email: '', full_name: '', password: '' });

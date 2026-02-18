@@ -178,28 +178,31 @@ export function EmployeesPage() {
 
         if (error) throw error;
       } else {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-        });
+        // Create new employee via server endpoint
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error('Not authenticated');
 
-        if (authError) throw authError;
-
-        if (authData.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
-            id: authData.user.id,
+        const response = await fetch('/api/employees/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
             email: formData.email,
+            password: formData.password,
             full_name: formData.full_name,
             role: formData.role,
             status: formData.status,
             phone: formData.phone || null,
-            max_capacity: parseInt(formData.max_capacity),
+            max_capacity: formData.max_capacity,
             skills: formData.skills,
             manager_id: formData.manager_id || null,
-          });
+          })
+        });
 
-          if (profileError) throw profileError;
-        }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Failed to create employee');
       }
 
       setShowModal(false);

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, TrendingUp, DollarSign, Target, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, TrendingUp, DollarSign, Target, CheckCircle2, XCircle, Trash2, Edit2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Modal } from "../Modal";
 import { Badge } from "@/components/ui/badge";
@@ -194,6 +194,31 @@ export default function DealsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this deal?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('deals')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Deal deleted successfully",
+      });
+      fetchDeals();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleEdit = (deal: Deal) => {
     setEditingDeal(deal);
     setFormData({
@@ -339,11 +364,10 @@ export default function DealsPage() {
               deals.map((deal) => (
                 <div
                   key={deal.id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleEdit(deal)}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 cursor-pointer" onClick={() => handleEdit(deal)}>
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-lg">{deal.deal_name}</h3>
                         <Badge className={getStageBadgeColor(deal.stage) + " text-white"}>
@@ -378,6 +402,28 @@ export default function DealsPage() {
                           <span className="font-medium">Notes:</span> {deal.notes}
                         </div>
                       )}
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(deal);
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(deal.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -40,6 +40,7 @@ import { ReportsPage } from "./components/admin/ReportsPage";
 import ConsolidatedReportsPage from "./components/admin/ConsolidatedReportsPage";
 import DealsPage from "./components/admin/DealsPage";
 import { BudgetTrackingPage } from "./components/admin/BudgetTrackingPage";
+import BudgetsManagementPage from "./components/admin/BudgetsManagementPage";
 import { BulkOperationsPage } from "./components/admin/BulkOperationsPage";
 import { ClientPortalPage } from "./components/admin/ClientPortalPage";
 import { ActivityLogsPage } from "./components/admin/ActivityLogsPage";
@@ -119,6 +120,7 @@ function AdminRoutes() {
       <Route path="/communications" component={CommunicationHubPage} />
       <Route path="/resources" component={ResourceManagementPage} />
       <Route path="/budget" component={BudgetTrackingPage} />
+      <Route path="/budgets" component={BudgetsManagementPage} />
       <Route path="/benchmarks" component={PerformanceBenchmarksPage} />
       <Route path="/metrics" component={CustomMetricsPage} />
       <Route path="/approvals" component={ReportApprovalsPage} />

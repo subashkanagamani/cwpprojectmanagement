@@ -71,6 +71,7 @@ export function ClientCredentialsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedCredential, setSelectedCredential] = useState<Credential | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [decryptedPasswords, setDecryptedPasswords] = useState<Map<string, string>>(new Map());
   const [submitting, setSubmitting] = useState(false);
   const [credentialForm, setCredentialForm] = useState({
     client_id: '',
@@ -128,24 +129,40 @@ export function ClientCredentialsPage() {
     }
   };
 
-  const encryptPassword = (password: string): string => {
-    return btoa(password);
-  };
-
-  const decryptPassword = (encryptedPassword: string): string => {
+  const decryptPassword = async (encryptedPassword: string): Promise<string> => {
     try {
-      return atob(encryptedPassword);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return '';
+
+      const response = await fetch('/api/credentials/decrypt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ encrypted_password: encryptedPassword })
+      });
+
+      if (!response.ok) return '';
+      const result = await response.json();
+      return result.password || '';
     } catch {
       return '';
     }
   };
 
-  const togglePasswordVisibility = (credentialId: string) => {
+  const togglePasswordVisibility = async (credential: Credential) => {
+    const credentialId = credential.id;
     const newVisible = new Set(visiblePasswords);
     if (newVisible.has(credentialId)) {
       newVisible.delete(credentialId);
     } else {
       newVisible.add(credentialId);
+      // Decrypt if not already decrypted
+      if (!decryptedPasswords.has(credentialId)) {
+        const decrypted = await decryptPassword(credential.encrypted_password);
+        setDecryptedPasswords((prev) => new Map(prev).set(credentialId, decrypted));
+      }
     }
     setVisiblePasswords(newVisible);
   };
@@ -159,16 +176,26 @@ export function ClientCredentialsPage() {
     try {
       setSubmitting(true);
 
-      const { error } = await supabase.from('client_credentials').insert({
-        client_id: credentialForm.client_id,
-        tool_name: credentialForm.tool_name,
-        username: credentialForm.username,
-        encrypted_password: encryptPassword(credentialForm.password),
-        notes: credentialForm.notes,
-        created_by: profile?.id,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch('/api/credentials/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          client_id: credentialForm.client_id,
+          tool_name: credentialForm.tool_name,
+          username: credentialForm.username,
+          password: credentialForm.password,
+          notes: credentialForm.notes,
+        })
       });
 
-      if (error) throw error;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to add credential');
 
       showToast('Credential added successfully', 'success');
       setShowAddModal(false);
@@ -196,22 +223,27 @@ export function ClientCredentialsPage() {
     try {
       setSubmitting(true);
 
-      const updateData: any = {
-        tool_name: credentialForm.tool_name,
-        username: credentialForm.username,
-        notes: credentialForm.notes,
-      };
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
-      if (credentialForm.password) {
-        updateData.encrypted_password = encryptPassword(credentialForm.password);
-      }
+      const response = await fetch('/api/credentials/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          id: selectedCredential.id,
+          client_id: credentialForm.client_id,
+          tool_name: credentialForm.tool_name,
+          username: credentialForm.username,
+          password: credentialForm.password || null,
+          notes: credentialForm.notes,
+        })
+      });
 
-      const { error } = await supabase
-        .from('client_credentials')
-        .update(updateData)
-        .eq('id', selectedCredential.id);
-
-      if (error) throw error;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update credential');
 
       showToast('Credential updated successfully', 'success');
       setShowEditModal(false);
@@ -388,7 +420,7 @@ export function ClientCredentialsPage() {
                 <div className="divide-y divide-border">
                   {group.credentials.map((credential) => {
                     const isPasswordVisible = visiblePasswords.has(credential.id);
-                    const decryptedPassword = decryptPassword(credential.encrypted_password);
+                    const decryptedPassword = decryptedPasswords.get(credential.id) || '';
 
                     return (
                       <div key={credential.id} className="p-6" data-testid={`card-credential-${credential.id}`}>
@@ -458,7 +490,7 @@ export function ClientCredentialsPage() {
                               <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => togglePasswordVisibility(credential.id)}
+                                onClick={() => togglePasswordVisibility(credential)}
                                 data-testid={`button-toggle-password-${credential.id}`}
                               >
                                 {isPasswordVisible ? (
