@@ -74,7 +74,7 @@ export function ReportAttachments({ reportId, canUpload = true, canDelete = fals
       const fileName = `${reportId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('report-attachments')
+        .from('attachments')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
@@ -83,7 +83,7 @@ export function ReportAttachments({ reportId, canUpload = true, canDelete = fals
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('report-attachments')
+        .from('attachments')
         .getPublicUrl(fileName);
 
       const { error: dbError } = await supabase
@@ -99,7 +99,7 @@ export function ReportAttachments({ reportId, canUpload = true, canDelete = fals
 
       if (dbError) {
         await supabase.storage
-          .from('report-attachments')
+          .from('attachments')
           .remove([fileName]);
         throw dbError;
       }
@@ -128,7 +128,7 @@ export function ReportAttachments({ reportId, canUpload = true, canDelete = fals
       if (dbError) throw dbError;
 
       await supabase.storage
-        .from('report-attachments')
+        .from('attachments')
         .remove([fileName]);
 
       showToast('Attachment deleted successfully', 'success');
