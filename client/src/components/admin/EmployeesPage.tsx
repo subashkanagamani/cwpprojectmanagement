@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Profile, Client, ClientAssignment, Service } from '../../lib/database.types';
-import { Plus, Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3 } from 'lucide-react';
+import { Plus, Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3, Trash2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -265,6 +265,32 @@ export function EmployeesPage() {
       loadEmployees();
     } catch (error) {
       console.error('Error updating employee status:', error);
+    }
+  };
+
+  const handleDeleteEmployee = async (employee: Profile) => {
+    if (!confirm(`Are you sure you want to delete ${employee.full_name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    if (employee.assignmentCount && employee.assignmentCount > 0) {
+      showToast(`Cannot delete ${employee.full_name}. Please remove all client assignments first.`, 'error');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', employee.id);
+
+      if (error) throw error;
+
+      showToast(`${employee.full_name} deleted successfully`, 'success');
+      loadEmployees();
+    } catch (error: any) {
+      console.error('Error deleting employee:', error);
+      showToast(error.message || 'Failed to delete employee', 'error');
     }
   };
 
@@ -636,14 +662,25 @@ export function EmployeesPage() {
                       </Button>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openModal(employee)}
-                        data-testid={`button-edit-employee-${employee.id}`}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openModal(employee)}
+                          data-testid={`button-edit-employee-${employee.id}`}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteEmployee(employee)}
+                          data-testid={`button-delete-employee-${employee.id}`}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

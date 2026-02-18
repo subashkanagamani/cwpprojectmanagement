@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Client, ClientAssignment, Profile, Service, WeeklyReport } from '../../lib/database.types';
-import { ArrowLeft, Users, Plus, X, FileText, Calendar, DollarSign, Clock, Briefcase, Mail, Phone, Globe, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Users, Plus, X, FileText, Calendar, DollarSign, Clock, Briefcase, Mail, Phone, Globe, AlertCircle, CheckCircle, Edit2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,9 +84,22 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [assignFormData, setAssignFormData] = useState({
     employee_id: '',
     service_id: '',
+  });
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    industry: '',
+    status: 'active' as 'active' | 'paused' | 'completed',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    health_status: 'healthy' as 'healthy' | 'needs_attention' | 'at_risk',
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    website: '',
+    notes: '',
   });
   const { showToast } = useToast();
 
@@ -117,7 +130,21 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         supabase.from('services').select('*').eq('is_active', true),
       ]);
 
-      if (clientRes.data) setClient(clientRes.data);
+      if (clientRes.data) {
+        setClient(clientRes.data);
+        setEditFormData({
+          name: clientRes.data.name,
+          industry: clientRes.data.industry || '',
+          status: clientRes.data.status,
+          priority: clientRes.data.priority,
+          health_status: clientRes.data.health_status,
+          contact_name: clientRes.data.contact_name || '',
+          contact_email: clientRes.data.contact_email || '',
+          contact_phone: clientRes.data.contact_phone || '',
+          website: clientRes.data.website || '',
+          notes: clientRes.data.notes || '',
+        });
+      }
 
       if (assignmentsRes.data) {
         setAssignments(
@@ -184,6 +211,42 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
     } catch (error) {
       console.error('Error assigning employee:', error);
       showToast('Failed to assign employee', 'error');
+    }
+  };
+
+  const handleEditClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editFormData.name.trim()) {
+      showToast('Client name is required', 'error');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({
+          name: editFormData.name,
+          industry: editFormData.industry || null,
+          status: editFormData.status,
+          priority: editFormData.priority,
+          health_status: editFormData.health_status,
+          contact_name: editFormData.contact_name || null,
+          contact_email: editFormData.contact_email || null,
+          contact_phone: editFormData.contact_phone || null,
+          website: editFormData.website || null,
+          notes: editFormData.notes || null,
+        })
+        .eq('id', clientId);
+
+      if (error) throw error;
+
+      showToast('Client updated successfully', 'success');
+      setShowEditModal(false);
+      loadClientData();
+    } catch (error) {
+      console.error('Error updating client:', error);
+      showToast('Failed to update client', 'error');
     }
   };
 
@@ -279,10 +342,16 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
             </p>
           </div>
         </div>
-        <Button onClick={() => setShowAssignModal(true)} data-testid="button-assign-employee">
-          <Plus className="h-4 w-4 mr-2" />
-          Assign Employee
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowEditModal(true)} data-testid="button-edit-client">
+            <Edit2 className="h-4 w-4 mr-2" />
+            Edit Client
+          </Button>
+          <Button onClick={() => setShowAssignModal(true)} data-testid="button-assign-employee">
+            <Plus className="h-4 w-4 mr-2" />
+            Assign Employee
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -588,6 +657,157 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
               </Button>
               <Button type="submit" data-testid="button-submit-assign">
                 Assign
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditClient} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Client Name</Label>
+                <Input
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label>Industry</Label>
+                <Input
+                  value={editFormData.industry}
+                  onChange={(e) => setEditFormData({ ...editFormData, industry: e.target.value })}
+                  placeholder="e.g., Technology, Healthcare"
+                />
+              </div>
+
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={editFormData.status}
+                  onValueChange={(value: 'active' | 'paused' | 'completed') =>
+                    setEditFormData({ ...editFormData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Priority</Label>
+                <Select
+                  value={editFormData.priority}
+                  onValueChange={(value: 'low' | 'medium' | 'high' | 'critical') =>
+                    setEditFormData({ ...editFormData, priority: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Health Status</Label>
+                <Select
+                  value={editFormData.health_status}
+                  onValueChange={(value: 'healthy' | 'needs_attention' | 'at_risk') =>
+                    setEditFormData({ ...editFormData, health_status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="healthy">Healthy</SelectItem>
+                    <SelectItem value="needs_attention">Needs Attention</SelectItem>
+                    <SelectItem value="at_risk">At Risk</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Contact Information</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Contact Name</Label>
+                  <Input
+                    value={editFormData.contact_name}
+                    onChange={(e) => setEditFormData({ ...editFormData, contact_name: e.target.value })}
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div>
+                  <Label>Contact Email</Label>
+                  <Input
+                    type="email"
+                    value={editFormData.contact_email}
+                    onChange={(e) => setEditFormData({ ...editFormData, contact_email: e.target.value })}
+                    placeholder="john@example.com"
+                  />
+                </div>
+
+                <div>
+                  <Label>Contact Phone</Label>
+                  <Input
+                    value={editFormData.contact_phone}
+                    onChange={(e) => setEditFormData({ ...editFormData, contact_phone: e.target.value })}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+
+                <div>
+                  <Label>Website</Label>
+                  <Input
+                    type="url"
+                    value={editFormData.website}
+                    onChange={(e) => setEditFormData({ ...editFormData, website: e.target.value })}
+                    placeholder="https://example.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>Notes</Label>
+              <textarea
+                className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                value={editFormData.notes}
+                onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                placeholder="Additional notes about the client..."
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Save Changes
               </Button>
             </DialogFooter>
           </form>

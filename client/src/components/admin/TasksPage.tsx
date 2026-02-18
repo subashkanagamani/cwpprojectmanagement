@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Plus, Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle, Search, Filter, ArrowUpDown } from 'lucide-react';
 import { format, parseISO, isPast, isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -57,6 +57,12 @@ export function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [priorityFilter, setPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+  const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
+  const [sortField, setSortField] = useState<'due_date' | 'priority' | 'title'>('due_date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -229,6 +235,34 @@ export function TasksPage() {
   const completedTasks = tasks.filter(t => t.status === 'completed');
   const overdueTasks = tasks.filter(isOverdue);
 
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.profiles?.full_name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+    const matchesAssignee = assigneeFilter === 'all' || task.assigned_to === assigneeFilter;
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
+  });
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    let comparison = 0;
+
+    if (sortField === 'due_date') {
+      comparison = new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    } else if (sortField === 'priority') {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      comparison = priorityOrder[b.priority] - priorityOrder[a.priority];
+    } else if (sortField === 'title') {
+      comparison = a.title.localeCompare(b.title);
+    }
+
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -306,12 +340,113 @@ export function TasksPage() {
         </Card>
       </div>
 
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search tasks by title, description, or assignee..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setPriorityFilter('all');
+                  setAssigneeFilter('all');
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={priorityFilter} onValueChange={(value: any) => setPriorityFilter(value)}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Assigned To" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assignees</SelectItem>
+                  {employees.map((emp) => (
+                    <SelectItem key={emp.id} value={emp.id}>
+                      {emp.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortField} onValueChange={(value: any) => setSortField(value)}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="due_date">Due Date</SelectItem>
+                  <SelectItem value="priority">Priority</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              >
+                <ArrowUpDown className="h-4 w-4 mr-2" />
+                {sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+              </Button>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Showing {sortedTasks.length} of {tasks.length} tasks
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {tasks.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
             <ClipboardList className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground text-lg">No tasks yet</p>
             <p className="text-sm text-muted-foreground mt-2">Create your first task to get started</p>
+          </CardContent>
+        </Card>
+      ) : sortedTasks.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Filter className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground text-lg">No tasks match your filters</p>
+            <p className="text-sm text-muted-foreground mt-2">Try adjusting your search or filters</p>
           </CardContent>
         </Card>
       ) : (
@@ -330,7 +465,7 @@ export function TasksPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tasks.map((task) => {
+                {sortedTasks.map((task) => {
                   const overdue = isOverdue(task);
 
                   return (

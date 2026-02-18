@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../contexts/ToastContext';
 import { Plus, Search, MoreHorizontal, ArrowUpRight, TrendingUp, Users } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ export function ModernClientsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [, setLocation] = useLocation();
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadClients();
@@ -117,6 +119,38 @@ export function ModernClientsPage() {
         return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
       default:
         return 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
+  const handleViewDetails = (clientId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLocation(`/clients/${clientId}`);
+  };
+
+  const handleEdit = (clientId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    showToast('Edit functionality coming soon', 'info');
+  };
+
+  const handleDelete = async (clientId: string, clientName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!confirm(`Are you sure you want to delete "${clientName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', clientId);
+
+      if (error) throw error;
+
+      showToast(`${clientName} deleted successfully`, 'success');
+      loadClients();
+    } catch (error: any) {
+      showToast(error.message || 'Failed to delete client', 'error');
     }
   };
 
@@ -219,9 +253,18 @@ export function ModernClientsPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => handleViewDetails(client.id, e)}>
+                    View Details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => handleEdit(client.id, e)}>
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={(e) => handleDelete(client.id, client.name, e)}
+                  >
+                    Delete
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
