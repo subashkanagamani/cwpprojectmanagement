@@ -19,11 +19,11 @@ import { Progress } from "@/components/ui/progress";
 
 interface ClientAssignment {
   id: string;
-  client: {
+  clients: {
     name: string;
     status: string;
     health_status: string;
-  };
+  } | null;
 }
 
 interface Task {
@@ -183,44 +183,48 @@ export function ModernEmployeeDashboard() {
           </div>
 
           <div className="space-y-3">
-            {assignments.slice(0, 5).map((assignment) => (
-              <div
-                key={assignment.id}
-                className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${assignment.client.name}`}
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                      {getInitials(assignment.client.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {assignment.client.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {assignment.client.status === "active"
-                        ? "Active"
-                        : "Paused"}
-                    </p>
-                  </div>
-                </div>
-                <Badge
-                  variant={
-                    assignment.client.health_status === "healthy"
-                      ? "default"
-                      : "secondary"
-                  }
+            {assignments.slice(0, 5).map((assignment) => {
+              if (!assignment.clients) return null;
+
+              return (
+                <div
+                  key={assignment.id}
+                  className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 >
-                  {assignment.client.health_status === "healthy"
-                    ? "Healthy"
-                    : "Needs Attention"}
-                </Badge>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${assignment.clients.name}`}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                        {getInitials(assignment.clients.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {assignment.clients.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {assignment.clients.status === "active"
+                          ? "Active"
+                          : "Paused"}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant={
+                      assignment.clients.health_status === "healthy"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {assignment.clients.health_status === "healthy"
+                      ? "Healthy"
+                      : "Needs Attention"}
+                  </Badge>
+                </div>
+              );
+            })}
 
             {assignments.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
