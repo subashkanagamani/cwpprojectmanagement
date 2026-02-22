@@ -444,7 +444,7 @@ export function EmployeeWorkloadDashboard() {
                     </CollapsibleTrigger>
 
                     <CollapsibleContent className="space-y-2">
-                      <div className="border-t pt-3 space-y-2.5">
+                      <div className="border-t pt-3 max-h-[280px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin">
                         {emp.clients.map(client => (
                           <div key={client.client_id} className="rounded-md border p-3 space-y-2" data-testid={`card-client-${client.client_id}-${emp.id}`}>
                             <div className="flex items-center gap-2 flex-wrap">
