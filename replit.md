@@ -140,3 +140,7 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Added scheduled cron endpoint (/api/cron/check-overdue-reports) for automated report reminders
 - Feb 2026: Integrated Replit Object Storage for SharedDocumentsPage file uploads (presigned URL flow)
 - Feb 2026: Configured production deployment (autoscale with npm build/start)
+- Feb 2026: Added 13 missing table definitions to database.types.ts (activity_logs, calendar_events, communications, email_templates, employee_tasks, goal_progress, meeting_notes, report_approvals, reports, report_templates, resource_allocations, shared_documents, skill_matrix)
+- Feb 2026: Added admin role check to /api/credentials/decrypt endpoint for security
+- Feb 2026: Added allowedHosts: true to vite.config.ts for Replit iframe proxy compatibility
+- Feb 2026: Production build verified - Vite + esbuild bundle succeeds (2.4MB JS, 90KB CSS)
