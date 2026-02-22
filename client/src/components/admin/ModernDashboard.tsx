@@ -13,8 +13,6 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,8 +25,12 @@ interface DashboardStats {
   totalClients: number;
   activeClients: number;
   totalEmployees: number;
+  activeEmployees: number;
   pendingReports: number;
   submittedReports: number;
+  totalAssignments: number;
+  totalBudget: number;
+  totalSpending: number;
   budgetUtilization: number;
 }
 
@@ -48,13 +50,23 @@ interface RecentActivity {
   created_at: string;
 }
 
+function formatCurrency(value: number): string {
+  if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
+  if (value >= 1000) return `₹${(value / 1000).toFixed(1)}k`;
+  return `₹${value.toLocaleString()}`;
+}
+
 export function ModernDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
     activeClients: 0,
     totalEmployees: 0,
+    activeEmployees: 0,
     pendingReports: 0,
     submittedReports: 0,
+    totalAssignments: 0,
+    totalBudget: 0,
+    totalSpending: 0,
     budgetUtilization: 0,
   });
   const [clients, setClients] = useState<Client[]>([]);
@@ -67,26 +79,50 @@ export function ModernDashboard() {
     loadDashboardData();
   }, []);
 
+  const getWeekStart = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff)).toISOString().split("T")[0];
+  };
+
   const loadDashboardData = async () => {
     try {
-      const [clientsRes, employeesRes, reportsRes, logsRes] = await Promise.all([
-        supabase.from("clients").select("id, name, status, health_status, priority").limit(10),
-        supabase.from("profiles").select("id, role").eq("role", "employee"),
-        supabase.from("weekly_reports").select("id, status"),
+      const [clientsRes, employeesRes, assignmentsRes, reportsRes, budgetsRes, logsRes] = await Promise.all([
+        supabase.from("clients").select("id, name, status, health_status, priority").is("deleted_at", null).order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, role, status").eq("role", "employee"),
+        supabase.from("client_assignments").select("id, employee_id").eq("is_active", true).is("deleted_at", null) as any,
+        supabase.from("weekly_reports").select("id, week_start_date, status"),
+        supabase.from("client_budgets").select("client_id, monthly_budget, actual_spending") as any,
         supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(5),
       ]);
 
-      const clientData = clientsRes.data || [];
+      const clientData = (clientsRes.data || []) as Client[];
       const employeeData = employeesRes.data || [];
+      const assignmentData = assignmentsRes.data || [];
       const reportData = reportsRes.data || [];
+      const budgetData = budgetsRes.data || [];
+
+      const currentWeekStart = getWeekStart(new Date());
+      const reportsThisWeek = reportData.filter((r: any) => r.week_start_date === currentWeekStart);
+      const submittedThisWeek = reportsThisWeek.filter((r: any) => r.status === "submitted" || r.status === "approved").length;
+      const pendingThisWeek = Math.max(0, assignmentData.length - submittedThisWeek);
+
+      const totalBudget = budgetData.reduce((sum: number, b: any) => sum + Number(b.monthly_budget || 0), 0);
+      const totalSpending = budgetData.reduce((sum: number, b: any) => sum + Number(b.actual_spending || 0), 0);
+      const budgetUtil = totalBudget > 0 ? Math.round((totalSpending / totalBudget) * 100) : 0;
 
       setStats({
         totalClients: clientData.length,
-        activeClients: clientData.filter((c: any) => c.status === "active").length,
+        activeClients: clientData.filter((c) => c.status === "active").length,
         totalEmployees: employeeData.length,
-        pendingReports: reportData.filter((r: any) => r.status === "pending").length,
-        submittedReports: reportData.filter((r: any) => r.status === "submitted").length,
-        budgetUtilization: 68,
+        activeEmployees: employeeData.filter((e: any) => e.status === "active").length,
+        pendingReports: pendingThisWeek,
+        submittedReports: submittedThisWeek,
+        totalAssignments: assignmentData.length,
+        totalBudget,
+        totalSpending,
+        budgetUtilization: budgetUtil,
       });
 
       setClients(clientData);
@@ -120,42 +156,42 @@ export function ModernDashboard() {
     {
       label: "Total Clients",
       value: stats.totalClients,
-      change: "+12%",
-      trend: "up" as const,
+      sub: `${stats.activeClients} active`,
       icon: Briefcase,
       gradient: "blue",
       iconBg: "bg-blue-50 dark:bg-blue-950/30",
       iconColor: "text-blue-600 dark:text-blue-400",
+      href: "/clients",
     },
     {
-      label: "Active Projects",
-      value: stats.activeClients,
-      change: "+8%",
-      trend: "up" as const,
+      label: "Active Assignments",
+      value: stats.totalAssignments,
+      sub: `across ${stats.activeClients} clients`,
       icon: TrendingUp,
       gradient: "green",
       iconBg: "bg-emerald-50 dark:bg-emerald-950/30",
       iconColor: "text-emerald-600 dark:text-emerald-400",
+      href: "/assignments",
     },
     {
       label: "Team Members",
       value: stats.totalEmployees,
-      change: "+3%",
-      trend: "up" as const,
+      sub: `${stats.activeEmployees} active`,
       icon: Users,
       gradient: "purple",
       iconBg: "bg-violet-50 dark:bg-violet-950/30",
       iconColor: "text-violet-600 dark:text-violet-400",
+      href: "/employees",
     },
     {
-      label: "Reports Pending",
-      value: stats.pendingReports,
-      change: "-5%",
-      trend: "down" as const,
+      label: "Reports This Week",
+      value: stats.submittedReports,
+      sub: `${stats.pendingReports} pending`,
       icon: FileText,
       gradient: "orange",
       iconBg: "bg-amber-50 dark:bg-amber-950/30",
       iconColor: "text-amber-600 dark:text-amber-400",
+      href: "/reports",
     },
   ];
 
@@ -168,7 +204,7 @@ export function ModernDashboard() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[140px] rounded-xl" />
+            <Skeleton key={i} className="h-[120px] rounded-xl" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,31 +232,21 @@ export function ModernDashboard() {
           return (
             <Card
               key={idx}
-              className={`stat-card-gradient ${stat.gradient} overflow-hidden animate-fade-up`}
+              className={`stat-card-gradient ${stat.gradient} overflow-hidden animate-fade-up hover-elevate cursor-pointer transition-shadow`}
               style={{ animationDelay: `${idx * 80}ms` }}
+              onClick={() => setLocation(stat.href)}
             >
               <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3">
                   <div className={`p-2.5 rounded-lg ${stat.iconBg}`}>
                     <Icon className={`h-5 w-5 ${stat.iconColor}`} />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-                    stat.trend === "up"
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
-                      : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"
-                  }`}>
-                    {stat.trend === "up" ? (
-                      <ArrowUp className="h-3 w-3" />
-                    ) : (
-                      <ArrowDown className="h-3 w-3" />
-                    )}
-                    {stat.change}
-                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-3xl font-bold text-foreground mt-1 animate-count-up" style={{ animationDelay: `${idx * 80 + 200}ms` }}>
+                <p className="text-3xl font-bold text-foreground mt-1">
                   {stat.value}
                 </p>
+                <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
               </CardContent>
             </Card>
           );
@@ -277,7 +303,9 @@ export function ModernDashboard() {
                         ? "Healthy"
                         : client.health_status === "at_risk"
                         ? "At Risk"
-                        : "Needs Attention"}
+                        : client.health_status === "needs_attention"
+                        ? "Needs Attention"
+                        : client.health_status || "Unknown"}
                     </Badge>
                     <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -315,15 +343,21 @@ export function ModernDashboard() {
                 <div className="pt-3 border-t space-y-2.5">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Total Budget</span>
-                    <span className="font-semibold text-foreground">$45,000</span>
+                    <span className="font-semibold text-foreground">
+                      {stats.totalBudget > 0 ? formatCurrency(stats.totalBudget) : '—'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Spent</span>
-                    <span className="font-semibold text-foreground">$30,600</span>
+                    <span className="font-semibold text-foreground">
+                      {stats.totalSpending > 0 ? formatCurrency(stats.totalSpending) : '—'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Remaining</span>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">$14,400</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      {stats.totalBudget > 0 ? formatCurrency(Math.max(0, stats.totalBudget - stats.totalSpending)) : '—'}
+                    </span>
                   </div>
                 </div>
               </div>
