@@ -12,7 +12,7 @@ export const users = pgTable("users", {
 
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").notNull().unique(),
   email: text("email").unique().notNull(),
   fullName: text("full_name").notNull(),
   role: text("role").notNull().default("employee"),
@@ -20,6 +20,7 @@ export const profiles = pgTable("profiles", {
   skills: jsonb("skills").default([]),
   maxCapacity: integer("max_capacity").default(5),
   phone: text("phone"),
+  managerId: uuid("manager_id"),
   customFields: jsonb("custom_fields").default({}),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -72,6 +73,8 @@ export const clientAssignments = pgTable("client_assignments", {
   clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }).notNull(),
   employeeId: uuid("employee_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
   serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+  isActive: boolean("is_active").default(true),
+  isAccountManager: boolean("is_account_manager").default(false),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -177,7 +180,7 @@ export const clientPortalUsers = pgTable("client_portal_users", {
   clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }).notNull(),
   email: text("email").unique().notNull(),
   fullName: text("full_name").notNull(),
-  userId: integer("user_id").references(() => users.id),
+  authUserId: uuid("auth_user_id"),
   isActive: boolean("is_active").default(true),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -520,6 +523,72 @@ export const notificationPreferences = pgTable("notification_preferences", {
   deadlineReminders: boolean("deadline_reminders").default(true),
   mentionNotifications: boolean("mention_notifications").default(true),
   approvalNotifications: boolean("approval_notifications").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const deals = pgTable("deals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }).notNull(),
+  dealName: text("deal_name").notNull(),
+  dealValue: numeric("deal_value", { precision: 12, scale: 2 }).default("0"),
+  stage: text("stage").notNull().default("lead"),
+  probability: integer("probability").default(0),
+  expectedCloseDate: date("expected_close_date"),
+  ownerId: uuid("owner_id"),
+  notes: text("notes"),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const feedback = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  fromUserId: uuid("from_user_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  toUserId: uuid("to_user_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  message: text("message").notNull(),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const timeOffRequests = pgTable("time_off_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  employeeId: uuid("employee_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  type: text("type").notNull().default("vacation"),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  reason: text("reason"),
+  status: text("status").default("pending"),
+  approvedBy: uuid("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailLogs = pgTable("email_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  recipientEmail: text("recipient_email").notNull(),
+  subject: text("subject").notNull(),
+  body: text("body"),
+  templateUsed: text("template_used"),
+  status: text("status").default("sent"),
+  sentBy: uuid("sent_by"),
+  clientId: uuid("client_id"),
+  sentAt: timestamp("sent_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dailyTaskLogs = pgTable("daily_task_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  assignmentId: uuid("assignment_id").references(() => clientAssignments.id, { onDelete: "cascade" }).notNull(),
+  employeeId: uuid("employee_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }).notNull(),
+  serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+  logDate: date("log_date").notNull(),
+  metrics: jsonb("metrics").default({}).notNull(),
+  notes: text("notes"),
+  status: text("status").notNull().default("pending"),
+  submittedAt: timestamp("submitted_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

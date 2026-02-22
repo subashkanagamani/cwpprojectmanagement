@@ -19,8 +19,7 @@ try {
   console.error("Failed to initialize Supabase admin client:", e.message);
 }
 
-// Encryption key for credentials - in production, use a secure key from environment
-const ENCRYPTION_KEY = process.env.CREDENTIALS_ENCRYPTION_KEY || 'your-secret-key-at-least-32-chars-long-please-change';
+const ENCRYPTION_KEY = process.env.CREDENTIALS_ENCRYPTION_KEY || '';
 const ALGORITHM = 'aes-256-cbc';
 
 function encryptPassword(password: string): string {
@@ -364,20 +363,20 @@ export function registerRoutes(app: Express) {
 
       const { data: assignments, error: assignErr } = await (supabaseAdmin
         .from("client_assignments") as any)
-        .select("id, employee_id, client_id, clients(name)")
+        .select("id, employee_id, client_id, service_id, clients(name)")
         .eq("is_active", true);
 
       if (assignErr) throw assignErr;
 
       const { data: existingReports, error: repErr } = await (supabaseAdmin
         .from("weekly_reports") as any)
-        .select("assignment_id")
+        .select("employee_id, client_id, service_id")
         .eq("week_start_date", weekStartStr);
 
       if (repErr) throw repErr;
 
-      const reportedAssignments = new Set((existingReports || []).map((r: any) => r.assignment_id));
-      const missingReports = (assignments || []).filter((a: any) => !reportedAssignments.has(a.id));
+      const reportedKeys = new Set((existingReports || []).map((r: any) => `${r.employee_id}:${r.client_id}:${r.service_id}`));
+      const missingReports = (assignments || []).filter((a: any) => !reportedKeys.has(`${a.employee_id}:${a.client_id}:${a.service_id}`));
 
       const employeeMap = new Map<string, string[]>();
       for (const assignment of missingReports) {
@@ -431,16 +430,16 @@ export function registerRoutes(app: Express) {
 
       const { data: assignments } = await (supabaseAdmin
         .from("client_assignments") as any)
-        .select("id, employee_id, client_id, clients(name)")
+        .select("id, employee_id, client_id, service_id, clients(name)")
         .eq("is_active", true);
 
       const { data: existingReports } = await (supabaseAdmin
         .from("weekly_reports") as any)
-        .select("assignment_id")
+        .select("employee_id, client_id, service_id")
         .eq("week_start_date", weekStartStr);
 
-      const reportedAssignments = new Set((existingReports || []).map((r: any) => r.assignment_id));
-      const missingReports = (assignments || []).filter((a: any) => !reportedAssignments.has(a.id));
+      const reportedKeys = new Set((existingReports || []).map((r: any) => `${r.employee_id}:${r.client_id}:${r.service_id}`));
+      const missingReports = (assignments || []).filter((a: any) => !reportedKeys.has(`${a.employee_id}:${a.client_id}:${a.service_id}`));
 
       const employeeMap = new Map<string, string[]>();
       for (const assignment of missingReports) {
@@ -492,7 +491,7 @@ export function registerRoutes(app: Express) {
 
       const { data: reports, error } = await (supabaseAdmin
         .from("weekly_reports") as any)
-        .select("id, status, assignment_id")
+        .select("id, status, employee_id, client_id")
         .eq("week_start_date", weekStartStr);
 
       if (error) throw error;

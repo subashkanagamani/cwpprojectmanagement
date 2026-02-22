@@ -12,6 +12,7 @@ export interface Database {
       profiles: {
         Row: {
           id: string
+          user_id: string
           email: string
           full_name: string
           role: 'admin' | 'employee'
@@ -19,12 +20,15 @@ export interface Database {
           skills: Json
           max_capacity: number
           phone: string | null
+          manager_id: string | null
           custom_fields: Json
+          deleted_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id: string
+          user_id: string
           email: string
           full_name: string
           role: 'admin' | 'employee'
@@ -32,12 +36,15 @@ export interface Database {
           skills?: Json
           max_capacity?: number
           phone?: string | null
+          manager_id?: string | null
           custom_fields?: Json
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
+          user_id?: string
           email?: string
           full_name?: string
           role?: 'admin' | 'employee'
@@ -45,7 +52,9 @@ export interface Database {
           skills?: Json
           max_capacity?: number
           phone?: string | null
+          manager_id?: string | null
           custom_fields?: Json
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -55,17 +64,23 @@ export interface Database {
           id: string
           name: string
           industry: string | null
-          status: 'active' | 'paused' | 'completed'
+          status: string
           start_date: string
           notes: string | null
           contact_name: string | null
           contact_email: string | null
           contact_phone: string | null
           website: string | null
-          priority: 'low' | 'medium' | 'high' | 'critical'
-          health_status: 'healthy' | 'needs_attention' | 'at_risk'
+          priority: string
+          health_status: string
+          health_score: number
+          last_activity_date: string | null
           custom_fields: Json
           report_due_day: number
+          weekly_meeting_day: number | null
+          meeting_time: string
+          meeting_reminder_hours: number
+          deleted_at: string | null
           created_at: string
           updated_at: string
         }
@@ -73,17 +88,23 @@ export interface Database {
           id?: string
           name: string
           industry?: string | null
-          status?: 'active' | 'paused' | 'completed'
+          status?: string
           start_date?: string
           notes?: string | null
           contact_name?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           website?: string | null
-          priority?: 'low' | 'medium' | 'high' | 'critical'
-          health_status?: 'healthy' | 'needs_attention' | 'at_risk'
+          priority?: string
+          health_status?: string
+          health_score?: number
+          last_activity_date?: string | null
           custom_fields?: Json
           report_due_day?: number
+          weekly_meeting_day?: number | null
+          meeting_time?: string
+          meeting_reminder_hours?: number
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -91,17 +112,23 @@ export interface Database {
           id?: string
           name?: string
           industry?: string | null
-          status?: 'active' | 'paused' | 'completed'
+          status?: string
           start_date?: string
           notes?: string | null
           contact_name?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           website?: string | null
-          priority?: 'low' | 'medium' | 'high' | 'critical'
-          health_status?: 'healthy' | 'needs_attention' | 'at_risk'
+          priority?: string
+          health_status?: string
+          health_score?: number
+          last_activity_date?: string | null
           custom_fields?: Json
           report_due_day?: number
+          weekly_meeting_day?: number | null
+          meeting_time?: string
+          meeting_reminder_hours?: number
+          deleted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -158,6 +185,9 @@ export interface Database {
           client_id: string
           employee_id: string
           service_id: string
+          is_active: boolean
+          is_account_manager: boolean
+          deleted_at: string | null
           created_at: string
         }
         Insert: {
@@ -165,6 +195,9 @@ export interface Database {
           client_id: string
           employee_id: string
           service_id: string
+          is_active?: boolean
+          is_account_manager?: boolean
+          deleted_at?: string | null
           created_at?: string
         }
         Update: {
@@ -172,6 +205,9 @@ export interface Database {
           client_id?: string
           employee_id?: string
           service_id?: string
+          is_active?: boolean
+          is_account_manager?: boolean
+          deleted_at?: string | null
           created_at?: string
         }
       }
@@ -227,16 +263,18 @@ export interface Database {
           service_id: string
           week_start_date: string
           work_summary: string | null
-          status: 'on_track' | 'needs_attention' | 'delayed'
+          status: string
           key_wins: string | null
           challenges: string | null
           next_week_plan: string | null
-          submitted_at: string
-          created_at: string
-          updated_at: string
+          approval_status: string
           is_draft: boolean
           last_auto_saved: string | null
           report_template_id: string | null
+          submitted_at: string | null
+          deleted_at: string | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -245,16 +283,18 @@ export interface Database {
           service_id: string
           week_start_date: string
           work_summary?: string | null
-          status: 'on_track' | 'needs_attention' | 'delayed'
+          status?: string
           key_wins?: string | null
           challenges?: string | null
           next_week_plan?: string | null
-          submitted_at?: string
-          created_at?: string
-          updated_at?: string
+          approval_status?: string
           is_draft?: boolean
           last_auto_saved?: string | null
           report_template_id?: string | null
+          submitted_at?: string | null
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -263,16 +303,18 @@ export interface Database {
           service_id?: string
           week_start_date?: string
           work_summary?: string | null
-          status?: 'on_track' | 'needs_attention' | 'delayed'
+          status?: string
           key_wins?: string | null
           challenges?: string | null
           next_week_plan?: string | null
-          submitted_at?: string
-          created_at?: string
-          updated_at?: string
+          approval_status?: string
           is_draft?: boolean
           last_auto_saved?: string | null
           report_template_id?: string | null
+          submitted_at?: string | null
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
         }
       }
       service_metrics: {
@@ -295,6 +337,205 @@ export interface Database {
           created_at?: string
         }
       }
+      deals: {
+        Row: {
+          id: string
+          client_id: string
+          deal_name: string
+          deal_value: number
+          stage: string
+          probability: number
+          expected_close_date: string | null
+          owner_id: string | null
+          notes: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          deal_name: string
+          deal_value?: number
+          stage?: string
+          probability?: number
+          expected_close_date?: string | null
+          owner_id?: string | null
+          notes?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          deal_name?: string
+          deal_value?: number
+          stage?: string
+          probability?: number
+          expected_close_date?: string | null
+          owner_id?: string | null
+          notes?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      feedback: {
+        Row: {
+          id: string
+          from_user_id: string
+          to_user_id: string
+          message: string
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          from_user_id: string
+          to_user_id: string
+          message: string
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          from_user_id?: string
+          to_user_id?: string
+          message?: string
+          read?: boolean
+          created_at?: string
+        }
+      }
+      time_off_requests: {
+        Row: {
+          id: string
+          employee_id: string
+          type: string
+          start_date: string
+          end_date: string
+          reason: string | null
+          status: string
+          approved_by: string | null
+          approved_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          type: string
+          start_date: string
+          end_date: string
+          reason?: string | null
+          status?: string
+          approved_by?: string | null
+          approved_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          type?: string
+          start_date?: string
+          end_date?: string
+          reason?: string | null
+          status?: string
+          approved_by?: string | null
+          approved_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      email_logs: {
+        Row: {
+          id: string
+          recipient_email: string
+          subject: string
+          body: string | null
+          template_used: string | null
+          status: string
+          sent_by: string | null
+          client_id: string | null
+          sent_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipient_email: string
+          subject: string
+          body?: string | null
+          template_used?: string | null
+          status?: string
+          sent_by?: string | null
+          client_id?: string | null
+          sent_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipient_email?: string
+          subject?: string
+          body?: string | null
+          template_used?: string | null
+          status?: string
+          sent_by?: string | null
+          client_id?: string | null
+          sent_at?: string
+          created_at?: string
+        }
+      }
+      tasks: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          assigned_to: string
+          created_by: string | null
+          client_id: string | null
+          priority: string
+          due_date: string
+          status: string
+          completed_at: string | null
+          remarks: string | null
+          deleted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          assigned_to: string
+          created_by?: string | null
+          client_id?: string | null
+          priority?: string
+          due_date: string
+          status?: string
+          completed_at?: string | null
+          remarks?: string | null
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          assigned_to?: string
+          created_by?: string | null
+          client_id?: string | null
+          priority?: string
+          due_date?: string
+          status?: string
+          completed_at?: string | null
+          remarks?: string | null
+          deleted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -306,6 +547,11 @@ export type ClientService = Database['public']['Tables']['client_services']['Row
 export type ClientAssignment = Database['public']['Tables']['client_assignments']['Row']
 export type WeeklyReport = Database['public']['Tables']['weekly_reports']['Row']
 export type ServiceMetric = Database['public']['Tables']['service_metrics']['Row']
+export type Deal = Database['public']['Tables']['deals']['Row']
+export type Feedback = Database['public']['Tables']['feedback']['Row']
+export type TimeOffRequest = Database['public']['Tables']['time_off_requests']['Row']
+export type EmailLog = Database['public']['Tables']['email_logs']['Row']
+export type Task = Database['public']['Tables']['tasks']['Row']
 
 export interface EmailOutreachMetrics {
   emails_sent: number
@@ -559,6 +805,8 @@ export interface SharedDocument {
   file_type: string | null
   uploaded_by: string
   description: string | null
+  file_size: number
+  permissions: string
   created_at: string
 }
 
@@ -589,4 +837,91 @@ export interface DailyTaskLog {
     clients?: { id: string; name: string }
     services?: { id: string; name: string; slug: string }
   }
+}
+
+export interface ClientCredential {
+  id: string
+  client_id: string
+  tool_name: string
+  username: string
+  encrypted_password: string
+  notes: string
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Goal {
+  id: string
+  client_id: string
+  service_id: string | null
+  title: string
+  description: string | null
+  target_value: number | null
+  current_value: number
+  unit: string | null
+  start_date: string
+  target_date: string
+  status: string
+  priority: string
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Communication {
+  id: string
+  client_id: string
+  type: string
+  direction: string
+  subject: string | null
+  summary: string
+  content: string | null
+  created_by: string
+  created_at: string
+}
+
+export interface MeetingNote {
+  id: string
+  client_id: string
+  title: string
+  date: string
+  attendees: Json
+  agenda: string | null
+  notes: string
+  action_items: Json
+  next_meeting: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CalendarEvent {
+  id: string
+  title: string
+  description: string | null
+  event_type: string
+  start_time: string
+  end_time: string | null
+  client_id: string | null
+  attendees: Json
+  location: string | null
+  is_recurring: boolean
+  recurrence_rule: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Timesheet {
+  id: string
+  employee_id: string
+  week_start: string
+  status: string
+  total_hours: number
+  submitted_at: string | null
+  approved_at: string | null
+  approved_by: string | null
+  created_at: string
+  updated_at: string
 }
