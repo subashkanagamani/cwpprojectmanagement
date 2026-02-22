@@ -274,6 +274,19 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
   const needsAttentionCount = reports.filter((r) => r.status === 'needs_attention' || r.status === 'delayed').length;
   const uniqueServices = new Set(assignments.map(a => a.service?.name).filter(Boolean));
 
+  const groupedAssignments = assignments.reduce((acc, assignment) => {
+    const empId = assignment.employee_id;
+    if (!acc[empId]) {
+      acc[empId] = {
+        employee: assignment.employee,
+        assignments: [],
+      };
+    }
+    acc[empId].assignments.push(assignment);
+    return acc;
+  }, {} as Record<string, { employee?: Profile; assignments: AssignmentWithDetails[] }>);
+  const uniqueMembers = Object.keys(groupedAssignments).length;
+
   if (loading) {
     return (
       <div className="space-y-6" data-testid="loading-client-detail">
@@ -361,7 +374,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
                 <p className="text-[13px] font-medium text-muted-foreground">Team Size</p>
-                <p className="text-3xl font-semibold mt-1 tracking-tight">{assignments.length}</p>
+                <p className="text-3xl font-semibold mt-1 tracking-tight">{uniqueMembers}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{uniqueServices.size} service{uniqueServices.size !== 1 ? 's' : ''}</p>
               </div>
               <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
@@ -489,7 +502,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <CardTitle className="text-[15px] font-semibold">Assigned Team</CardTitle>
-            <p className="text-xs text-muted-foreground">{assignments.length} member{assignments.length !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-muted-foreground">{uniqueMembers} member{uniqueMembers !== 1 ? 's' : ''} &middot; {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}</p>
           </div>
         </CardHeader>
         <CardContent>
@@ -504,41 +517,51 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {assignments.map((assignment) => {
+              {Object.entries(groupedAssignments).map(([empId, group]) => {
+                const colorIndex = empId.charCodeAt(0) % AVATAR_COLORS.length;
                 return (
                   <div
-                    key={assignment.id}
-                    className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border"
-                    data-testid={`card-assignment-${assignment.id}`}
+                    key={empId}
+                    className="rounded-xl border bg-card p-4 hover:shadow-md transition-all duration-200"
+                    data-testid={`card-grouped-employee-${empId}`}
                   >
-                    <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-9 w-9 shrink-0">
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                            {assignment.employee ? getInitials(assignment.employee.full_name) : '??'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate" data-testid={`text-assignment-employee-${assignment.id}`}>
-                            {assignment.employee?.full_name || 'Unknown'}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {assignment.employee?.email}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar className="h-10 w-10 shrink-0">
+                        <AvatarFallback className={`${AVATAR_COLORS[colorIndex]} text-white font-semibold text-xs`}>
+                          {group.employee ? getInitials(group.employee.full_name) : '??'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold truncate">
+                          {group.employee?.full_name || 'Unknown'}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {group.employee?.email}
+                        </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveAssignment(assignment.id)}
-                        data-testid={`button-remove-assignment-${assignment.id}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
-                    <Badge variant="secondary" className="text-[11px]" data-testid={`badge-service-${assignment.id}`}>
-                      {assignment.service?.name || 'No service'}
-                    </Badge>
+                    <Separator className="mb-3" />
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                        Assigned Services ({group.assignments.length})
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {group.assignments.map((assignment) => (
+                          <div key={assignment.id} className="group/service flex items-center gap-1">
+                            <Badge variant="secondary" className="text-[11px] pr-1" data-testid={`badge-service-${assignment.id}`}>
+                              {assignment.service?.name || 'No service'}
+                              <button
+                                onClick={() => handleRemoveAssignment(assignment.id)}
+                                className="ml-1 rounded-full p-0.5 opacity-0 group-hover/service:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                                data-testid={`button-remove-assignment-${assignment.id}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
