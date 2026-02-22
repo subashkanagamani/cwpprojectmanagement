@@ -133,3 +133,10 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Enhanced CalendarPage with HTML5 drag-and-drop event rescheduling (preserves time/duration)
 - Feb 2026: Enhanced SettingsPage with profile editing (name, phone) and password change
 - Feb 2026: Built ClientOnboardingPage - 8-step checklist tracked in clients.custom_fields.onboarding JSON
+- Feb 2026: Cleaned up 8 unused/duplicate page components (old Dashboard, Analytics, EmployeeDashboard, etc.)
+- Feb 2026: Expanded employee sidebar - added Calendar, Documents, Time Entry, Settings to employee navigation
+- Feb 2026: Added email sending endpoint (/api/email/send) with email_logs tracking
+- Feb 2026: Added compose email dialog to EmailLogsPage and CommunicationHubPage
+- Feb 2026: Added scheduled cron endpoint (/api/cron/check-overdue-reports) for automated report reminders
+- Feb 2026: Integrated Replit Object Storage for SharedDocumentsPage file uploads (presigned URL flow)
+- Feb 2026: Configured production deployment (autoscale with npm build/start)

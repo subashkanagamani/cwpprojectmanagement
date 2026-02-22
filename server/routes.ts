@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createClient } from "@supabase/supabase-js";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
 let supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
 if (supabaseUrl && supabaseUrl.startsWith('//')) {
@@ -65,6 +66,115 @@ async function verifyAuth(req: Request, res: Response): Promise<string | null> {
 }
 
 export function registerRoutes(app: Express) {
+  registerObjectStorageRoutes(app);
+
+  // Scheduled automation: check overdue reports (can be called by cron)
+  app.get("/api/cron/check-overdue-reports", async (req: Request, res: Response) => {
+    const cronSecret = req.headers['x-cron-secret'] || req.query.secret;
+    if (cronSecret !== process.env.CRON_SECRET && process.env.CRON_SECRET) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+      if (!supabaseAdmin) {
+        return res.status(500).json({ error: "Supabase not configured" });
+      }
+
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const currentWeekStart = new Date(now);
+      currentWeekStart.setDate(now.getDate() + mondayOffset);
+      currentWeekStart.setHours(0, 0, 0, 0);
+      const weekStartStr = currentWeekStart.toISOString().split("T")[0];
+
+      const { data: assignments } = await (supabaseAdmin
+        .from("client_assignments") as any)
+        .select("id, employee_id, client_id, service_id, clients(name)")
+        .eq("is_active", true);
+
+      const { data: existingReports } = await (supabaseAdmin
+        .from("weekly_reports") as any)
+        .select("employee_id, client_id, service_id")
+        .eq("week_start_date", weekStartStr);
+
+      const reportedKeys = new Set((existingReports || []).map((r: any) => `${r.employee_id}:${r.client_id}:${r.service_id}`));
+      const missingReports = (assignments || []).filter((a: any) => !reportedKeys.has(`${a.employee_id}:${a.client_id}:${a.service_id}`));
+
+      const employeeMap = new Map<string, string[]>();
+      for (const assignment of missingReports) {
+        const empId = assignment.employee_id;
+        const clientName = assignment.clients?.name || "Unknown Client";
+        if (!employeeMap.has(empId)) employeeMap.set(empId, []);
+        employeeMap.get(empId)!.push(clientName);
+      }
+
+      const notifications: any[] = [];
+      for (const [employeeId, clientNames] of employeeMap.entries()) {
+        notifications.push({
+          user_id: employeeId,
+          title: "Weekly Report Reminder",
+          message: `You have pending reports for: ${clientNames.join(", ")}. Please submit them before the deadline.`,
+          type: "warning",
+          is_read: false,
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      if (notifications.length > 0) {
+        await (supabaseAdmin.from("notifications") as any).insert(notifications);
+      }
+
+      res.json({
+        success: true,
+        timestamp: new Date().toISOString(),
+        remindersSent: notifications.length,
+        missingReports: missingReports.length,
+      });
+    } catch (error: any) {
+      console.error("Cron check-overdue error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Email sending endpoint
+  app.post("/api/email/send", async (req: Request, res: Response) => {
+    const userId = await verifyAuth(req, res);
+    if (!userId) return;
+
+    try {
+      if (!supabaseAdmin) {
+        return res.status(500).json({ error: "Supabase not configured" });
+      }
+
+      const { to, subject, body, template_id } = req.body;
+      if (!to || !subject || !body) {
+        return res.status(400).json({ error: "to, subject, and body are required" });
+      }
+
+      // Log the email to email_logs table
+      const { error: logError } = await (supabaseAdmin.from("email_logs") as any).insert({
+        recipient_email: to,
+        subject,
+        body,
+        template_id: template_id || null,
+        sent_by: userId,
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      });
+
+      if (logError) {
+        console.error("Email log error:", logError);
+      }
+
+      res.json({ success: true, message: "Email logged successfully" });
+    } catch (error: any) {
+      console.error("Email send error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Profile endpoint - bypasses RLS using service key
   app.get("/api/profile", async (req: Request, res: Response) => {
     const userId = await verifyAuth(req, res);

@@ -7,8 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+}
 
 interface EmailLog {
   id: string;
@@ -32,10 +43,77 @@ export default function EmailLogsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [composeTo, setComposeTo] = useState('');
+  const [composeSubject, setComposeSubject] = useState('');
+  const [composeBody, setComposeBody] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState('');
 
   useEffect(() => {
     fetchEmails();
+    fetchTemplates();
   }, [statusFilter, dateFilter]);
+
+  const fetchTemplates = async () => {
+    try {
+      const { data } = await supabase
+        .from('email_templates')
+        .select('id, name, subject, body')
+        .order('name');
+      if (data) setTemplates(data);
+    } catch {
+    }
+  };
+
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    if (templateId === 'none') {
+      return;
+    }
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setComposeSubject(template.subject);
+      setComposeBody(template.body);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!composeTo || !composeSubject || !composeBody) {
+      showToast('Please fill in all fields', 'error');
+      return;
+    }
+    setIsSending(true);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ to: composeTo, subject: composeSubject, body: composeBody }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to send email');
+      }
+
+      showToast('Email sent successfully', 'success');
+      setIsComposeOpen(false);
+      setComposeTo('');
+      setComposeSubject('');
+      setComposeBody('');
+      setSelectedTemplate('');
+      fetchEmails();
+    } catch (error: any) {
+      showToast(error.message || 'Failed to send email', 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const fetchEmails = async () => {
     setLoading(true);
@@ -143,9 +221,15 @@ export default function EmailLogsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="animate-fade-up">
-        <h1 className="text-2xl font-bold text-foreground">Email Logs</h1>
-        <p className="text-muted-foreground mt-1">Track all sent emails and their engagement metrics</p>
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Email Logs</h1>
+          <p className="text-muted-foreground mt-1">Track all sent emails and their engagement metrics</p>
+        </div>
+        <Button onClick={() => setIsComposeOpen(true)} className="gap-2">
+          <Send className="h-4 w-4" />
+          Compose Email
+        </Button>
       </div>
 
       <div className="animate-fade-up grid grid-cols-1 md:grid-cols-4 gap-5" style={{ animationDelay: "100ms" }}>
@@ -285,6 +369,84 @@ export default function EmailLogsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Compose Email</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {templates.length > 0 && (
+              <div className="space-y-2">
+                <Label>Template (optional)</Label>
+                <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No template</SelectItem>
+                    {templates.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Input
+                type="email"
+                placeholder="recipient@example.com"
+                value={composeTo}
+                onChange={(e) => setComposeTo(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input
+                type="text"
+                placeholder="Email subject"
+                value={composeSubject}
+                onChange={(e) => setComposeSubject(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Body</Label>
+              <Textarea
+                placeholder="Write your email..."
+                value={composeBody}
+                onChange={(e) => setComposeBody(e.target.value)}
+                rows={8}
+                required
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsComposeOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendEmail}
+              disabled={isSending}
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              {isSending ? 'Sending...' : 'Send Email'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

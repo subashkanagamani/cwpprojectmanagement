@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { MessageSquare, Phone, Video, Mail, Plus, Search, Calendar, Users } from 'lucide-react';
+import { MessageSquare, Phone, Video, Mail, Plus, Search, Calendar, Users, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
@@ -52,6 +52,11 @@ export function CommunicationHubPage() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [showCommModal, setShowCommModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailTo, setEmailTo] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
 
@@ -128,13 +133,48 @@ export function CommunicationHubPage() {
     if (data) setEmployees(data);
   };
 
+  const handleSendEmail = async () => {
+    if (!emailTo || !emailSubject || !emailBody) {
+      showToast('Please fill in all fields', 'error');
+      return;
+    }
+    setIsSendingEmail(true);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch('/api/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ to: emailTo, subject: emailSubject, body: emailBody }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to send email');
+      }
+
+      showToast('Email sent successfully', 'success');
+      setShowEmailModal(false);
+      setEmailTo('');
+      setEmailSubject('');
+      setEmailBody('');
+      loadCommunications();
+    } catch (error: any) {
+      showToast(error.message || 'Failed to send email', 'error');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   const handleCommSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     try {
-      const { error } = await supabase.from('communications').insert({
+      const { error } = await (supabase.from('communications') as any).insert({
         ...commFormData,
         created_by: user.id,
       });
@@ -155,7 +195,7 @@ export function CommunicationHubPage() {
     if (!user) return;
 
     try {
-      const { error } = await supabase.from('meeting_notes').insert({
+      const { error } = await (supabase.from('meeting_notes') as any).insert({
         ...meetingFormData,
         attendees: meetingFormData.attendees,
         action_items: meetingFormData.action_items,
@@ -218,6 +258,15 @@ export function CommunicationHubPage() {
           >
             <Plus className="h-4 w-4" />
             Log Communication
+          </Button>
+          <Button
+            data-testid="button-send-email"
+            variant="outline"
+            onClick={() => setShowEmailModal(true)}
+            className="gap-2"
+          >
+            <Send className="h-4 w-4" />
+            Send Email
           </Button>
           <Button
             data-testid="button-meeting-notes"
@@ -600,6 +649,64 @@ export function CommunicationHubPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEmailModal} onOpenChange={setShowEmailModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Send Email</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Input
+                type="email"
+                placeholder="recipient@example.com"
+                value={emailTo}
+                onChange={(e) => setEmailTo(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input
+                type="text"
+                placeholder="Email subject"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Body</Label>
+              <Textarea
+                placeholder="Write your email..."
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                rows={8}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowEmailModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendEmail}
+              disabled={isSendingEmail}
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              {isSendingEmail ? 'Sending...' : 'Send Email'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

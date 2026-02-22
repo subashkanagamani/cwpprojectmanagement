@@ -1,6 +1,7 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
 [agent]
 expertMode = true
+integrations = ["javascript_object_storage:2.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -35,5 +36,10 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
+run = ["npm", "run", "start"]
+
+[userenv]
+
+[userenv.shared]
+CRON_SECRET = "clientflow-cron-2026-auto"

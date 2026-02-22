@@ -169,6 +169,9 @@ function EmployeeRoutes() {
       <Route path="/feedback" component={FeedbackPage} />
       <Route path="/time-off" component={TimeOffPage} />
       <Route path="/credentials" component={ClientCredentialsPage} />
+      <Route path="/calendar" component={CalendarPage} />
+      <Route path="/documents" component={SharedDocumentsPage} />
+      <Route path="/settings" component={SettingsPage} />
       <Route>
         <Redirect to="/dashboard" />
       </Route>

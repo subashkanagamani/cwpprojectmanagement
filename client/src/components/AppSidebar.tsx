@@ -138,9 +138,18 @@ const getEmployeeNavGroups = (isAccountManager: boolean) => [
       { id: "tasks", label: "My Tasks", icon: CheckSquare, path: "/tasks" },
       ...(isAccountManager ? [{ id: "account-manager", label: "Account Manager", icon: UsersRound, path: "/account-manager" }] : []),
       { id: "team-progress", label: "Team Progress", icon: UsersRound, path: "/team-progress" },
+      { id: "calendar", label: "Calendar", icon: Calendar, path: "/calendar" },
+      { id: "time-entry", label: "Time Entry", icon: Clock, path: "/time-entry" },
+    ],
+  },
+  {
+    label: "Other",
+    items: [
+      { id: "documents", label: "Documents", icon: FileText, path: "/documents" },
       { id: "feedback", label: "Feedback", icon: MessageSquare, path: "/feedback" },
       { id: "time-off", label: "Time Off", icon: Calendar, path: "/time-off" },
       { id: "credentials", label: "Credentials", icon: Key, path: "/credentials" },
+      { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
     ],
   },
 ];

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileUpload } from '../FileUpload';
+import { useUpload } from '../../hooks/use-upload';
 
 interface SharedDocument {
   id: string;
@@ -50,6 +50,12 @@ export default function SharedDocumentsPage() {
     permissions: 'view' as 'view' | 'download',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { uploadFile, isUploading: isUploadingFile, progress } = useUpload({
+    onSuccess: (response) => {
+      setUploadedObjectPath(response.objectPath);
+    },
+  });
+  const [uploadedObjectPath, setUploadedObjectPath] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDocuments();
@@ -91,94 +97,53 @@ export default function SharedDocumentsPage() {
     }
   };
 
-  const handleFileSelect = async (file: File) => {
-    setSelectedFile(file);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.client_id || !selectedFile) {
-      showToast('Please select a client and file', 'error');
+  const handleUpload = async () => {
+    if (!selectedFile || !formData.client_id) {
+      showToast('Please select a file and client', 'error');
       return;
     }
 
+    setUploading(true);
     try {
-      setUploading(true);
+      const uploadResult = await uploadFile(selectedFile);
+      if (!uploadResult) {
+        throw new Error('File upload failed');
+      }
 
-      const fileName = `${Date.now()}_${selectedFile.name}`;
-      const filePath = `${formData.client_id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('shared_documents')
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      const payload = {
+      const { error } = await (supabase.from('shared_documents') as any).insert({
         file_name: selectedFile.name,
-        file_path: filePath,
-        file_type: selectedFile.type,
+        file_path: uploadResult.objectPath,
+        file_type: selectedFile.type || 'application/octet-stream',
         file_size: selectedFile.size,
-        description: formData.description,
-        client_id: formData.client_id,
         permissions: formData.permissions,
+        client_id: formData.client_id,
         uploaded_by: user?.id,
-      };
+        description: formData.description,
+      });
 
-      const { error: dbError } = await supabase
-        .from('shared_documents')
-        .insert(payload);
-
-      if (dbError) throw dbError;
+      if (error) throw error;
 
       showToast('Document uploaded successfully', 'success');
       setIsModalOpen(false);
-      resetForm();
+      setSelectedFile(null);
+      setUploadedObjectPath(null);
+      setFormData({ description: '', client_id: '', permissions: 'view' });
       fetchDocuments();
     } catch (error: any) {
-      showToast(error.message, 'error');
+      showToast(error.message || 'Upload failed', 'error');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleDownload = async (doc: SharedDocument) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from('shared_documents')
-        .download(doc.file_path);
-
-      if (error) throw error;
-
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = doc.file_name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showToast('Download started', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-    }
+  const handleDownload = (doc: SharedDocument) => {
+    window.open(doc.file_path, '_blank');
   };
 
   const handleDelete = async (doc: SharedDocument) => {
     if (!confirm('Are you sure you want to delete this document?')) return;
 
     try {
-      const { error: storageError } = await supabase.storage
-        .from('shared_documents')
-        .remove([doc.file_path]);
-
-      if (storageError) throw storageError;
-
       const { error: dbError } = await supabase
         .from('shared_documents')
         .delete()
@@ -371,7 +336,7 @@ export default function SharedDocumentsPage() {
           <DialogHeader>
             <DialogTitle>Upload Document</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }} className="space-y-4">
             <div>
               <Label>Client</Label>
               <Select
@@ -392,16 +357,23 @@ export default function SharedDocumentsPage() {
               </Select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label>File</Label>
-              <FileUpload
-                onUpload={handleFileSelect}
-                accept="*"
-                maxSizeMB={50}
-              />
+              <div className="flex items-center gap-3">
+                <Input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setSelectedFile(file);
+                    }
+                  }}
+                  className="flex-1"
+                />
+              </div>
               {selectedFile && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                <p className="text-sm text-muted-foreground">
+                  Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
                 </p>
               )}
             </div>
