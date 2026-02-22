@@ -2,7 +2,12 @@ import type { Express, Request, Response } from "express";
 import { createClient } from "@supabase/supabase-js";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+let supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
+if (supabaseUrl && supabaseUrl.startsWith('//')) {
+  supabaseUrl = 'https:' + supabaseUrl;
+} else if (supabaseUrl && !supabaseUrl.startsWith('http')) {
+  supabaseUrl = 'https://' + supabaseUrl;
+}
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 let supabaseAdmin: ReturnType<typeof createClient> | null = null;
