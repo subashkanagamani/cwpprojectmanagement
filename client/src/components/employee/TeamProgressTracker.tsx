@@ -117,16 +117,16 @@ export function TeamProgressTracker() {
     setLoading(true);
     try {
       const [clientsRes, progressRes] = await Promise.all([
-        supabase.rpc('get_managed_clients'),
-        supabase.rpc('get_team_daily_progress', { p_log_date: selectedDate })
+        (supabase.rpc as any)('get_managed_clients'),
+        (supabase.rpc as any)('get_team_daily_progress', { p_log_date: selectedDate })
       ]);
 
       if (clientsRes.error) throw clientsRes.error;
       if (progressRes.error) throw progressRes.error;
 
-      const clients = clientsRes.data || [];
+      const clients = (clientsRes.data || []) as ManagedClient[];
       setManagedClients(clients);
-      setTeamProgress(progressRes.data || []);
+      setTeamProgress((progressRes.data || []) as TeamProgress[]);
 
       if (clients.length > 0) {
         setExpandedClients(new Set(clients.map((c: ManagedClient) => c.client_id)));

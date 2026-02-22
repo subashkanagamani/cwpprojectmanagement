@@ -57,7 +57,7 @@ export default function TimeEntryPage() {
         supabase
           .from('time_entries')
           .select('*')
-          .eq('employee_id', user?.id)
+          .eq('employee_id', user?.id || '')
           .gte('date', format(weekStart, 'yyyy-MM-dd'))
           .lt('date', format(addDays(weekStart, 7), 'yyyy-MM-dd'))
       ]);
@@ -124,8 +124,8 @@ export default function TimeEntryPage() {
         id: e.id || undefined
       }));
 
-      const { error } = await supabase
-        .from('time_entries')
+      const { error } = await (supabase
+        .from('time_entries') as any)
         .upsert(entriesToUpsert, { onConflict: 'id' });
 
       if (error) throw error;

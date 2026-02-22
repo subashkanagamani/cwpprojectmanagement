@@ -34,15 +34,15 @@ export function UpcomingMeetingsPriority() {
 
       if (assignError) throw assignError;
 
-      const clientIds = assignments?.map(a => a.client_id) || [];
+      const clientIds = assignments?.map((a: any) => a.client_id) || [];
 
       if (clientIds.length === 0) {
         setLoading(false);
         return;
       }
 
-      const { data: clients, error: clientError } = await supabase
-        .from('clients')
+      const { data: clients, error: clientError } = await (supabase
+        .from('clients') as any)
         .select('id, name, weekly_meeting_day, meeting_time')
         .in('id', clientIds)
         .not('weekly_meeting_day', 'is', null);
@@ -50,7 +50,7 @@ export function UpcomingMeetingsPriority() {
       if (clientError) throw clientError;
 
       const clientsWithData = await Promise.all(
-        (clients || []).map(async (client) => {
+        (clients || []).map(async (client: any) => {
           const { count } = await supabase
             .from('tasks')
             .select('*', { count: 'exact', head: true })

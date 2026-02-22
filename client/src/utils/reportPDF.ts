@@ -60,11 +60,11 @@ export function generateReportPDF(data: ReportData) {
   yPosition = (doc as any).lastAutoTable.finalY + 10;
 
   doc.setFontSize(14);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text('Work Summary', margin, yPosition);
   yPosition += 7;
 
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   const summaryLines = doc.splitTextToSize(report.work_summary || 'No summary provided', pageWidth - 2 * margin);
   doc.text(summaryLines, margin, yPosition);
@@ -72,11 +72,11 @@ export function generateReportPDF(data: ReportData) {
 
   if (report.key_wins) {
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Key Wins', margin, yPosition);
     yPosition += 7;
 
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const winsLines = doc.splitTextToSize(report.key_wins, pageWidth - 2 * margin);
     doc.text(winsLines, margin, yPosition);
@@ -90,11 +90,11 @@ export function generateReportPDF(data: ReportData) {
     }
 
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Challenges / Blockers', margin, yPosition);
     yPosition += 7;
 
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const challengesLines = doc.splitTextToSize(report.challenges, pageWidth - 2 * margin);
     doc.text(challengesLines, margin, yPosition);
@@ -108,11 +108,11 @@ export function generateReportPDF(data: ReportData) {
     }
 
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Next Week Plan', margin, yPosition);
     yPosition += 7;
 
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     const planLines = doc.splitTextToSize(report.next_week_plan, pageWidth - 2 * margin);
     doc.text(planLines, margin, yPosition);
@@ -126,7 +126,7 @@ export function generateReportPDF(data: ReportData) {
     }
 
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Metrics', margin, yPosition);
     yPosition += 7;
 

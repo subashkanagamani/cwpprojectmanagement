@@ -124,9 +124,9 @@ export function validateClientImport(rows: CSVRow[]): ParseResult<ClientImportDa
         name: row.name,
         company: row.company,
         email: row.email.toLowerCase(),
-        phone: row.phone || null,
+        phone: row.phone || undefined,
         status: row.status || 'active',
-        industry: row.industry || null
+        industry: row.industry || undefined
       });
     }
   });
@@ -182,7 +182,7 @@ export function validateEmployeeImport(rows: CSVRow[]): ParseResult<EmployeeImpo
         email: row.email.toLowerCase(),
         full_name: row.full_name,
         role: row.role?.toLowerCase() as 'admin' | 'employee' || 'employee',
-        department: row.department || null
+        department: row.department || undefined
       });
     }
   });

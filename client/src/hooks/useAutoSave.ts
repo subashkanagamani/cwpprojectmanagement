@@ -31,8 +31,8 @@ export function useAutoSave({
     }
 
     try {
-      const { error } = await supabase
-        .from('weekly_reports')
+      const { error } = await (supabase
+        .from('weekly_reports') as any)
         .update({
           ...data,
           is_draft: true,

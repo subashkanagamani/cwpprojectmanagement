@@ -1065,6 +1065,491 @@ export interface Database {
           updated_at?: string
         }
       }
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id: string | null
+          details: Json | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          user_id: string
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          action?: string
+          entity_type?: string
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+      }
+      calendar_events: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          start_date: string
+          end_date: string | null
+          all_day: boolean
+          color: string | null
+          client_id: string | null
+          employee_id: string | null
+          event_type: string
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          start_date: string
+          end_date?: string | null
+          all_day?: boolean
+          color?: string | null
+          client_id?: string | null
+          employee_id?: string | null
+          event_type: string
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          start_date?: string
+          end_date?: string | null
+          all_day?: boolean
+          color?: string | null
+          client_id?: string | null
+          employee_id?: string | null
+          event_type?: string
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      communications: {
+        Row: {
+          id: string
+          client_id: string
+          type: string
+          subject: string
+          content: string | null
+          sent_by: string | null
+          sent_at: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          type: string
+          subject: string
+          content?: string | null
+          sent_by?: string | null
+          sent_at?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          type?: string
+          subject?: string
+          content?: string | null
+          sent_by?: string | null
+          sent_at?: string | null
+          status?: string
+          created_at?: string
+        }
+      }
+      email_templates: {
+        Row: {
+          id: string
+          name: string
+          subject: string
+          body: string
+          category: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          subject: string
+          body: string
+          category?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          subject?: string
+          body?: string
+          category?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      employee_tasks: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          assigned_to: string
+          assigned_by: string | null
+          client_id: string | null
+          status: string
+          priority: string
+          due_date: string | null
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          assigned_to: string
+          assigned_by?: string | null
+          client_id?: string | null
+          status?: string
+          priority?: string
+          due_date?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          assigned_to?: string
+          assigned_by?: string | null
+          client_id?: string | null
+          status?: string
+          priority?: string
+          due_date?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      goal_progress: {
+        Row: {
+          id: string
+          goal_id: string
+          value: number
+          notes: string | null
+          recorded_by: string | null
+          recorded_at: string
+          created_at: string
+        }
+        Insert: {
+          id: string
+          goal_id: string
+          value: number
+          notes?: string | null
+          recorded_by?: string | null
+          recorded_at: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          goal_id?: string
+          value?: number
+          notes?: string | null
+          recorded_by?: string | null
+          recorded_at?: string
+          created_at?: string
+        }
+      }
+      meeting_notes: {
+        Row: {
+          id: string
+          client_id: string
+          meeting_date: string
+          notes: string
+          action_items: Json | null
+          attendees: Json | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          meeting_date: string
+          notes: string
+          action_items?: Json | null
+          attendees?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          meeting_date?: string
+          notes?: string
+          action_items?: Json | null
+          attendees?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+      }
+      report_approvals: {
+        Row: {
+          id: string
+          report_id: string
+          approved_by: string | null
+          status: string
+          comments: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          report_id: string
+          approved_by?: string | null
+          status: string
+          comments?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          report_id?: string
+          approved_by?: string | null
+          status?: string
+          comments?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      reports: {
+        Row: {
+          id: string
+          employee_id: string
+          client_id: string
+          service_id: string | null
+          week_start_date: string
+          status: string
+          work_summary: string | null
+          key_wins: string | null
+          challenges: string | null
+          next_week_plan: string | null
+          hours_worked: number | null
+          metric_data: Json | null
+          submitted_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          client_id: string
+          service_id?: string | null
+          week_start_date: string
+          status?: string
+          work_summary?: string | null
+          key_wins?: string | null
+          challenges?: string | null
+          next_week_plan?: string | null
+          hours_worked?: number | null
+          metric_data?: Json | null
+          submitted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          client_id?: string
+          service_id?: string | null
+          week_start_date?: string
+          status?: string
+          work_summary?: string | null
+          key_wins?: string | null
+          challenges?: string | null
+          next_week_plan?: string | null
+          hours_worked?: number | null
+          metric_data?: Json | null
+          submitted_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      report_templates: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          template_data: Json | null
+          service_id: string | null
+          is_default: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          template_data?: Json | null
+          service_id?: string | null
+          is_default?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          template_data?: Json | null
+          service_id?: string | null
+          is_default?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      resource_allocations: {
+        Row: {
+          id: string
+          employee_id: string
+          client_id: string
+          service_id: string | null
+          hours_allocated: number
+          start_date: string
+          end_date: string | null
+          status: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          client_id: string
+          service_id?: string | null
+          hours_allocated: number
+          start_date: string
+          end_date?: string | null
+          status?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          client_id?: string
+          service_id?: string | null
+          hours_allocated?: number
+          start_date?: string
+          end_date?: string | null
+          status?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      shared_documents: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          file_path: string
+          file_type: string | null
+          file_size: number | null
+          uploaded_by: string
+          client_id: string | null
+          is_public: boolean
+          tags: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          file_path: string
+          file_type?: string | null
+          file_size?: number | null
+          uploaded_by: string
+          client_id?: string | null
+          is_public?: boolean
+          tags?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          file_path?: string
+          file_type?: string | null
+          file_size?: number | null
+          uploaded_by?: string
+          client_id?: string | null
+          is_public?: boolean
+          tags?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      skill_matrix: {
+        Row: {
+          id: string
+          employee_id: string
+          skill_name: string
+          proficiency_level: number
+          notes: string | null
+          assessed_by: string | null
+          assessed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          employee_id: string
+          skill_name: string
+          proficiency_level: number
+          notes?: string | null
+          assessed_by?: string | null
+          assessed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          skill_name?: string
+          proficiency_level?: number
+          notes?: string | null
+          assessed_by?: string | null
+          assessed_at?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

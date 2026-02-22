@@ -83,7 +83,7 @@ export default function UnifiedTasksPage() {
 
       if (error) throw error;
 
-      const tasksWithType = (data || []).map((task) => ({
+      const tasksWithType = (data || []).map((task: any) => ({
         ...task,
         task_type: task.is_daily_task ? "daily" : "assigned",
       }));
@@ -140,8 +140,8 @@ export default function UnifiedTasksPage() {
       };
 
       if (editingTask) {
-        const { error } = await supabase
-          .from("tasks")
+        const { error } = await (supabase
+          .from("tasks") as any)
           .update(taskData)
           .eq("id", editingTask.id);
 
@@ -152,7 +152,7 @@ export default function UnifiedTasksPage() {
           description: "Task updated successfully",
         });
       } else {
-        const { error } = await supabase.from("tasks").insert([taskData]);
+        const { error } = await (supabase.from("tasks") as any).insert([taskData]);
 
         if (error) throw error;
 
@@ -176,8 +176,8 @@ export default function UnifiedTasksPage() {
 
   const handleStatusChange = async (taskId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("tasks")
+      const { error } = await (supabase
+        .from("tasks") as any)
         .update({ status: newStatus })
         .eq("id", taskId);
 
