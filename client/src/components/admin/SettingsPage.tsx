@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, User, Bell, Globe, Clock } from 'lucide-react';
+import { Settings, Save, User, Bell, Globe, Clock, Lock, Edit, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -24,6 +24,11 @@ interface UserPreference {
 export function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
+  const [passwordData, setPasswordData] = useState({ new_password: '', confirm_password: '' });
+  const [changingPassword, setChangingPassword] = useState(false);
   const [preferences, setPreferences] = useState<UserPreference>({
     theme: 'light',
     language: 'en',
@@ -38,6 +43,15 @@ export function SettingsPage() {
   useEffect(() => {
     loadPreferences();
   }, [user]);
+
+  useEffect(() => {
+    if (profile) {
+      setProfileData({
+        full_name: profile.full_name || '',
+        phone: (profile as any).phone || '',
+      });
+    }
+  }, [profile]);
 
   async function loadPreferences() {
     if (!user) return;
@@ -65,6 +79,55 @@ export function SettingsPage() {
       showToast(error.message, 'error');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSaveProfile() {
+    if (!profile) return;
+
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: profileData.full_name, phone: profileData.phone })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      showToast('Profile updated successfully', 'success');
+      setEditingProfile(false);
+    } catch (error: any) {
+      showToast(error.message || 'Failed to update profile', 'error');
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+
+    if (passwordData.new_password.length < 8) {
+      showToast('Password must be at least 8 characters', 'error');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.new_password,
+      });
+
+      if (error) throw error;
+
+      showToast('Password changed successfully', 'success');
+      setPasswordData({ new_password: '', confirm_password: '' });
+    } catch (error: any) {
+      showToast(error.message || 'Failed to change password', 'error');
+    } finally {
+      setChangingPassword(false);
     }
   }
 
@@ -134,12 +197,41 @@ export function SettingsPage() {
         <Card>
           <CardContent className="p-6 space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-                <div className="p-1.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                Profile Information
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                    <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  Profile Information
+                </h2>
+                {!editingProfile ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingProfile(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingProfile(false);
+                      if (profile) {
+                        setProfileData({
+                          full_name: profile.full_name || '',
+                          phone: (profile as any).phone || '',
+                        });
+                      }
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                )}
+              </div>
               <div className="space-y-4 pl-7">
                 <div>
                   <Label htmlFor="full-name">Full Name</Label>
@@ -147,8 +239,9 @@ export function SettingsPage() {
                     id="full-name"
                     data-testid="input-full-name"
                     type="text"
-                    value={profile?.full_name || ''}
-                    disabled
+                    value={editingProfile ? profileData.full_name : (profile?.full_name || '')}
+                    disabled={!editingProfile}
+                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
                     className="mt-1"
                   />
                 </div>
@@ -163,6 +256,30 @@ export function SettingsPage() {
                     className="mt-1"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    data-testid="input-phone"
+                    type="tel"
+                    value={editingProfile ? profileData.phone : ((profile as any)?.phone || '')}
+                    disabled={!editingProfile}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    placeholder="Enter phone number"
+                    className="mt-1"
+                  />
+                </div>
+                {editingProfile && (
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleSaveProfile}
+                      disabled={savingProfile}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {savingProfile ? 'Saving...' : 'Save Profile'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -267,6 +384,59 @@ export function SettingsPage() {
                     checked={preferences.push_notifications}
                     onCheckedChange={(checked) => setPreferences({ ...preferences, push_notifications: checked })}
                   />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <div className="p-1.5 bg-red-50 dark:bg-red-950/30 rounded-lg">
+                  <Lock className="w-4 h-4 text-red-600 dark:text-red-400" />
+                </div>
+                Account Security
+              </h2>
+              <div className="space-y-4 pl-7">
+                <div>
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    data-testid="input-new-password"
+                    type="password"
+                    value={passwordData.new_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                    placeholder="Enter new password (min 8 characters)"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    data-testid="input-confirm-password"
+                    type="password"
+                    value={passwordData.confirm_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+                    placeholder="Confirm new password"
+                    className="mt-1"
+                  />
+                </div>
+                {passwordData.new_password && passwordData.confirm_password && passwordData.new_password !== passwordData.confirm_password && (
+                  <p className="text-sm text-red-500">Passwords do not match</p>
+                )}
+                {passwordData.new_password && passwordData.new_password.length > 0 && passwordData.new_password.length < 8 && (
+                  <p className="text-sm text-red-500">Password must be at least 8 characters</p>
+                )}
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleChangePassword}
+                    disabled={changingPassword || !passwordData.new_password || !passwordData.confirm_password}
+                    variant="destructive"
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    {changingPassword ? 'Changing...' : 'Change Password'}
+                  </Button>
                 </div>
               </div>
             </div>

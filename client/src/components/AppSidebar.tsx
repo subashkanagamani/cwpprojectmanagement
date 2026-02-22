@@ -25,6 +25,7 @@ import {
   Activity,
   Users,
   Scale,
+  ClipboardCheck,
   ClipboardList,
   UserCog,
   FileText,
@@ -70,6 +71,7 @@ const adminNavGroups = [
       { id: "client-health", label: "Client Health", icon: Activity, path: "/client-health" },
       { id: "deals", label: "Deals", icon: Handshake, path: "/deals" },
       { id: "credentials", label: "Credentials", icon: Key, path: "/credentials" },
+      { id: "onboarding", label: "Onboarding", icon: ClipboardCheck, path: "/onboarding" },
     ],
   },
   {
@@ -81,12 +83,14 @@ const adminNavGroups = [
       { id: "team-monitoring", label: "Team Monitoring", icon: UsersRound, path: "/team-monitoring" },
       { id: "assignments", label: "Assignments", icon: UserCog, path: "/assignments" },
       { id: "resources", label: "Resources", icon: UserCheck, path: "/resources" },
+      { id: "performance", label: "Performance", icon: TrendingUp, path: "/performance" },
     ],
   },
   {
     label: "Work",
     items: [
       { id: "reports", label: "Reports", icon: FileText, path: "/reports" },
+      { id: "report-pdf", label: "PDF Reports", icon: FileText, path: "/report-pdf" },
       { id: "consolidated-reports", label: "Client Reports", icon: FileText, path: "/consolidated-reports" },
       { id: "tasks", label: "Tasks", icon: CheckSquare, path: "/tasks" },
       { id: "calendar", label: "Calendar", icon: Calendar, path: "/calendar" },
@@ -101,6 +105,7 @@ const adminNavGroups = [
     label: "Finance",
     items: [
       { id: "budget", label: "Budget", icon: DollarSign, path: "/budget" },
+      { id: "revenue", label: "Revenue", icon: DollarSign, path: "/revenue" },
       { id: "benchmarks", label: "Benchmarks", icon: TrendingUp, path: "/benchmarks" },
       { id: "metrics", label: "Metrics", icon: Sliders, path: "/metrics" },
     ],

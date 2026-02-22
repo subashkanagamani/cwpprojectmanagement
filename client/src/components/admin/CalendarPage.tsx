@@ -31,6 +31,8 @@ export function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [draggingEvent, setDraggingEvent] = useState<CalendarEvent | null>(null);
+  const [justDropped, setJustDropped] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -181,6 +183,7 @@ export function CalendarPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
           <p className="text-muted-foreground mt-1">Manage deadlines, meetings, and milestones</p>
+          <p className="text-xs text-muted-foreground">Drag and drop events to reschedule them</p>
         </div>
         <Button onClick={() => openModal()} data-testid="button-add-event">
           <Plus className="h-4 w-4 mr-2" />
@@ -225,7 +228,57 @@ export function CalendarPage() {
               return (
                 <div
                   key={day.toISOString()}
-                  onClick={() => openModal(undefined, day)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.add('ring-2', 'ring-primary', 'ring-inset');
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.classList.remove('ring-2', 'ring-primary', 'ring-inset');
+                  }}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove('ring-2', 'ring-primary', 'ring-inset');
+                    if (!draggingEvent) return;
+
+                    const originalDate = new Date(draggingEvent.start_time);
+                    const newDate = new Date(day);
+                    newDate.setHours(originalDate.getHours(), originalDate.getMinutes());
+
+                    let newEndTime: string | null = null;
+                    if (draggingEvent.end_time) {
+                      const duration = new Date(draggingEvent.end_time).getTime() - originalDate.getTime();
+                      newEndTime = new Date(newDate.getTime() + duration).toISOString();
+                    }
+
+                    setEvents(prev => prev.map(ev =>
+                      ev.id === draggingEvent.id
+                        ? { ...ev, start_time: newDate.toISOString(), end_time: newEndTime }
+                        : ev
+                    ));
+
+                    const { error } = await supabase
+                      .from('calendar_events')
+                      .update({
+                        start_time: newDate.toISOString(),
+                        end_time: newEndTime
+                      })
+                      .eq('id', draggingEvent.id);
+
+                    if (error) {
+                      showToast('Failed to move event', 'error');
+                      loadEvents();
+                    } else {
+                      showToast('Event moved successfully', 'success');
+                    }
+
+                    setDraggingEvent(null);
+                    setJustDropped(true);
+                    setTimeout(() => setJustDropped(false), 100);
+                  }}
+                  onClick={() => {
+                    if (justDropped) return;
+                    openModal(undefined, day);
+                  }}
                   className={`min-h-32 p-2 border rounded-md cursor-pointer transition ${
                     isCurrentMonth ? 'hover-elevate' : 'bg-muted'
                   } ${isCurrentDay ? 'border-primary border-2' : 'border-border'}`}
@@ -237,13 +290,24 @@ export function CalendarPage() {
                     {dayEvents.slice(0, 3).map(event => (
                       <div
                         key={event.id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.stopPropagation();
+                          setDraggingEvent(event);
+                          e.dataTransfer.effectAllowed = 'move';
+                          e.dataTransfer.setData('text/plain', event.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggingEvent(null);
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           openModal(event);
                         }}
                         data-testid={`card-event-${event.id}`}
+                        className={draggingEvent?.id === event.id ? 'opacity-50' : ''}
                       >
-                        <Badge variant={getEventTypeBadgeVariant(event.event_type)} className="text-xs w-full justify-start truncate">
+                        <Badge variant={getEventTypeBadgeVariant(event.event_type)} className="text-xs w-full justify-start truncate cursor-grab">
                           {event.title}
                         </Badge>
                       </div>

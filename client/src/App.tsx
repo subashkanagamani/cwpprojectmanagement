@@ -77,6 +77,10 @@ import SharedDocumentsPage from "./components/admin/SharedDocumentsPage";
 import EmailLogsPage from "./components/admin/EmailLogsPage";
 import ReportTemplatesPage from "./components/admin/ReportTemplatesPage";
 import { GlobalSearch } from "./components/GlobalSearch";
+import { ClientOnboardingPage } from "./components/admin/ClientOnboardingPage";
+import { RevenueDashboardPage } from "./components/admin/RevenueDashboardPage";
+import { PerformanceScoringPage } from "./components/admin/PerformanceScoringPage";
+import { ReportPDFPage } from "./components/admin/ReportPDFPage";
 
 function AdminRoutes() {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -141,6 +145,10 @@ function AdminRoutes() {
       <Route path="/credentials" component={ClientCredentialsPage} />
       <Route path="/logs" component={ActivityLogsPage} />
       <Route path="/settings" component={SettingsPage} />
+      <Route path="/onboarding" component={ClientOnboardingPage} />
+      <Route path="/revenue" component={RevenueDashboardPage} />
+      <Route path="/performance" component={PerformanceScoringPage} />
+      <Route path="/report-pdf" component={ReportPDFPage} />
       <Route>
         <Redirect to="/dashboard" />
       </Route>
