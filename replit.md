@@ -116,3 +116,8 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Added employee-to-employee task request feature (Raise Task Request dialog)
 - Feb 2026: Removed separate /daily-submissions route for employees, consolidated into /tasks
 - Feb 2026: Sidebar simplified - single "My Tasks" entry for employees instead of two separate items
+- Feb 2026: Database schema audit - added migration for 4 missing tables (deals, feedback, time_off_requests, email_logs) and missing columns
+- Feb 2026: Fixed weekly_reports queries to use employee_id:client_id:service_id composite key (was using non-existent assignment_id)
+- Feb 2026: Updated database.types.ts and shared/schema.ts with complete type definitions for all tables
+- Feb 2026: Removed hardcoded encryption key fallback for security
+- Feb 2026: Migration file: supabase/migrations/20260222_add_missing_tables_and_columns.sql (must be run in Supabase dashboard)
