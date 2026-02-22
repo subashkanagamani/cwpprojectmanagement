@@ -47,6 +47,7 @@ import {
   LogOut,
   UsersRound,
   Handshake,
+  ChevronsUpDown,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -176,19 +177,19 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 py-4">
+      <SidebarHeader className="px-5 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-sm">
             <Building2 className="h-4 w-4" />
           </div>
-          <span className="text-[15px] font-semibold" data-testid="text-app-name">ClientFlow</span>
+          <span className="text-[15px] font-bold tracking-tight" data-testid="text-app-name">ClientFlow</span>
         </div>
       </SidebarHeader>
       <SidebarSeparator />
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-3">
         {navGroups.map((group) => (
           <SidebarGroup key={group.label} className="py-1">
-            <SidebarGroupLabel className="text-[11px] uppercase tracking-wider font-medium text-muted-foreground px-2">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground/70 px-2 mb-0.5">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -202,7 +203,11 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
                         isActive={active}
                         onClick={() => setLocation(item.path)}
                         data-testid={`nav-${item.id}`}
-                        className="text-[13px]"
+                        className={`text-[13px] rounded-lg transition-all ${
+                          active
+                            ? "font-medium"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
                       >
                         <Icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -215,36 +220,33 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      {!isAdmin && (
-        <>
-          <SidebarSeparator />
-          <SidebarFooter className="p-3">
-            <div className="flex items-center gap-2.5">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium truncate" data-testid="text-sidebar-user">
-                  {profile?.full_name || "User"}
-                </p>
-                <p className="text-[11px] text-muted-foreground capitalize">
-                  {profile?.role || "employee"}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={signOut}
-                data-testid="button-sidebar-logout"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </SidebarFooter>
-        </>
-      )}
+      <SidebarSeparator />
+      <SidebarFooter className="p-3">
+        <div className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-indigo-500 text-white font-semibold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-medium truncate" data-testid="text-sidebar-user">
+              {profile?.full_name || "User"}
+            </p>
+            <p className="text-[11px] text-muted-foreground capitalize">
+              {profile?.role || "employee"}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={signOut}
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            data-testid="button-sidebar-logout"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

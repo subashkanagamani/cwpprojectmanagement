@@ -280,19 +280,21 @@ function AppContent() {
       <div className="flex h-screen w-full">
         <AppSidebar isAdmin={isAdmin} />
         <div className="flex flex-col flex-1 min-w-0">
-          <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b bg-card/80 backdrop-blur-sm px-6 h-14">
-            <div className="flex items-center gap-2 flex-1">
+          <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b bg-card/95 backdrop-blur-lg px-6 h-14">
+            <div className="flex items-center gap-3 flex-1">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <div className="h-5 w-px bg-border" />
               <GlobalSearch compact />
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <NotificationCenter />
               <ThemeToggle />
+              <div className="h-5 w-px bg-border ml-1" />
               <UserMenu />
             </div>
           </header>
           <main className="flex-1 overflow-auto">
-            <div className="px-6 py-6 lg:px-8">
+            <div className="px-6 py-6 lg:px-8 max-w-[1600px]">
               {isAdmin ? <AdminRoutes /> : <EmployeeRoutes />}
             </div>
           </main>

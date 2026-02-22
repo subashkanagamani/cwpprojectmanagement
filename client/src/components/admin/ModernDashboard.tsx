@@ -12,13 +12,16 @@ import {
   Clock,
   AlertCircle,
   CheckCircle2,
-  MoreHorizontal,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardStats {
   totalClients: number;
@@ -118,192 +121,250 @@ export function ModernDashboard() {
       label: "Total Clients",
       value: stats.totalClients,
       change: "+12%",
-      trend: "up",
+      trend: "up" as const,
       icon: Briefcase,
-      color: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400",
+      gradient: "blue",
+      iconBg: "bg-blue-50 dark:bg-blue-950/30",
+      iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       label: "Active Projects",
       value: stats.activeClients,
       change: "+8%",
-      trend: "up",
+      trend: "up" as const,
       icon: TrendingUp,
-      color: "bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400",
+      gradient: "green",
+      iconBg: "bg-emerald-50 dark:bg-emerald-950/30",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
     },
     {
       label: "Team Members",
       value: stats.totalEmployees,
       change: "+3%",
-      trend: "up",
+      trend: "up" as const,
       icon: Users,
-      color: "bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400",
+      gradient: "purple",
+      iconBg: "bg-violet-50 dark:bg-violet-950/30",
+      iconColor: "text-violet-600 dark:text-violet-400",
     },
     {
       label: "Reports Pending",
       value: stats.pendingReports,
       change: "-5%",
-      trend: "down",
+      trend: "down" as const,
       icon: FileText,
-      color: "bg-orange-50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400",
+      gradient: "orange",
+      iconBg: "bg-amber-50 dark:bg-amber-950/30",
+      iconColor: "text-amber-600 dark:text-amber-400",
     },
   ];
 
   if (loading) {
-    return <div className="animate-pulse">Loading...</div>;
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-72" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-[140px] rounded-xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="lg:col-span-2 h-[400px] rounded-xl" />
+          <Skeleton className="h-[400px] rounded-xl" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground mb-1">
-          {getGreeting()}, {firstName}!
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground">
+          {getGreeting()}, {firstName}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Here's what's happening with your projects today
+        <p className="text-muted-foreground mt-1">
+          Here's what's happening across your agency today
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <Card key={idx} className="p-6 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-lg ${stat.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <Badge
-                  variant="secondary"
-                  className={`${
+            <Card
+              key={idx}
+              className={`stat-card-gradient ${stat.gradient} overflow-hidden animate-fade-up`}
+              style={{ animationDelay: `${idx * 80}ms` }}
+            >
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`p-2.5 rounded-lg ${stat.iconBg}`}>
+                    <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                  </div>
+                  <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
                     stat.trend === "up"
-                      ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                      : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                  }`}
-                >
-                  {stat.change}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                      : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"
+                  }`}>
+                    {stat.trend === "up" ? (
+                      <ArrowUp className="h-3 w-3" />
+                    ) : (
+                      <ArrowDown className="h-3 w-3" />
+                    )}
+                    {stat.change}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-3xl font-bold text-foreground mt-1 animate-count-up" style={{ animationDelay: `${idx * 80 + 200}ms` }}>
+                  {stat.value}
+                </p>
+              </CardContent>
             </Card>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Client Health Overview */}
-        <Card className="lg:col-span-2 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">Client Health</h3>
-              <p className="text-sm text-muted-foreground">Overview of client status</p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => setLocation("/clients")}>
-              View All
-              <ArrowUpRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            {clients.slice(0, 6).map((client, idx) => (
-              <div
-                key={client.id}
-                className="flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                onClick={() => setLocation(`/clients/${client.id}`)}
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${client.name}`} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-medium">{getInitials(client.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{client.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {client.status === "active" ? "Active Project" : "Paused"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant={
-                      client.health_status === "healthy"
-                        ? "default"
-                        : client.health_status === "at_risk"
-                        ? "destructive"
-                        : "secondary"
-                    }
-                    className="hidden sm:inline-flex"
-                  >
-                    {client.health_status === "healthy" && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                    {client.health_status === "at_risk" && <AlertCircle className="h-3 w-3 mr-1" />}
-                    {client.health_status === "healthy"
-                      ? "Healthy"
-                      : client.health_status === "at_risk"
-                      ? "At Risk"
-                      : "Needs Attention"}
-                  </Badge>
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Quick Stats */}
-        <div className="space-y-6">
-          {/* Budget Card */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-foreground">Budget Usage</h3>
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-3">
+        <Card className="lg:col-span-2 animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-foreground">{stats.budgetUtilization}%</span>
-                  <span className="text-sm text-muted-foreground">of monthly budget</span>
-                </div>
-                <Progress value={stats.budgetUtilization} className="h-2" />
+                <CardTitle className="text-lg">Client Overview</CardTitle>
+                <p className="text-sm text-muted-foreground mt-0.5">Health status of your active clients</p>
               </div>
-              <div className="pt-3 border-t">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Budget</span>
-                  <span className="font-medium text-foreground">$45,000</span>
-                </div>
-                <div className="flex items-center justify-between text-sm mt-2">
-                  <span className="text-muted-foreground">Spent</span>
-                  <span className="font-medium text-foreground">$30,600</span>
-                </div>
-              </div>
+              <Button variant="ghost" size="sm" onClick={() => setLocation("/clients")} className="text-primary">
+                View All
+                <ArrowUpRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-foreground">Recent Activity</h3>
-              <Clock className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-4">
-              {activities.map((activity, idx) => (
-                <div key={activity.id} className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
+          </CardHeader>
+          <CardContent className="px-6 pb-6">
+            <div className="space-y-1">
+              {clients.slice(0, 6).map((client) => (
+                <div
+                  key={client.id}
+                  className="flex items-center justify-between p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                  onClick={() => setLocation(`/clients/${client.id}`)}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+                        {getInitials(client.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{client.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 capitalize">{client.status}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">
-                      <span className="font-medium">{activity.user_name || "User"}</span>{" "}
-                      {activity.action} {activity.entity_type}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(activity.created_at).toLocaleTimeString()}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      variant={
+                        client.health_status === "healthy"
+                          ? "default"
+                          : client.health_status === "at_risk"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                      className="hidden sm:inline-flex text-[11px]"
+                    >
+                      {client.health_status === "healthy" && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                      {client.health_status === "at_risk" && <AlertCircle className="h-3 w-3 mr-1" />}
+                      {client.health_status === "healthy"
+                        ? "Healthy"
+                        : client.health_status === "at_risk"
+                        ? "At Risk"
+                        : "Needs Attention"}
+                    </Badge>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </div>
               ))}
+              {clients.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No clients yet</p>
+                </div>
+              )}
             </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="animate-fade-up" style={{ animationDelay: "400ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Budget Usage</CardTitle>
+                <div className="p-1.5 rounded-md bg-muted">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <span className="text-3xl font-bold text-foreground">{stats.budgetUtilization}%</span>
+                    <span className="text-xs text-muted-foreground">of monthly budget</span>
+                  </div>
+                  <Progress value={stats.budgetUtilization} className="h-2" />
+                </div>
+                <div className="pt-3 border-t space-y-2.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Total Budget</span>
+                    <span className="font-semibold text-foreground">$45,000</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Spent</span>
+                    <span className="font-semibold text-foreground">$30,600</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Remaining</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">$14,400</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="animate-fade-up" style={{ animationDelay: "500ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Recent Activity</CardTitle>
+                <div className="p-1.5 rounded-md bg-muted">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <div className="space-y-4">
+                {activities.map((activity) => (
+                  <div key={activity.id} className="flex gap-3">
+                    <div className="flex-shrink-0 mt-1.5">
+                      <div className="h-2 w-2 rounded-full bg-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground leading-snug">
+                        <span className="font-medium">{activity.user_name || "User"}</span>{" "}
+                        {activity.action} {activity.entity_type}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(activity.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {activities.length === 0 && (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <Clock className="h-6 w-6 mx-auto mb-1.5 opacity-40" />
+                    <p className="text-xs">No recent activity</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
