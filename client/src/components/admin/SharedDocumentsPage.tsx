@@ -110,7 +110,7 @@ export default function SharedDocumentsPage() {
       const filePath = `${formData.client_id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('shared_documents')
         .upload(filePath, selectedFile, {
           cacheControl: '3600',
           upsert: false
@@ -149,7 +149,7 @@ export default function SharedDocumentsPage() {
   const handleDownload = async (doc: SharedDocument) => {
     try {
       const { data, error } = await supabase.storage
-        .from('documents')
+        .from('shared_documents')
         .download(doc.file_path);
 
       if (error) throw error;
@@ -174,7 +174,7 @@ export default function SharedDocumentsPage() {
 
     try {
       const { error: storageError } = await supabase.storage
-        .from('documents')
+        .from('shared_documents')
         .remove([doc.file_path]);
 
       if (storageError) throw storageError;

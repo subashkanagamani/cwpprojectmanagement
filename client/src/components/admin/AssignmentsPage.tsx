@@ -109,7 +109,7 @@ export function AssignmentsPage() {
     e.preventDefault();
 
     if (formData.employee_ids.length === 0) {
-      showToast('warning', 'Please select at least one employee');
+      showToast('Please select at least one employee', 'warning');
       return;
     }
 
@@ -122,7 +122,7 @@ export function AssignmentsPage() {
         .maybeSingle();
 
       if (!clientService) {
-        showToast('error', 'This service is not enabled for this client. Please enable it in the client settings first.');
+        showToast('This service is not enabled for this client. Please enable it in the client settings first.', 'error');
         return;
       }
 
@@ -137,7 +137,7 @@ export function AssignmentsPage() {
 
       if (error) {
         if (error.code === '23505') {
-          showToast('error', 'One or more assignments already exist');
+          showToast('One or more assignments already exist', 'error');
         } else {
           throw error;
         }
@@ -149,7 +149,7 @@ export function AssignmentsPage() {
       loadData();
     } catch (error) {
       console.error('Error creating assignment:', error);
-      showToast('error', 'Failed to create assignment');
+      showToast('Failed to create assignment', 'error');
     }
   };
 

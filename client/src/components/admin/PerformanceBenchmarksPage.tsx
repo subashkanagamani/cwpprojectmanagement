@@ -58,7 +58,7 @@ export function PerformanceBenchmarksPage() {
     try {
       const [benchmarksRes, servicesRes] = await Promise.all([
         supabase
-          .from('benchmarks')
+          .from('performance_benchmarks')
           .select('*, service:services(name)')
           .order('industry', { ascending: true }),
         supabase
@@ -122,7 +122,7 @@ export function PerformanceBenchmarksPage() {
     try {
       if (editingBenchmark) {
         const { error } = await supabase
-          .from('benchmarks')
+          .from('performance_benchmarks')
           .update(data)
           .eq('id', editingBenchmark.id);
 
@@ -130,7 +130,7 @@ export function PerformanceBenchmarksPage() {
         showToast('Benchmark updated successfully', 'success');
       } else {
         const { error } = await supabase
-          .from('benchmarks')
+          .from('performance_benchmarks')
           .insert([data]);
 
         if (error) throw error;
@@ -149,7 +149,7 @@ export function PerformanceBenchmarksPage() {
 
     try {
       const { error } = await supabase
-        .from('benchmarks')
+        .from('performance_benchmarks')
         .delete()
         .eq('id', id);
 

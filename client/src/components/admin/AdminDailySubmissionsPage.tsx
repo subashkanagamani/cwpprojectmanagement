@@ -91,7 +91,7 @@ export function AdminDailySubmissionsPage() {
       if (error) throw error;
       setLogs(data || []);
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to load submissions');
+      showToast(error.message || 'Failed to load submissions', 'error');
     } finally {
       setLoading(false);
     }

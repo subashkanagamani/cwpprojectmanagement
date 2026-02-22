@@ -71,7 +71,7 @@ export function ReportsPage() {
     );
 
     if (clientReports.length === 0) {
-      showToast('error', 'No reports found for this week');
+      showToast('No reports found for this week', 'error');
       return;
     }
 
@@ -86,10 +86,10 @@ export function ReportsPage() {
         service: report.service,
         metrics: report.metrics,
       });
-      showToast('success', 'PDF downloaded successfully');
+      showToast('PDF downloaded successfully', 'success');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      showToast('error', 'Failed to generate PDF');
+      showToast('Failed to generate PDF', 'error');
     }
   };
 

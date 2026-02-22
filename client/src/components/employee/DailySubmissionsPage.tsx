@@ -248,7 +248,7 @@ export function DailySubmissionsPage() {
         setLocalWorkStatus({});
       }
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to load data');
+      showToast(error.message || 'Failed to load data', 'error');
     } finally {
       setLoading(false);
     }
@@ -301,10 +301,10 @@ export function DailySubmissionsPage() {
         if (error) throw error;
       }
 
-      showToast('success', 'Draft saved');
+      showToast('Draft saved', 'success');
       await loadData();
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to save draft');
+      showToast(error.message || 'Failed to save draft', 'error');
     } finally {
       setSavingIds(prev => { const n = new Set(prev); n.delete(assignment.id); return n; });
     }
@@ -339,10 +339,10 @@ export function DailySubmissionsPage() {
         if (error) throw error;
       }
 
-      showToast('success', 'Submission completed');
+      showToast('Submission completed', 'success');
       await loadData();
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to submit');
+      showToast(error.message || 'Failed to submit', 'error');
     } finally {
       setSubmittingIds(prev => { const n = new Set(prev); n.delete(assignment.id); return n; });
     }
@@ -511,17 +511,17 @@ export function DailySubmissionsPage() {
                               </div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 {isSubmitted ? (
-                                  <Badge variant="default" className="bg-green-600 dark:bg-green-700" size="sm">
+                                  <Badge variant="default" className="bg-green-600 dark:bg-green-700 text-[11px]">
                                     <CheckCircle2 className="h-3 w-3 mr-1" />
                                     Submitted
                                   </Badge>
                                 ) : isDraft ? (
-                                  <Badge variant="secondary" size="sm">
+                                  <Badge variant="secondary" className="text-[11px]">
                                     <FileText className="h-3 w-3 mr-1" />
                                     Draft
                                   </Badge>
                                 ) : (
-                                  <Badge variant="outline" size="sm">
+                                  <Badge variant="outline" className="text-[11px]">
                                     <Clock className="h-3 w-3 mr-1" />
                                     Not Started
                                   </Badge>

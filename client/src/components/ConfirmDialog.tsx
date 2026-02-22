@@ -1,5 +1,13 @@
-import { AlertTriangle, X } from 'lucide-react';
-import { Modal } from './Modal';
+import { AlertTriangle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
+import { Button } from './ui/button';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -25,49 +33,34 @@ export function ConfirmDialog({
   loading = false,
 }: ConfirmDialogProps) {
   return (
-    <Modal open={open} onClose={onClose} size="sm">
-      <div className="p-6">
-        <div className="flex items-start gap-4 mb-4">
-          {danger && (
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex items-start gap-3">
+            {danger && (
+              <div className="flex-shrink-0 rounded-full bg-red-100 dark:bg-red-950/40 p-2">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
+            )}
+            <div>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription className="mt-1.5">{message}</DialogDescription>
             </div>
-          )}
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-            <p className="text-gray-600">{message}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition"
-            disabled={loading}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="flex gap-3 justify-end">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition disabled:opacity-50"
-          >
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} disabled={loading}>
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={danger ? 'destructive' : 'default'}
             onClick={onConfirm}
             disabled={loading}
-            className={`px-4 py-2 text-white rounded-lg font-medium transition disabled:opacity-50 ${
-              danger
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-blue-600 hover:bg-blue-700'
-            }`}
           >
             {loading ? 'Processing...' : confirmText}
-          </button>
-        </div>
-      </div>
-    </Modal>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

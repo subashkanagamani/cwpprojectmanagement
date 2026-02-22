@@ -81,7 +81,7 @@ export function DashboardCustomizationPage() {
       setWidgets(data || []);
     } catch (error) {
       console.error('Error loading widgets:', error);
-      showToast('error', 'Failed to load widgets');
+      showToast('Failed to load widgets', 'error');
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export function DashboardCustomizationPage() {
           .eq('id', editingWidget.id);
 
         if (error) throw error;
-        showToast('success', 'Widget updated successfully');
+        showToast('Widget updated successfully', 'success');
       } else {
         const maxPosition = widgets.length > 0 ? Math.max(...widgets.map(w => w.position)) : 0;
         const { error } = await (supabase
@@ -141,14 +141,14 @@ export function DashboardCustomizationPage() {
           });
 
         if (error) throw error;
-        showToast('success', 'Widget added successfully');
+        showToast('Widget added successfully', 'success');
       }
 
       setShowModal(false);
       loadWidgets();
     } catch (error) {
       console.error('Error saving widget:', error);
-      showToast('error', 'Failed to save widget');
+      showToast('Failed to save widget', 'error');
     } finally {
       setSaving(false);
     }
@@ -164,11 +164,11 @@ export function DashboardCustomizationPage() {
         .eq('id', id);
 
       if (error) throw error;
-      showToast('success', 'Widget removed successfully');
+      showToast('Widget removed successfully', 'success');
       loadWidgets();
     } catch (error) {
       console.error('Error deleting widget:', error);
-      showToast('error', 'Failed to remove widget');
+      showToast('Failed to remove widget', 'error');
     }
   };
 
@@ -180,11 +180,11 @@ export function DashboardCustomizationPage() {
         .eq('id', widget.id);
 
       if (error) throw error;
-      showToast('success', `Widget ${!widget.is_visible ? 'shown' : 'hidden'}`);
+      showToast(`Widget ${!widget.is_visible ? 'shown' : 'hidden'}`, 'success');
       loadWidgets();
     } catch (error) {
       console.error('Error toggling visibility:', error);
-      showToast('error', 'Failed to update widget');
+      showToast('Failed to update widget', 'error');
     }
   };
 
@@ -213,11 +213,11 @@ export function DashboardCustomizationPage() {
           .eq('id', targetWidget.id),
       ]);
 
-      showToast('success', 'Widget position updated');
+      showToast('Widget position updated', 'success');
       loadWidgets();
     } catch (error) {
       console.error('Error moving widget:', error);
-      showToast('error', 'Failed to move widget');
+      showToast('Failed to move widget', 'error');
     }
   };
 

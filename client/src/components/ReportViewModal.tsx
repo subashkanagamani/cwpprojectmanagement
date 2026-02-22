@@ -261,7 +261,7 @@ export function ReportViewModal({ reportId, onClose, canApprove = false, onAppro
           )}
 
           {activeTab === 'history' && (
-            <ReportVersionHistory reportId={reportId} />
+            <ReportVersionHistory reportId={reportId} onClose={onClose} />
           )}
         </div>
 

@@ -285,7 +285,7 @@ export function MyTasksPage() {
 
       setTasks(tasksWithCreator);
     } catch (error: any) {
-      showToast('error', error.message);
+      showToast(error.message, 'error');
     } finally {
       setTasksLoading(false);
     }
@@ -341,7 +341,7 @@ export function MyTasksPage() {
         setLocalNotes({});
       }
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to load submissions');
+      showToast(error.message || 'Failed to load submissions', 'error');
     } finally {
       setSubmissionsLoading(false);
     }
@@ -378,10 +378,10 @@ export function MyTasksPage() {
         .eq('id', task.id);
 
       if (error) throw error;
-      showToast('success', newStatus === 'completed' ? 'Task marked as completed' : 'Task marked as pending');
+      showToast(newStatus === 'completed' ? 'Task marked as completed' : 'Task marked as pending', 'success');
       loadTasks();
     } catch (error: any) {
-      showToast('error', error.message);
+      showToast(error.message, 'error');
     }
   };
 
@@ -392,19 +392,19 @@ export function MyTasksPage() {
         .eq('id', taskId);
 
       if (error) throw error;
-      showToast('success', 'Remarks saved');
+      showToast('Remarks saved', 'success');
       setEditingRemarks(null);
       setRemarksText('');
       loadTasks();
     } catch (error: any) {
-      showToast('error', error.message);
+      showToast(error.message, 'error');
     }
   };
 
   const raiseTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!raiseTaskForm.title || !raiseTaskForm.assigned_to || !raiseTaskForm.due_date) {
-      showToast('error', 'Please fill in the task title, assign to, and due date');
+      showToast('Please fill in the task title, assign to, and due date', 'error');
       return;
     }
     setIsRaisingTask(true);
@@ -422,12 +422,12 @@ export function MyTasksPage() {
 
       if (error) throw error;
 
-      showToast('success', 'Task request sent successfully');
+      showToast('Task request sent successfully', 'success');
       setShowRaiseTaskDialog(false);
       setRaiseTaskForm({ title: '', description: '', assigned_to: '', client_id: '', priority: 'medium', due_date: '' });
       loadTasks();
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to raise task');
+      showToast(error.message || 'Failed to raise task', 'error');
     } finally {
       setIsRaisingTask(false);
     }
@@ -509,10 +509,10 @@ export function MyTasksPage() {
         if (error) throw error;
       }
 
-      showToast('success', 'Draft saved');
+      showToast('Draft saved', 'success');
       await loadSubmissions();
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to save draft');
+      showToast(error.message || 'Failed to save draft', 'error');
     } finally {
       setSavingIds(prev => { const n = new Set(prev); n.delete(assignment.id); return n; });
     }
@@ -545,10 +545,10 @@ export function MyTasksPage() {
         if (error) throw error;
       }
 
-      showToast('success', 'Submission completed');
+      showToast('Submission completed', 'success');
       await loadSubmissions();
     } catch (error: any) {
-      showToast('error', error.message || 'Failed to submit');
+      showToast(error.message || 'Failed to submit', 'error');
     } finally {
       setSubmittingIds(prev => { const n = new Set(prev); n.delete(assignment.id); return n; });
     }
