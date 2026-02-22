@@ -12,6 +12,7 @@ import {
   Layers,
   UserCheck,
   BarChart3,
+  Info,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,40 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+const SERVICE_CAPACITY: Record<string, { maxClients: number; category: string }> = {
+  'LinkedIn Outreach': { maxClients: 5, category: 'outreach' },
+  'Email':            { maxClients: 5, category: 'outreach' },
+  'Email Outreach':   { maxClients: 5, category: 'outreach' },
+  'SEO':              { maxClients: 3, category: 'technical' },
+  'Paid Ads':         { maxClients: 3, category: 'technical' },
+  'Meta Ads':         { maxClients: 3, category: 'technical' },
+  'Google Ads':       { maxClients: 3, category: 'technical' },
+  'Social Media':     { maxClients: 4, category: 'creative' },
+  'Content Creation': { maxClients: 4, category: 'creative' },
+  'Lead Sourcing':    { maxClients: 5, category: 'outreach' },
+  'Lead Filtration':  { maxClients: 5, category: 'outreach' },
+  'Designer':         { maxClients: 4, category: 'creative' },
+  'Account Manager':  { maxClients: 6, category: 'management' },
+};
+
+function getServiceCapacity(serviceName: string): number {
+  return SERVICE_CAPACITY[serviceName]?.maxClients || 4;
+}
+
+interface ServiceWorkload {
+  serviceName: string;
+  clientCount: number;
+  maxClients: number;
+  clients: string[];
+  utilization: number;
+}
 
 interface ClientAssignment {
   client_id: string;
@@ -40,6 +75,9 @@ interface EmployeeWorkload {
   clients: ClientAssignment[];
   total_services: number;
   total_clients: number;
+  serviceBreakdown: ServiceWorkload[];
+  overallUtilization: number;
+  availableCapacity: ServiceWorkload[];
 }
 
 const AVATAR_COLORS = [
@@ -49,31 +87,69 @@ const AVATAR_COLORS = [
 ];
 
 const SERVICE_COLORS: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
-  'Account Manager': { bg: 'bg-blue-50', text: 'text-blue-700', darkBg: 'dark:bg-blue-950/40', darkText: 'dark:text-blue-300' },
-  'LinkedIn Outreach': { bg: 'bg-sky-50', text: 'text-sky-700', darkBg: 'dark:bg-sky-950/40', darkText: 'dark:text-sky-300' },
-  'Email': { bg: 'bg-violet-50', text: 'text-violet-700', darkBg: 'dark:bg-violet-950/40', darkText: 'dark:text-violet-300' },
+  'Account Manager':  { bg: 'bg-blue-50', text: 'text-blue-700', darkBg: 'dark:bg-blue-950/40', darkText: 'dark:text-blue-300' },
+  'LinkedIn Outreach':{ bg: 'bg-sky-50', text: 'text-sky-700', darkBg: 'dark:bg-sky-950/40', darkText: 'dark:text-sky-300' },
+  'Email':            { bg: 'bg-violet-50', text: 'text-violet-700', darkBg: 'dark:bg-violet-950/40', darkText: 'dark:text-violet-300' },
+  'Email Outreach':   { bg: 'bg-violet-50', text: 'text-violet-700', darkBg: 'dark:bg-violet-950/40', darkText: 'dark:text-violet-300' },
   'Content Creation': { bg: 'bg-emerald-50', text: 'text-emerald-700', darkBg: 'dark:bg-emerald-950/40', darkText: 'dark:text-emerald-300' },
-  'Lead Sourcing': { bg: 'bg-amber-50', text: 'text-amber-700', darkBg: 'dark:bg-amber-950/40', darkText: 'dark:text-amber-300' },
-  'Social Media': { bg: 'bg-pink-50', text: 'text-pink-700', darkBg: 'dark:bg-pink-950/40', darkText: 'dark:text-pink-300' },
-  'SEO': { bg: 'bg-teal-50', text: 'text-teal-700', darkBg: 'dark:bg-teal-950/40', darkText: 'dark:text-teal-300' },
-  'Paid Ads': { bg: 'bg-orange-50', text: 'text-orange-700', darkBg: 'dark:bg-orange-950/40', darkText: 'dark:text-orange-300' },
-  'Designer': { bg: 'bg-indigo-50', text: 'text-indigo-700', darkBg: 'dark:bg-indigo-950/40', darkText: 'dark:text-indigo-300' },
-  'Lead Filtration': { bg: 'bg-rose-50', text: 'text-rose-700', darkBg: 'dark:bg-rose-950/40', darkText: 'dark:text-rose-300' },
+  'Lead Sourcing':    { bg: 'bg-amber-50', text: 'text-amber-700', darkBg: 'dark:bg-amber-950/40', darkText: 'dark:text-amber-300' },
+  'Social Media':     { bg: 'bg-pink-50', text: 'text-pink-700', darkBg: 'dark:bg-pink-950/40', darkText: 'dark:text-pink-300' },
+  'SEO':              { bg: 'bg-teal-50', text: 'text-teal-700', darkBg: 'dark:bg-teal-950/40', darkText: 'dark:text-teal-300' },
+  'Paid Ads':         { bg: 'bg-orange-50', text: 'text-orange-700', darkBg: 'dark:bg-orange-950/40', darkText: 'dark:text-orange-300' },
+  'Meta Ads':         { bg: 'bg-orange-50', text: 'text-orange-700', darkBg: 'dark:bg-orange-950/40', darkText: 'dark:text-orange-300' },
+  'Google Ads':       { bg: 'bg-red-50', text: 'text-red-700', darkBg: 'dark:bg-red-950/40', darkText: 'dark:text-red-300' },
+  'Designer':         { bg: 'bg-indigo-50', text: 'text-indigo-700', darkBg: 'dark:bg-indigo-950/40', darkText: 'dark:text-indigo-300' },
+  'Lead Filtration':  { bg: 'bg-rose-50', text: 'text-rose-700', darkBg: 'dark:bg-rose-950/40', darkText: 'dark:text-rose-300' },
 };
 
 function getServiceStyle(serviceName: string) {
   return SERVICE_COLORS[serviceName] || { bg: 'bg-muted', text: 'text-muted-foreground', darkBg: 'dark:bg-muted', darkText: 'dark:text-muted-foreground' };
 }
 
-function getWorkloadLevel(totalServices: number, maxServices: number) {
-  const ratio = totalServices / Math.max(maxServices, 1);
-  if (ratio >= 0.7) return { label: 'High', variant: 'destructive' as const, color: 'text-red-600 dark:text-red-400' };
-  if (ratio >= 0.4) return { label: 'Medium', variant: 'default' as const, color: 'text-amber-600 dark:text-amber-400' };
-  return { label: 'Low', variant: 'secondary' as const, color: 'text-emerald-600 dark:text-emerald-400' };
+function getWorkloadLevel(utilization: number) {
+  if (utilization >= 90) return { label: 'Overloaded', variant: 'destructive' as const, color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-950/20' };
+  if (utilization >= 70) return { label: 'High', variant: 'destructive' as const, color: 'text-orange-600 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-950/20' };
+  if (utilization >= 40) return { label: 'Medium', variant: 'default' as const, color: 'text-amber-600 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-950/20' };
+  return { label: 'Low', variant: 'secondary' as const, color: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-50 dark:bg-emerald-950/20' };
 }
 
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function calculateServiceBreakdown(clients: ClientAssignment[]): { breakdown: ServiceWorkload[]; utilization: number } {
+  const serviceMap = new Map<string, Set<string>>();
+
+  for (const client of clients) {
+    for (const svc of client.services) {
+      if (!serviceMap.has(svc)) serviceMap.set(svc, new Set());
+      serviceMap.get(svc)!.add(client.client_name);
+    }
+  }
+
+  const breakdown: ServiceWorkload[] = [];
+  let totalUtilization = 0;
+  let serviceCount = 0;
+
+  for (const [serviceName, clientSet] of serviceMap) {
+    const maxClients = getServiceCapacity(serviceName);
+    const clientCount = clientSet.size;
+    const utilization = Math.round((clientCount / maxClients) * 100);
+    breakdown.push({
+      serviceName,
+      clientCount,
+      maxClients,
+      clients: Array.from(clientSet),
+      utilization,
+    });
+    totalUtilization += utilization;
+    serviceCount++;
+  }
+
+  breakdown.sort((a, b) => b.utilization - a.utilization);
+
+  const overallUtilization = serviceCount > 0 ? Math.round(totalUtilization / serviceCount) : 0;
+  return { breakdown, utilization: overallUtilization };
 }
 
 export function EmployeeWorkloadDashboard() {
@@ -82,7 +158,7 @@ export function EmployeeWorkloadDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<'name' | 'clients' | 'services'>('services');
+  const [sortBy, setSortBy] = useState<'name' | 'clients' | 'utilization'>('utilization');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
@@ -98,9 +174,9 @@ export function EmployeeWorkloadDashboard() {
       type NamedRow = { id: string; name: string };
 
       const [aRes, pRes, cRes, sRes] = await Promise.all([
-        supabase.from('client_assignments').select('employee_id, client_id, service_id'),
+        supabase.from('client_assignments').select('employee_id, client_id, service_id').eq('is_active', true).is('deleted_at', null) as any,
         supabase.from('profiles').select('id, full_name, email, role'),
-        supabase.from('clients').select('id, name'),
+        supabase.from('clients').select('id, name').is('deleted_at', null) as any,
         supabase.from('services').select('id, name'),
       ]);
 
@@ -128,6 +204,9 @@ export function EmployeeWorkloadDashboard() {
           clients: [],
           total_services: 0,
           total_clients: 0,
+          serviceBreakdown: [],
+          overallUtilization: 0,
+          availableCapacity: [],
         });
       }
 
@@ -152,6 +231,11 @@ export function EmployeeWorkloadDashboard() {
         emp.total_clients = emp.clients.length;
         emp.total_services = emp.clients.reduce((sum, c) => sum + c.services.length, 0);
         emp.clients.sort((a, b) => b.services.length - a.services.length);
+
+        const { breakdown, utilization } = calculateServiceBreakdown(emp.clients);
+        emp.serviceBreakdown = breakdown;
+        emp.overallUtilization = utilization;
+        emp.availableCapacity = breakdown.filter(s => s.clientCount < s.maxClients);
       }
 
       setWorkloads(Array.from(empMap.values()));
@@ -162,38 +246,38 @@ export function EmployeeWorkloadDashboard() {
     }
   };
 
-  const maxServices = useMemo(() => Math.max(...workloads.map(w => w.total_services), 1), [workloads]);
-  const maxClients = useMemo(() => Math.max(...workloads.map(w => w.total_clients), 1), [workloads]);
-
   const summary = useMemo(() => {
-    const total = workloads.length;
-    let high = 0, medium = 0, low = 0;
+    const total = workloads.filter(w => w.role === 'employee').length;
+    let overloaded = 0, high = 0, medium = 0, low = 0;
     for (const w of workloads) {
-      const level = getWorkloadLevel(w.total_services, maxServices);
-      if (level.label === 'High') high++;
+      if (w.role !== 'employee') continue;
+      const level = getWorkloadLevel(w.overallUtilization);
+      if (level.label === 'Overloaded') overloaded++;
+      else if (level.label === 'High') high++;
       else if (level.label === 'Medium') medium++;
       else low++;
     }
     const totalAssignments = workloads.reduce((s, w) => s + w.total_services, 0);
     const totalClients = new Set(workloads.flatMap(w => w.clients.map(c => c.client_id))).size;
-    return { total, high, medium, low, totalAssignments, totalClients };
-  }, [workloads, maxServices]);
+    return { total, overloaded, high, medium, low, totalAssignments, totalClients };
+  }, [workloads]);
 
   const sortedAndFiltered = useMemo(() => {
-    let filtered = workloads;
+    let filtered = workloads.filter(w => w.role === 'employee');
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      filtered = workloads.filter(w =>
+      filtered = filtered.filter(w =>
         w.full_name.toLowerCase().includes(q) ||
         w.email.toLowerCase().includes(q) ||
-        w.clients.some(c => c.client_name.toLowerCase().includes(q))
+        w.clients.some(c => c.client_name.toLowerCase().includes(q)) ||
+        w.serviceBreakdown.some(s => s.serviceName.toLowerCase().includes(q))
       );
     }
     return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortBy === 'name') cmp = a.full_name.localeCompare(b.full_name);
       else if (sortBy === 'clients') cmp = a.total_clients - b.total_clients;
-      else cmp = a.total_services - b.total_services;
+      else cmp = a.overallUtilization - b.overallUtilization;
       return sortDir === 'desc' ? -cmp : cmp;
     });
   }, [workloads, searchQuery, sortBy, sortDir]);
@@ -218,7 +302,7 @@ export function EmployeeWorkloadDashboard() {
     }
   };
 
-  const handleSort = (field: 'name' | 'clients' | 'services') => {
+  const handleSort = (field: 'name' | 'clients' | 'utilization') => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortDir('desc'); }
   };
@@ -244,257 +328,309 @@ export function EmployeeWorkloadDashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground" data-testid="text-workload-title">
-            Team Workload
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Overview of each team member's client assignments and service responsibilities
-          </p>
-        </div>
-        <Button variant="outline" onClick={loadData} data-testid="button-refresh-workload">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
-        <Card className="stat-card-gradient blue" data-testid="card-stat-team">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
-              <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{summary.total}</p>
-              <p className="text-xs text-muted-foreground">Team Members</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="stat-card-gradient orange" data-testid="card-stat-high">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/30">
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{summary.high}</p>
-              <p className="text-xs text-muted-foreground">High Workload</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="stat-card-gradient purple" data-testid="card-stat-assignments">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-lg p-2.5 bg-violet-50 dark:bg-violet-950/30">
-              <Layers className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{summary.totalAssignments}</p>
-              <p className="text-xs text-muted-foreground">Total Assignments</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="stat-card-gradient green" data-testid="card-stat-clients">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
-              <Briefcase className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{summary.totalClients}</p>
-              <p className="text-xs text-muted-foreground">Active Clients</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex items-center gap-3 flex-wrap animate-fade-up" style={{ animationDelay: "200ms" }}>
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, email, or client..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="pl-9"
-            data-testid="input-search-workload"
-          />
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs text-muted-foreground mr-1">Sort:</span>
-          <Button
-            variant={sortBy === 'services' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleSort('services')}
-            data-testid="button-sort-services"
-          >
-            Assignments {sortBy === 'services' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
-          </Button>
-          <Button
-            variant={sortBy === 'clients' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleSort('clients')}
-            data-testid="button-sort-clients"
-          >
-            Clients {sortBy === 'clients' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
-          </Button>
-          <Button
-            variant={sortBy === 'name' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleSort('name')}
-            data-testid="button-sort-name"
-          >
-            Name {sortBy === 'name' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
+    <TooltipProvider>
+      <div className="space-y-8">
+        <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Team Workload
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Capacity based on service type — each service has its own client limit
+            </p>
+          </div>
+          <Button variant="outline" onClick={loadData}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
         </div>
-        <Button variant="ghost" size="sm" onClick={expandAll} data-testid="button-expand-all">
-          {expandedCards.size === sortedAndFiltered.length ? 'Collapse All' : 'Expand All'}
-        </Button>
-      </div>
 
-      {sortedAndFiltered.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <UserCheck className="h-8 w-8 opacity-40 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No team members found matching your search.</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+          <Card className="stat-card-gradient blue">
+            <CardContent className="flex items-center gap-3 p-5">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{summary.total}</p>
+                <p className="text-xs text-muted-foreground">Team Members</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="stat-card-gradient orange">
+            <CardContent className="flex items-center gap-3 p-5">
+              <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/30">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{summary.overloaded + summary.high}</p>
+                <p className="text-xs text-muted-foreground">High / Overloaded</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="stat-card-gradient purple">
+            <CardContent className="flex items-center gap-3 p-5">
+              <div className="rounded-lg p-2.5 bg-violet-50 dark:bg-violet-950/30">
+                <Layers className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{summary.totalAssignments}</p>
+                <p className="text-xs text-muted-foreground">Total Assignments</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="stat-card-gradient green">
+            <CardContent className="flex items-center gap-3 p-5">
+              <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
+                <Briefcase className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{summary.totalClients}</p>
+                <p className="text-xs text-muted-foreground">Active Clients</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="animate-fade-up" style={{ animationDelay: "150ms" }}>
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="h-4 w-4 text-blue-500" />
+              <span className="text-sm font-medium">Service Capacity Rules</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {Object.entries(SERVICE_CAPACITY).filter(([name]) => 
+                !['Email Outreach'].includes(name)
+              ).map(([name, config]) => {
+                const style = getServiceStyle(name);
+                return (
+                  <div key={name} className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg ${style.bg} ${style.darkBg}`}>
+                    <span className={`text-xs font-medium ${style.text} ${style.darkText}`}>{name}</span>
+                    <span className={`text-xs font-bold ${style.text} ${style.darkText}`}>{config.maxClients} clients</span>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "300ms" }}>
-          {sortedAndFiltered.map((emp, index) => {
-            const level = getWorkloadLevel(emp.total_services, maxServices);
-            const isExpanded = expandedCards.has(emp.id);
-            const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
-            const capacityPercent = Math.round((emp.total_services / maxServices) * 100);
 
-            return (
-              <Collapsible key={emp.id} open={isExpanded} onOpenChange={() => toggleExpand(emp.id)}>
-                <Card className="overflow-visible" data-testid={`card-employee-${emp.id}`}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3 flex-wrap">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className={`${avatarColor} text-white text-sm font-medium`}>
-                          {getInitials(emp.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <CardTitle className="text-sm font-semibold truncate" data-testid={`text-employee-name-${emp.id}`}>
-                            {emp.full_name}
-                          </CardTitle>
-                          {emp.role === 'admin' && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">Admin</Badge>
+        <div className="flex items-center gap-3 flex-wrap animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, service, or client..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+            <Button
+              variant={sortBy === 'utilization' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSort('utilization')}
+            >
+              Workload {sortBy === 'utilization' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
+            </Button>
+            <Button
+              variant={sortBy === 'clients' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSort('clients')}
+            >
+              Clients {sortBy === 'clients' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
+            </Button>
+            <Button
+              variant={sortBy === 'name' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSort('name')}
+            >
+              Name {sortBy === 'name' && (sortDir === 'desc' ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronUp className="h-3 w-3 ml-1" />)}
+            </Button>
+          </div>
+          <Button variant="ghost" size="sm" onClick={expandAll}>
+            {expandedCards.size === sortedAndFiltered.length ? 'Collapse All' : 'Expand All'}
+          </Button>
+        </div>
+
+        {sortedAndFiltered.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <UserCheck className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No team members found matching your search.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "300ms" }}>
+            {sortedAndFiltered.map((emp, index) => {
+              const level = getWorkloadLevel(emp.overallUtilization);
+              const isExpanded = expandedCards.has(emp.id);
+              const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+
+              return (
+                <Collapsible key={emp.id} open={isExpanded} onOpenChange={() => toggleExpand(emp.id)}>
+                  <Card className="overflow-visible">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3 flex-wrap">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className={`${avatarColor} text-white text-sm font-medium`}>
+                            {getInitials(emp.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <CardTitle className="text-sm font-semibold truncate">
+                              {emp.full_name}
+                            </CardTitle>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{emp.email}</p>
+                        </div>
+                        <Badge variant={level.variant} className="text-[11px] shrink-0">
+                          {level.label}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0 space-y-3">
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="text-center p-2 rounded-md bg-muted/50">
+                          <p className="text-lg font-semibold">{emp.total_clients}</p>
+                          <p className="text-[11px] text-muted-foreground">Clients</p>
+                        </div>
+                        <div className="text-center p-2 rounded-md bg-muted/50">
+                          <p className="text-lg font-semibold">{emp.total_services}</p>
+                          <p className="text-[11px] text-muted-foreground">Assignments</p>
+                        </div>
+                        <div className={`text-center p-2 rounded-md ${level.bgColor}`}>
+                          <p className={`text-lg font-semibold ${level.color}`}>{emp.overallUtilization}%</p>
+                          <p className="text-[11px] text-muted-foreground">Capacity</p>
+                        </div>
+                      </div>
+
+                      {emp.serviceBreakdown.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Service Utilization</p>
+                          {emp.serviceBreakdown.slice(0, isExpanded ? undefined : 3).map(svc => {
+                            const style = getServiceStyle(svc.serviceName);
+                            const isOver = svc.clientCount > svc.maxClients;
+                            const barWidth = Math.min(svc.utilization, 100);
+                            return (
+                              <Tooltip key={svc.serviceName}>
+                                <TooltipTrigger asChild>
+                                  <div className="space-y-1 cursor-help">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className={`text-[11px] font-medium ${style.text} ${style.darkText}`}>{svc.serviceName}</span>
+                                      <span className={`text-[11px] font-semibold ${isOver ? 'text-red-600' : 'text-muted-foreground'}`}>
+                                        {svc.clientCount}/{svc.maxClients}
+                                      </span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                      <div
+                                        className={`h-full rounded-full transition-all duration-500 ${
+                                          isOver ? 'bg-red-500' : svc.utilization >= 80 ? 'bg-orange-500' : 'bg-blue-500'
+                                        }`}
+                                        style={{ width: `${barWidth}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                  <p className="font-medium">{svc.serviceName}: {svc.clientCount} of {svc.maxClients} max clients</p>
+                                  <p className="text-muted-foreground mt-0.5">Clients: {svc.clients.join(', ')}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            );
+                          })}
+                          {!isExpanded && emp.serviceBreakdown.length > 3 && (
+                            <p className="text-[10px] text-muted-foreground text-center">+{emp.serviceBreakdown.length - 3} more services</p>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground truncate mt-0.5">{emp.email}</p>
-                      </div>
-                      <Badge
-                        variant={level.variant}
-                        className="text-[11px] shrink-0"
-                        data-testid={`badge-workload-${emp.id}`}
-                      >
-                        {level.label}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="text-center p-2 rounded-md bg-muted/50">
-                        <p className="text-lg font-semibold" data-testid={`text-client-count-${emp.id}`}>{emp.total_clients}</p>
-                        <p className="text-[11px] text-muted-foreground">Clients</p>
-                      </div>
-                      <div className="text-center p-2 rounded-md bg-muted/50">
-                        <p className="text-lg font-semibold" data-testid={`text-service-count-${emp.id}`}>{emp.total_services}</p>
-                        <p className="text-[11px] text-muted-foreground">Assignments</p>
-                      </div>
-                    </div>
+                      )}
 
-                    <div>
-                      <div className="flex items-center justify-between gap-2 flex-wrap mb-1.5">
-                        <span className="text-[11px] text-muted-foreground">Capacity Usage</span>
-                        <span className={`text-[11px] font-medium ${level.color}`}>{capacityPercent}%</span>
-                      </div>
-                      <Progress value={capacityPercent} className="h-1.5" />
-                    </div>
+                      {emp.clients.length > 0 && !isExpanded && (
+                        <div className="flex flex-wrap gap-1">
+                          {emp.clients.slice(0, 3).map(c => (
+                            <Badge key={c.client_id} variant="outline" className="text-[10px] font-normal">
+                              {c.client_name}
+                              <span className="ml-1 text-muted-foreground">({c.services.length})</span>
+                            </Badge>
+                          ))}
+                          {emp.clients.length > 3 && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              +{emp.clients.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      )}
 
-                    {emp.clients.length > 0 && !isExpanded && (
-                      <div className="flex flex-wrap gap-1">
-                        {emp.clients.slice(0, 4).map(c => (
-                          <Badge key={c.client_id} variant="outline" className="text-[10px] font-normal">
-                            {c.client_name}
-                            <span className="ml-1 text-muted-foreground">({c.services.length})</span>
-                          </Badge>
-                        ))}
-                        {emp.clients.length > 4 && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            +{emp.clients.length - 4} more
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="w-full text-xs">
+                          {isExpanded ? (
+                            <>Hide Details <ChevronUp className="h-3 w-3 ml-1" /></>
+                          ) : (
+                            <>View Details <ChevronDown className="h-3 w-3 ml-1" /></>
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
 
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="w-full text-xs" data-testid={`button-expand-${emp.id}`}>
-                        {isExpanded ? (
-                          <>Hide Details <ChevronUp className="h-3 w-3 ml-1" /></>
-                        ) : (
-                          <>View Details <ChevronDown className="h-3 w-3 ml-1" /></>
-                        )}
-                      </Button>
-                    </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="border-t pt-2 space-y-3">
+                          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider pt-1">Client Assignments</p>
+                          <div className="max-h-[260px] overflow-y-auto scrollbar-thin">
+                            <div className="divide-y">
+                              {emp.clients.map(client => (
+                                <div key={client.client_id} className="flex items-center justify-between gap-2 py-2 px-1">
+                                  <span className="text-[13px] font-medium truncate min-w-0">{client.client_name}</span>
+                                  <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                                    {client.services.map(svc => {
+                                      const style = getServiceStyle(svc);
+                                      return (
+                                        <span
+                                          key={svc}
+                                          className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
+                                        >
+                                          {svc}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                              {emp.clients.length === 0 && (
+                                <p className="text-xs text-muted-foreground text-center py-3">No client assignments yet</p>
+                              )}
+                            </div>
+                          </div>
 
-                    <CollapsibleContent>
-                      <div className="border-t pt-2 max-h-[260px] overflow-y-auto scrollbar-thin">
-                        <div className="divide-y">
-                          {emp.clients.map(client => (
-                            <div key={client.client_id} className="flex items-center justify-between gap-2 py-2 px-1" data-testid={`card-client-${client.client_id}-${emp.id}`}>
-                              <span className="text-[13px] font-medium truncate min-w-0" data-testid={`text-client-name-${client.client_id}-${emp.id}`}>{client.client_name}</span>
-                              <div className="flex flex-wrap gap-1 shrink-0 justify-end">
-                                {client.services.map(svc => {
-                                  const style = getServiceStyle(svc);
+                          {emp.availableCapacity.length > 0 && (
+                            <>
+                              <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider pt-1">Available Capacity</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {emp.availableCapacity.map(svc => {
+                                  const remaining = svc.maxClients - svc.clientCount;
+                                  const style = getServiceStyle(svc.serviceName);
                                   return (
                                     <span
-                                      key={svc}
-                                      className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
+                                      key={svc.serviceName}
+                                      className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
                                     >
-                                      {svc}
+                                      {svc.serviceName}
+                                      <span className="font-bold">+{remaining}</span>
                                     </span>
                                   );
                                 })}
                               </div>
-                            </div>
-                          ))}
+                            </>
+                          )}
                         </div>
-                        {emp.clients.length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-3">No client assignments yet</p>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </CardContent>
-                </Card>
-              </Collapsible>
-            );
-          })}
-        </div>
-      )}
-
-      <Card className="animate-fade-up" style={{ animationDelay: "400ms" }}>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 flex-wrap mb-3">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Service Legend</span>
+                      </CollapsibleContent>
+                    </CardContent>
+                  </Card>
+                </Collapsible>
+              );
+            })}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(SERVICE_COLORS).map(([name, style]) => (
-              <span
-                key={name}
-                className={`inline-block text-[11px] font-medium px-2.5 py-1 rounded-md ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
-                data-testid={`legend-service-${name.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
