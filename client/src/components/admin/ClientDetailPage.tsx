@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -112,22 +113,22 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
       setLoading(true);
 
       const [clientRes, assignmentsRes, reportsRes, employeesRes, servicesRes] = await Promise.all([
-        supabase.from('clients').select('*').eq('id', clientId).maybeSingle(),
+        supabase.from('clients').select('*').eq('id', clientId).maybeSingle() as any,
         supabase
           .from('client_assignments')
           .select('*, profiles(*), services(*)')
-          .eq('client_id', clientId),
+          .eq('client_id', clientId) as any,
         supabase
           .from('weekly_reports')
           .select('*, profiles(*), services(*)')
           .eq('client_id', clientId)
-          .order('week_start_date', { ascending: false }),
+          .order('week_start_date', { ascending: false }) as any,
         supabase
           .from('profiles')
           .select('*')
           .eq('role', 'employee')
-          .eq('status', 'active'),
-        supabase.from('services').select('*').eq('is_active', true),
+          .eq('status', 'active') as any,
+        supabase.from('services').select('*').eq('is_active', true) as any,
       ]);
 
       if (clientRes.data) {
@@ -148,7 +149,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
 
       if (assignmentsRes.data) {
         setAssignments(
-          assignmentsRes.data.map((a) => ({
+          assignmentsRes.data.map((a: any) => ({
             ...a,
             employee: a.profiles,
             service: a.services,
@@ -158,7 +159,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
 
       if (reportsRes.data) {
         setReports(
-          reportsRes.data.map((r) => ({
+          reportsRes.data.map((r: any) => ({
             ...r,
             employee: r.profiles,
             service: r.services,
@@ -196,7 +197,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
     }
 
     try {
-      const { error } = await supabase.from('client_assignments').insert({
+      const { error } = await (supabase.from('client_assignments') as any).insert({
         client_id: clientId,
         employee_id: assignFormData.employee_id,
         service_id: assignFormData.service_id,
@@ -223,8 +224,8 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
     }
 
     try {
-      const { error } = await supabase
-        .from('clients')
+      const { error } = await (supabase
+        .from('clients') as any)
         .update({
           name: editFormData.name,
           industry: editFormData.industry || null,
