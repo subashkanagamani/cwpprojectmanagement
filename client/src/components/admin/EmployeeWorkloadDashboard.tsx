@@ -415,26 +415,24 @@ export function EmployeeWorkloadDashboard() {
                       <Progress value={capacityPercent} className="h-1.5" />
                     </div>
 
-                    {emp.clients.length > 0 && (
-                      <div>
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {emp.clients.slice(0, isExpanded ? undefined : 3).map(c => (
-                            <Badge key={c.client_id} variant="outline" className="text-[10px] font-normal">
-                              {c.client_name}
-                              <span className="ml-1 text-muted-foreground">({c.services.length})</span>
-                            </Badge>
-                          ))}
-                          {!isExpanded && emp.clients.length > 3 && (
-                            <Badge variant="secondary" className="text-[10px]">
-                              +{emp.clients.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
+                    {emp.clients.length > 0 && !isExpanded && (
+                      <div className="flex flex-wrap gap-1">
+                        {emp.clients.slice(0, 4).map(c => (
+                          <Badge key={c.client_id} variant="outline" className="text-[10px] font-normal">
+                            {c.client_name}
+                            <span className="ml-1 text-muted-foreground">({c.services.length})</span>
+                          </Badge>
+                        ))}
+                        {emp.clients.length > 4 && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            +{emp.clients.length - 4} more
+                          </Badge>
+                        )}
                       </div>
                     )}
 
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="w-full" data-testid={`button-expand-${emp.id}`}>
+                      <Button variant="ghost" size="sm" className="w-full text-xs" data-testid={`button-expand-${emp.id}`}>
                         {isExpanded ? (
                           <>Hide Details <ChevronUp className="h-3 w-3 ml-1" /></>
                         ) : (
@@ -443,31 +441,30 @@ export function EmployeeWorkloadDashboard() {
                       </Button>
                     </CollapsibleTrigger>
 
-                    <CollapsibleContent className="space-y-2">
-                      <div className="border-t pt-3 max-h-[280px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin">
-                        {emp.clients.map(client => (
-                          <div key={client.client_id} className="rounded-md border p-3 space-y-2" data-testid={`card-client-${client.client_id}-${emp.id}`}>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Briefcase className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                              <span className="text-sm font-medium truncate" data-testid={`text-client-name-${client.client_id}-${emp.id}`}>{client.client_name}</span>
+                    <CollapsibleContent>
+                      <div className="border-t pt-2 max-h-[260px] overflow-y-auto scrollbar-thin">
+                        <div className="divide-y">
+                          {emp.clients.map(client => (
+                            <div key={client.client_id} className="flex items-center justify-between gap-2 py-2 px-1" data-testid={`card-client-${client.client_id}-${emp.id}`}>
+                              <span className="text-[13px] font-medium truncate min-w-0" data-testid={`text-client-name-${client.client_id}-${emp.id}`}>{client.client_name}</span>
+                              <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                                {client.services.map(svc => {
+                                  const style = getServiceStyle(svc);
+                                  return (
+                                    <span
+                                      key={svc}
+                                      className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
+                                    >
+                                      {svc}
+                                    </span>
+                                  );
+                                })}
+                              </div>
                             </div>
-                            <div className="flex flex-wrap gap-1">
-                              {client.services.map(svc => {
-                                const style = getServiceStyle(svc);
-                                return (
-                                  <span
-                                    key={svc}
-                                    className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-md ${style.bg} ${style.text} ${style.darkBg} ${style.darkText}`}
-                                  >
-                                    {svc}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                         {emp.clients.length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-2">No client assignments yet</p>
+                          <p className="text-xs text-muted-foreground text-center py-3">No client assignments yet</p>
                         )}
                       </div>
                     </CollapsibleContent>
