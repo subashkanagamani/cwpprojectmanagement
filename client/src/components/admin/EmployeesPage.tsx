@@ -436,11 +436,11 @@ export function EmployeesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-employees-title">Employees</h1>
-          <p className="text-sm text-muted-foreground">Manage team members, skills, and assignments</p>
+          <h1 className="text-2xl font-bold text-foreground" data-testid="text-employees-title">Employees</h1>
+          <p className="text-muted-foreground mt-1">Manage team members, skills, and assignments</p>
         </div>
         <Button onClick={() => openModal()} data-testid="button-add-employee">
           <Plus className="h-4 w-4 mr-2" />
@@ -448,12 +448,13 @@ export function EmployeesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {statCards.map((stat) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        {statCards.map((stat, idx) => {
           const Icon = stat.icon;
+          const gradientColors = ['blue', 'green', 'orange', 'purple'];
           return (
-            <Card key={stat.label} data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
-              <CardContent className="p-6">
+            <Card key={stat.label} className={`stat-card-gradient ${gradientColors[idx % gradientColors.length]}`} data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <p className="text-[13px] font-medium text-muted-foreground">{stat.label}</p>
@@ -472,7 +473,7 @@ export function EmployeesPage() {
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -546,7 +547,7 @@ export function EmployeesPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
         <CardContent className="p-0">
           <Table>
             <TableHeader>

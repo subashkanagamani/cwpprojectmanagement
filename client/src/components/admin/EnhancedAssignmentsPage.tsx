@@ -17,6 +17,7 @@ import { Modal } from "../Modal";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Assignment {
   id: string;
@@ -250,15 +251,31 @@ export default function EnhancedAssignmentsPage() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading assignments...</div>;
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-9 w-36" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}><CardContent className="p-5"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between animate-fade-up">
         <div>
-          <h1 className="text-3xl font-bold">Client Assignments</h1>
-          <p className="text-muted-foreground">Manage team assignments and account managers</p>
+          <h1 className="text-2xl font-bold text-foreground">Client Assignments</h1>
+          <p className="text-muted-foreground mt-1">Manage team assignments and account managers</p>
         </div>
         <Button
           onClick={() => {
@@ -271,37 +288,49 @@ export default function EnhancedAssignmentsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Clients</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalClients}</div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{stats.totalClients}</p>
+                <p className="text-xs text-muted-foreground">Assigned Clients</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
+                <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{stats.totalAssignments}</p>
+                <p className="text-xs text-muted-foreground">Total Assignments</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Account Managers</CardTitle>
-            <Crown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.accountManagers}</div>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-violet-50 dark:bg-violet-950/30">
+                <Crown className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{stats.accountManagers}</p>
+                <p className="text-xs text-muted-foreground">Account Managers</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Assignments by Client</CardTitle>
@@ -321,7 +350,10 @@ export default function EnhancedAssignmentsPage() {
         <CardContent>
           <div className="space-y-4">
             {filteredGroups.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No assignments found</p>
+              <div className="text-center py-8">
+                <Users className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No assignments found</p>
+              </div>
             ) : (
               filteredGroups.map((group) => (
                 <Card key={group.client.id} className="border-2">
@@ -346,7 +378,7 @@ export default function EnhancedAssignmentsPage() {
                       {group.assignments.map((assignment) => (
                         <div
                           key={assignment.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:shadow-md transition-shadow"
+                          className="flex items-center justify-between p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border"
                         >
                           <div className="flex items-center gap-3 flex-1">
                             <Avatar>

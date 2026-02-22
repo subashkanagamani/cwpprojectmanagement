@@ -132,19 +132,24 @@ export function ModernProjectsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <ProjectHeader
-        title="Mobile App"
-        description="Modern mobile application development project"
-        team={projectTeam}
-        status="active"
-        onInvite={() => console.log('Invite clicked')}
-      />
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground">Projects</h1>
+        <p className="text-muted-foreground mt-1">Manage and track your project progress</p>
+      </div>
 
-      {/* View Mode Toggle */}
-      <div className="flex justify-end">
-        <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <ProjectHeader
+          title="Mobile App"
+          description="Modern mobile application development project"
+          team={projectTeam}
+          status="active"
+          onInvite={() => console.log('Invite clicked')}
+        />
+      </div>
+
+      <div className="flex justify-end animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
@@ -168,8 +173,7 @@ export function ModernProjectsPage() {
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <div className="mt-6">
+      <div className="animate-fade-up" style={{ animationDelay: "300ms" }}>
         <KanbanBoard
           columns={kanbanData.columns}
           onCardClick={(columnId, cardIndex) => {

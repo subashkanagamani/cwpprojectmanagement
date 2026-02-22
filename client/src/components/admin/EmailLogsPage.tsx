@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Search, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
+import { Mail, Search, ExternalLink, CheckCircle, XCircle, Send, MousePointerClick } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { format } from 'date-fns';
@@ -126,16 +126,14 @@ export default function EmailLogsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center gap-4 flex-wrap">
-          <div>
-            <Skeleton className="h-8 w-40 mb-2" />
-            <Skeleton className="h-4 w-72" />
-          </div>
+      <div className="space-y-8">
+        <div className="animate-fade-up">
+          <Skeleton className="h-8 w-40 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
+            <Skeleton key={i} className="h-24 w-full" />
           ))}
         </div>
         <Skeleton className="h-96 w-full" />
@@ -144,121 +142,149 @@ export default function EmailLogsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Email Logs</h1>
-          <p className="text-sm text-muted-foreground">Track all sent emails and their engagement metrics</p>
-        </div>
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground">Email Logs</h1>
+        <p className="text-muted-foreground mt-1">Track all sent emails and their engagement metrics</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card data-testid="stat-total-sent">
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Total Sent</div>
-            <div className="text-2xl font-semibold tracking-tight text-foreground">{emails.length}</div>
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-4 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue" data-testid="stat-total-sent">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <Send className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Sent</p>
+                <p className="text-2xl font-bold text-foreground">{emails.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card data-testid="stat-open-rate">
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Open Rate</div>
-            <div className="text-2xl font-semibold tracking-tight text-foreground">{stats.opened}%</div>
+        <Card className="stat-card-gradient green" data-testid="stat-open-rate">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Open Rate</p>
+                <p className="text-2xl font-bold text-foreground">{stats.opened}%</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card data-testid="stat-click-rate">
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Click Rate</div>
-            <div className="text-2xl font-semibold tracking-tight text-foreground">{stats.clicked}%</div>
+        <Card className="stat-card-gradient purple" data-testid="stat-click-rate">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                <MousePointerClick className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Click Rate</p>
+                <p className="text-2xl font-bold text-foreground">{stats.clicked}%</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card data-testid="stat-failed">
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Failed</div>
-            <div className="text-2xl font-semibold tracking-tight text-foreground">
-              {emails.filter((e) => e.status === 'failed').length}
+        <Card className="stat-card-gradient orange" data-testid="stat-failed">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/30">
+                <XCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {emails.filter((e) => e.status === 'failed').length}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <CardHeader>
+            <div className="flex gap-4 flex-wrap">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search emails..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                  data-testid="input-search-emails"
+                />
+              </div>
+              <Select value={statusFilter || 'all'} onValueChange={(val) => setStatusFilter(val === 'all' ? '' : val)}>
+                <SelectTrigger className="w-[160px]" data-testid="trigger-status-filter">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
+                  <SelectItem value="opened">Opened</SelectItem>
+                  <SelectItem value="clicked">Clicked</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
-                type="text"
-                placeholder="Search emails..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-                data-testid="input-search-emails"
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="w-auto"
+                data-testid="input-date-filter"
               />
             </div>
-            <Select value={statusFilter || 'all'} onValueChange={(val) => setStatusFilter(val === 'all' ? '' : val)}>
-              <SelectTrigger className="w-[160px]" data-testid="trigger-status-filter">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="opened">Opened</SelectItem>
-                <SelectItem value="clicked">Clicked</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-auto"
-              data-testid="input-date-filter"
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Recipient</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Sent By</TableHead>
-                <TableHead>Sent At</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmails.map((email) => (
-                <TableRow key={email.id} data-testid={`row-email-${email.id}`}>
-                  <TableCell>
-                    <div className="font-medium text-foreground">{email.recipient_email}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-foreground">{email.subject}</div>
-                    {email.template_used && (
-                      <div className="text-xs text-muted-foreground">Template: {email.template_used}</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {email.profiles?.full_name || 'System'}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(email.sent_at), 'MMM d, yyyy HH:mm')}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(email)}</TableCell>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Recipient</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Sent By</TableHead>
+                  <TableHead>Sent At</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredEmails.map((email) => (
+                  <TableRow key={email.id} data-testid={`row-email-${email.id}`} className="hover:bg-muted/50 transition-colors">
+                    <TableCell>
+                      <div className="font-medium text-foreground">{email.recipient_email}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm text-foreground">{email.subject}</div>
+                      {email.template_used && (
+                        <div className="text-xs text-muted-foreground">Template: {email.template_used}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {email.profiles?.full_name || 'System'}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {format(new Date(email.sent_at), 'MMM d, yyyy HH:mm')}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(email)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-          {filteredEmails.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Mail className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p>No email logs found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {filteredEmails.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Mail className="h-8 w-8 opacity-40 mb-3" />
+                <p className="text-sm text-muted-foreground">No email logs found</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

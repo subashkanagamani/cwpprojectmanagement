@@ -225,11 +225,11 @@ export function ClientHealthDashboard() {
   }
 
   return (
-    <div data-testid="health-dashboard-page" className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div data-testid="health-dashboard-page" className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-page-title">Client Health Monitoring</h1>
-          <p className="text-sm text-muted-foreground">Track client engagement and identify accounts needing attention</p>
+          <h1 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Client Health Monitoring</h1>
+          <p className="text-muted-foreground mt-1">Track client engagement and identify accounts needing attention</p>
         </div>
         <Button
           onClick={refreshHealthScores}
@@ -241,8 +241,8 @@ export function ClientHealthDashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card data-testid="card-stat-total">
+      <div className="animate-fade-up grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue" data-testid="card-stat-total">
           <CardContent className="p-6 flex flex-col items-center justify-center text-center">
             <p className="text-sm font-medium text-muted-foreground mb-4">Overall Health</p>
             <HealthRing score={averageScore} size={140} strokeWidth={12} />
@@ -252,7 +252,7 @@ export function ClientHealthDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2" data-testid="card-breakdown">
+        <Card className="lg:col-span-2 stat-card-gradient green" data-testid="card-breakdown">
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">Health Breakdown</CardTitle>
           </CardHeader>
@@ -330,7 +330,7 @@ export function ClientHealthDashboard() {
       </div>
 
       {atRiskCount > 0 && filter === 'all' && (
-        <Card className="border-red-200 dark:border-red-900/60" data-testid="card-alert-at-risk">
+        <Card className="animate-fade-up border-red-200 dark:border-red-900/60" style={{ animationDelay: "200ms" }} data-testid="card-alert-at-risk">
           <CardContent className="p-4">
             <div className="flex items-center gap-3 flex-wrap">
               <div className="rounded-md p-2 bg-red-50 dark:bg-red-950/40 flex-shrink-0">
@@ -358,7 +358,7 @@ export function ClientHealthDashboard() {
         </Card>
       )}
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="animate-fade-up flex items-center gap-2 flex-wrap" style={{ animationDelay: "250ms" }}>
         <Button
           variant={filter === 'all' ? 'default' : 'outline'}
           size="sm"
@@ -397,7 +397,7 @@ export function ClientHealthDashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style={{ animationDelay: "300ms" }}>
         {filteredClients.map((client) => {
           const daysSinceActivity = getDaysSinceActivity(client.last_activity_date);
           const statusLabel = getScoreLabel(client.health_score);
@@ -406,7 +406,7 @@ export function ClientHealthDashboard() {
             <Card
               key={client.id}
               data-testid={`card-client-health-${client.id}`}
-              className="overflow-visible"
+              className={`overflow-visible hover:shadow-md transition-all cursor-pointer group stat-card-gradient ${client.health_status === 'healthy' ? 'green' : client.health_status === 'needs_attention' ? 'orange' : 'orange'}`}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-3 mb-4">

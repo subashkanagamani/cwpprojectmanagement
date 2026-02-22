@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Mail, Plus, Edit2, Trash2, Copy } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -173,13 +173,10 @@ export function EmailTemplatesPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center gap-4 flex-wrap">
-          <div>
-            <Skeleton className="h-7 w-48 mb-2" />
-            <Skeleton className="h-4 w-72" />
-          </div>
-          <Skeleton className="h-9 w-36" />
+      <div className="space-y-8">
+        <div className="animate-fade-up">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
@@ -200,11 +197,11 @@ export function EmailTemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Email Templates</h1>
-          <p className="text-sm text-muted-foreground">Manage email templates for automated communications</p>
+          <h1 className="text-2xl font-bold text-foreground">Email Templates</h1>
+          <p className="text-muted-foreground mt-1">Manage email templates for automated communications</p>
         </div>
         <Button data-testid="button-create-template" onClick={() => openModal()}>
           <Plus className="h-4 w-4 mr-2" />
@@ -212,75 +209,79 @@ export function EmailTemplatesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[700px] overflow-y-auto">
-        {templates.map((template) => (
-          <Card key={template.id} data-testid={`card-template-${template.id}`}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start gap-4 flex-wrap mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold text-foreground">{template.name}</h3>
+      <div className="animate-fade-up grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ animationDelay: "100ms" }}>
+        {templates.map((template, index) => (
+          <div key={template.id} className="animate-fade-up" style={{ animationDelay: `${(index + 2) * 50}ms` }}>
+            <Card data-testid={`card-template-${template.id}`}>
+              <CardContent className="p-5">
+                <div className="flex justify-between items-start gap-4 flex-wrap mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                        <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground">{template.name}</h3>
+                    </div>
+                    <Badge variant={getTypeBadgeVariant(template.template_type)} data-testid={`badge-type-${template.id}`}>
+                      {template.template_type.replace('_', ' ')}
+                    </Badge>
                   </div>
-                  <Badge variant={getTypeBadgeVariant(template.template_type)} data-testid={`badge-type-${template.id}`}>
-                    {template.template_type.replace('_', ' ')}
-                  </Badge>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDuplicate(template)}
+                      aria-label="Duplicate"
+                      data-testid={`button-duplicate-${template.id}`}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openModal(template)}
+                      aria-label="Edit"
+                      data-testid={`button-edit-${template.id}`}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(template.id)}
+                      aria-label="Delete"
+                      data-testid={`button-delete-${template.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDuplicate(template)}
-                    aria-label="Duplicate"
-                    data-testid={`button-duplicate-${template.id}`}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openModal(template)}
-                    aria-label="Edit"
-                    data-testid={`button-edit-${template.id}`}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(template.id)}
-                    aria-label="Delete"
-                    data-testid={`button-delete-${template.id}`}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
 
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Subject</p>
-                  <p className="text-sm text-foreground bg-muted p-2 rounded-md">{template.subject}</p>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Subject</p>
+                    <p className="text-sm text-foreground bg-muted p-2 rounded-md">{template.subject}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Body Preview</p>
+                    <p className="text-sm text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap line-clamp-3">
+                      {template.body}
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-border text-xs text-muted-foreground">
+                    Created by {template.profiles?.full_name || 'Unknown'}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Body Preview</p>
-                  <p className="text-sm text-muted-foreground bg-muted p-2 rounded-md whitespace-pre-wrap line-clamp-3">
-                    {template.body}
-                  </p>
-                </div>
-                <div className="pt-3 border-t border-border text-xs text-muted-foreground">
-                  Created by {template.profiles?.full_name || 'Unknown'}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         ))}
 
         {templates.length === 0 && (
           <Card className="col-span-2">
-            <CardContent className="text-center py-12">
-              <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No email templates yet</p>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Mail className="h-8 w-8 opacity-40 mb-3" />
+              <p className="text-sm text-muted-foreground">No email templates yet</p>
               <Button
                 variant="ghost"
                 onClick={() => openModal()}

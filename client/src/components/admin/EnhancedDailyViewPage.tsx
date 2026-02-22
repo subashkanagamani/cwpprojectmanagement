@@ -7,6 +7,7 @@ import { Calendar, CheckCircle, Clock, Users, Activity, FileText, Target, Trendi
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DailyActivity {
   id: string;
@@ -291,22 +292,38 @@ export default function EnhancedDailyViewPage() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading daily view...</div>;
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <Skeleton className="h-9 w-48" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i}><CardContent className="p-5"><Skeleton className="h-16 w-full" /></CardContent></Card>
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between animate-fade-up">
         <div>
-          <h1 className="text-3xl font-bold">Daily Overview</h1>
-          <p className="text-muted-foreground">Comprehensive view of all daily activities</p>
+          <h1 className="text-2xl font-bold text-foreground">Daily Overview</h1>
+          <p className="text-muted-foreground mt-1">Comprehensive view of all daily activities</p>
         </div>
         <div className="flex items-center gap-2">
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-3 py-2 border rounded-md"
+            className="px-3 py-2 border rounded-md bg-background text-foreground"
           />
           <Button onClick={fetchAllActivities} size="sm">
             <Activity className="w-4 h-4 mr-2" />
@@ -315,64 +332,76 @@ export default function EnhancedDailyViewPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Activities</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/30">
+                <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.totalActivities}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total Activities</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasks Created</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-emerald-50 dark:bg-emerald-950/30">
+                <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.tasksCreated}</div>
+            <p className="text-xs text-muted-foreground mt-1">Tasks Created</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tasks Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-violet-50 dark:bg-violet-950/30">
+                <CheckCircle className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.completedTasks}</div>
+            <p className="text-xs text-muted-foreground mt-1">Tasks Completed</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reports</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-amber-50 dark:bg-amber-950/30">
+                <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.reportsSubmitted}</div>
+            <p className="text-xs text-muted-foreground mt-1">Reports</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Team</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/30">
+                <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.activeTeamMembers}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active Team</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="rounded-lg p-2 bg-emerald-50 dark:bg-emerald-950/30">
+                <Briefcase className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
             <div className="text-2xl font-bold">{summaryStats.activeClients}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active Clients</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="activities" className="space-y-4">
+      <Tabs defaultValue="activities" className="space-y-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
         <TabsList>
           <TabsTrigger value="activities">All Activities</TabsTrigger>
           <TabsTrigger value="team">Team Status</TabsTrigger>
@@ -387,10 +416,13 @@ export default function EnhancedDailyViewPage() {
             <CardContent>
               <div className="space-y-3">
                 {activities.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No activities for this date</p>
+                  <div className="text-center py-8">
+                    <Activity className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No activities for this date</p>
+                  </div>
                 ) : (
                   activities.map((activity) => (
-                    <div key={activity.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={activity.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -438,10 +470,13 @@ export default function EnhancedDailyViewPage() {
             <CardContent>
               <div className="space-y-3">
                 {teamActivities.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No team activities</p>
+                  <div className="text-center py-8">
+                    <Users className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No team activities</p>
+                  </div>
                 ) : (
                   teamActivities.map((member) => (
-                    <div key={member.id} className="border rounded-lg p-4">
+                    <div key={member.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <Avatar>
@@ -496,10 +531,13 @@ export default function EnhancedDailyViewPage() {
             <CardContent>
               <div className="space-y-3">
                 {clientActivities.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No client activities</p>
+                  <div className="text-center py-8">
+                    <Briefcase className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No client activities</p>
+                  </div>
                 ) : (
                   clientActivities.map((client) => (
-                    <div key={client.id} className="border rounded-lg p-4">
+                    <div key={client.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold">{client.name}</h3>
                         {client.health_score !== undefined && (

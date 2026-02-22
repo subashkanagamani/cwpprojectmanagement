@@ -4,7 +4,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { Plus, Edit2, Trash2, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -204,18 +204,19 @@ export default function BudgetsManagementPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-48" />
         <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Budget Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Budget Management</h1>
           <p className="text-muted-foreground mt-1">Manage client budgets and track spending</p>
         </div>
         <Button onClick={openCreateModal}>
@@ -224,90 +225,92 @@ export default function BudgetsManagementPage() {
         </Button>
       </div>
 
-      {budgets.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <DollarSign className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg">No budgets configured</p>
-            <p className="text-sm text-muted-foreground mt-2">Create your first budget to start tracking</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Monthly Budget</TableHead>
-                  <TableHead>Actual Spending</TableHead>
-                  <TableHead>Utilization</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {budgets.map((budget) => (
-                  <TableRow key={budget.id}>
-                    <TableCell className="font-medium">{budget.clients?.name}</TableCell>
-                    <TableCell>{budget.services?.name || 'All Services'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-semibold">
-                          {budget.monthly_budget.toLocaleString()} {budget.currency}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {budget.actual_spending > budget.monthly_budget ? (
-                          <TrendingUp className="h-4 w-4 text-destructive" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4 text-green-500" />
-                        )}
-                        <span>
-                          {budget.actual_spending.toLocaleString()} {budget.currency}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getUtilizationBadge(budget.budget_utilization)}</TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{format(parseISO(budget.start_date), 'MMM d, yyyy')}</div>
-                        {budget.end_date && (
-                          <div className="text-muted-foreground">
-                            to {format(parseISO(budget.end_date), 'MMM d, yyyy')}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditModal(budget)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(budget.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        {budgets.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <DollarSign className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No budgets configured</p>
+              <p className="text-sm text-muted-foreground mt-1">Create your first budget to start tracking</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Monthly Budget</TableHead>
+                    <TableHead>Actual Spending</TableHead>
+                    <TableHead>Utilization</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+                </TableHeader>
+                <TableBody>
+                  {budgets.map((budget) => (
+                    <TableRow key={budget.id} className="hover:bg-muted/50 transition-colors cursor-pointer group">
+                      <TableCell className="font-medium text-foreground">{budget.clients?.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{budget.services?.name || 'All Services'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-semibold text-foreground">
+                            {budget.monthly_budget.toLocaleString()} {budget.currency}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {budget.actual_spending > budget.monthly_budget ? (
+                            <TrendingUp className="h-4 w-4 text-destructive" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4 text-green-500" />
+                          )}
+                          <span className="text-foreground">
+                            {budget.actual_spending.toLocaleString()} {budget.currency}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getUtilizationBadge(budget.budget_utilization)}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div className="text-foreground">{format(parseISO(budget.start_date), 'MMM d, yyyy')}</div>
+                          {budget.end_date && (
+                            <div className="text-muted-foreground">
+                              to {format(parseISO(budget.end_date), 'MMM d, yyyy')}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditModal(budget)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(budget.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">

@@ -11,7 +11,7 @@ interface Toast {
 }
 
 interface ToastContextType {
-  showToast: (type: ToastType, message: string, duration?: number) => void;
+  showToast: (message: string, type: ToastType, duration?: number) => void;
   success: (message: string, duration?: number) => void;
   error: (message: string, duration?: number) => void;
   warning: (message: string, duration?: number) => void;
@@ -28,7 +28,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (type: ToastType, message: string, duration = 5000) => {
+    (message: string, type: ToastType, duration = 5000) => {
       const id = Math.random().toString(36).substr(2, 9);
       const toast: Toast = { id, type, message, duration };
 
@@ -42,19 +42,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 
   const success = useCallback((message: string, duration?: number) => {
-    showToast('success', message, duration);
+    showToast(message, 'success', duration);
   }, [showToast]);
 
   const error = useCallback((message: string, duration?: number) => {
-    showToast('error', message, duration);
+    showToast(message, 'error', duration);
   }, [showToast]);
 
   const warning = useCallback((message: string, duration?: number) => {
-    showToast('warning', message, duration);
+    showToast(message, 'warning', duration);
   }, [showToast]);
 
   const info = useCallback((message: string, duration?: number) => {
-    showToast('info', message, duration);
+    showToast(message, 'info', duration);
   }, [showToast]);
 
   const getIcon = (type: ToastType) => {

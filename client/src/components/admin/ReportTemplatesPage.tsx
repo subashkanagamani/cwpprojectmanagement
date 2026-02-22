@@ -208,13 +208,10 @@ export default function ReportTemplatesPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center gap-4 flex-wrap">
-          <div>
-            <Skeleton className="h-8 w-56 mb-2" />
-            <Skeleton className="h-4 w-72" />
-          </div>
-          <Skeleton className="h-9 w-36" />
+      <div className="space-y-8">
+        <div className="animate-fade-up">
+          <Skeleton className="h-8 w-56 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -226,11 +223,11 @@ export default function ReportTemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Report Templates</h1>
-          <p className="text-sm text-muted-foreground">Create reusable templates for weekly reports</p>
+          <h1 className="text-2xl font-bold text-foreground">Report Templates</h1>
+          <p className="text-muted-foreground mt-1">Create reusable templates for weekly reports</p>
         </div>
         <Button
           onClick={() => {
@@ -244,78 +241,82 @@ export default function ReportTemplatesPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {templates.map((template) => (
-          <Card key={template.id} data-testid={`card-template-${template.id}`}>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-base">{template.name}</CardTitle>
+      <div className="animate-fade-up grid gap-6 md:grid-cols-2 lg:grid-cols-3" style={{ animationDelay: "100ms" }}>
+        {templates.map((template, index) => (
+          <div key={template.id} className="animate-fade-up" style={{ animationDelay: `${(index + 2) * 50}ms` }}>
+            <Card data-testid={`card-template-${template.id}`}>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-lg p-2 bg-purple-50 dark:bg-purple-950/30">
+                      <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <CardTitle className="text-base">{template.name}</CardTitle>
+                  </div>
+                  <Badge
+                    variant={template.is_active ? 'default' : 'secondary'}
+                    className="no-default-active-elevate"
+                  >
+                    {template.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
                 </div>
-                <Badge
-                  variant={template.is_active ? 'default' : 'secondary'}
-                  className="no-default-active-elevate"
-                >
-                  {template.is_active ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {template.description && (
-                <p className="text-sm text-muted-foreground">{template.description}</p>
-              )}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {template.description && (
+                  <p className="text-sm text-muted-foreground">{template.description}</p>
+                )}
 
-              {template.clients && (
-                <p className="text-sm text-muted-foreground">
-                  Default Client: {template.clients.name}
-                </p>
-              )}
+                {template.clients && (
+                  <p className="text-sm text-muted-foreground">
+                    Default Client: {template.clients.name}
+                  </p>
+                )}
 
-              <div className="text-xs text-muted-foreground">
-                Created by {template.profiles?.full_name || 'Unknown'}
-              </div>
+                <div className="text-xs text-muted-foreground">
+                  Created by {template.profiles?.full_name || 'Unknown'}
+                </div>
 
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handleEdit(template)}
-                  data-testid={`button-edit-template-${template.id}`}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handleDuplicate(template)}
-                  data-testid={`button-duplicate-template-${template.id}`}
-                >
-                  <Copy className="h-4 w-4 mr-1" />
-                  Duplicate
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDelete(template.id)}
-                  data-testid={`button-delete-template-${template.id}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleEdit(template)}
+                    data-testid={`button-edit-template-${template.id}`}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleDuplicate(template)}
+                    data-testid={`button-duplicate-template-${template.id}`}
+                  >
+                    <Copy className="h-4 w-4 mr-1" />
+                    Duplicate
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleDelete(template.id)}
+                    data-testid={`button-delete-template-${template.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 
       {templates.length === 0 && (
-        <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <div className="animate-fade-up flex flex-col items-center justify-center py-12" style={{ animationDelay: "100ms" }}>
+          <FileText className="h-8 w-8 opacity-40 mb-3" />
           <h3 className="text-lg font-medium text-foreground mb-2">No templates yet</h3>
-          <p className="text-muted-foreground mb-4">Create your first report template to get started</p>
+          <p className="text-sm text-muted-foreground mb-4">Create your first report template to get started</p>
           <Button
             onClick={() => {
               resetForm();

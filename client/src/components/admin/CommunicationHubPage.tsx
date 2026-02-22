@@ -4,7 +4,7 @@ import { MessageSquare, Phone, Video, Mail, Plus, Search, Calendar, Users } from
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -188,7 +188,7 @@ export function CommunicationHubPage() {
       case 'email': return 'rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400';
       case 'call': return 'rounded-lg p-2.5 bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400';
       case 'meeting': return 'rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400';
-      case 'message': return 'rounded-lg p-2.5 bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400';
+      case 'message': return 'rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400';
       default: return 'rounded-lg p-2.5 bg-muted text-muted-foreground';
     }
   };
@@ -200,12 +200,16 @@ export function CommunicationHubPage() {
     return matchesSearch && matchesType;
   });
 
+  const emailCount = communications.filter(c => c.type === 'email').length;
+  const callCount = communications.filter(c => c.type === 'call').length;
+  const meetingCount = communications.filter(c => c.type === 'meeting').length;
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Communication Hub</h1>
-          <p className="text-sm text-muted-foreground">Track all client interactions and meetings</p>
+          <h1 className="text-2xl font-bold text-foreground">Communication Hub</h1>
+          <p className="text-muted-foreground mt-1">Track all client interactions and meetings</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button
@@ -226,7 +230,62 @@ export function CommunicationHubPage() {
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-4 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold text-foreground">{communications.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Emails</p>
+                <p className="text-2xl font-bold text-foreground">{emailCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                <Phone className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Calls</p>
+                <p className="text-2xl font-bold text-foreground">{callCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/30">
+                <Video className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Meetings</p>
+                <p className="text-2xl font-bold text-foreground">{meetingCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="animate-fade-up flex gap-2 flex-wrap" style={{ animationDelay: "200ms" }}>
         <Button
           data-testid="tab-timeline"
           variant={activeTab === 'timeline' ? 'default' : 'outline'}
@@ -244,8 +303,8 @@ export function CommunicationHubPage() {
       </div>
 
       {activeTab === 'timeline' && (
-        <>
-          <Card>
+        <div className="animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <Card className="mb-6">
             <CardContent className="p-4">
               <div className="flex gap-4 flex-wrap">
                 <div className="flex-1 relative min-w-[200px]">
@@ -276,138 +335,145 @@ export function CommunicationHubPage() {
           </Card>
 
           <div className="space-y-4 max-h-[600px] overflow-y-auto">
-            {filteredComms.map((comm) => (
-              <Card key={comm.id} data-testid={`card-communication-${comm.id}`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className={getCommTypeIconStyle(comm.type)}>
-                      {getCommTypeIcon(comm.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">{comm.clients?.name}</h3>
-                          {comm.subject && <p className="text-sm text-muted-foreground">{comm.subject}</p>}
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={comm.direction === 'inbound' ? 'secondary' : 'outline'} className="no-default-active-elevate no-default-hover-elevate">
-                            {comm.direction === 'inbound' ? 'Inbound' : 'Outbound'}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {format(new Date(comm.created_at), 'MMM d, yyyy h:mm a')}
-                          </p>
-                        </div>
+            {filteredComms.map((comm, index) => (
+              <div key={comm.id} className="animate-fade-up" style={{ animationDelay: `${index * 30}ms` }}>
+                <Card data-testid={`card-communication-${comm.id}`}>
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div className={getCommTypeIconStyle(comm.type)}>
+                        {getCommTypeIcon(comm.type)}
                       </div>
-                      <p className="text-foreground mb-2">{comm.summary}</p>
-                      {comm.content && (
-                        <details className="text-sm text-muted-foreground mt-2">
-                          <summary className="cursor-pointer text-primary">
-                            View details
-                          </summary>
-                          <p className="mt-2 whitespace-pre-wrap">{comm.content}</p>
-                        </details>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Logged by {comm.profiles?.full_name}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 flex-wrap mb-2">
+                          <div>
+                            <h3 className="text-lg font-semibold text-foreground">{comm.clients?.name}</h3>
+                            {comm.subject && <p className="text-sm text-muted-foreground">{comm.subject}</p>}
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={comm.direction === 'inbound' ? 'secondary' : 'outline'} className="no-default-active-elevate no-default-hover-elevate">
+                              {comm.direction === 'inbound' ? 'Inbound' : 'Outbound'}
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(comm.created_at), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-foreground mb-2">{comm.summary}</p>
+                        {comm.content && (
+                          <details className="text-sm text-muted-foreground mt-2">
+                            <summary className="cursor-pointer text-primary">
+                              View details
+                            </summary>
+                            <p className="mt-2 whitespace-pre-wrap">{comm.content}</p>
+                          </details>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Logged by {comm.profiles?.full_name}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
 
             {filteredComms.length === 0 && (
               <Card>
-                <CardContent className="text-center py-12">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No communications found</h3>
-                  <p className="text-muted-foreground">Log your first client interaction to get started</p>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <MessageSquare className="h-8 w-8 opacity-40 mb-3" />
+                  <p className="text-sm text-muted-foreground">No communications found. Log your first client interaction to get started.</p>
                 </CardContent>
               </Card>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {activeTab === 'meetings' && (
-        <div className="space-y-4 max-h-[600px] overflow-y-auto">
-          {meetings.map((meeting) => (
-            <Card key={meeting.id} data-testid={`card-meeting-${meeting.id}`}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground">{meeting.title}</h3>
-                    <p className="text-sm text-muted-foreground">{meeting.clients?.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">
-                      {format(new Date(meeting.date), 'MMM d, yyyy h:mm a')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">by {meeting.profiles?.full_name}</p>
-                  </div>
-                </div>
-
-                {meeting.attendees && Array.isArray(meeting.attendees) && meeting.attendees.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-foreground mb-2">Attendees:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {meeting.attendees.map((attendee: string, idx: number) => (
-                        <Badge key={idx} variant="secondary" className="no-default-active-elevate no-default-hover-elevate">
-                          {attendee}
-                        </Badge>
-                      ))}
+        <div className="animate-fade-up space-y-4 max-h-[600px] overflow-y-auto" style={{ animationDelay: "300ms" }}>
+          {meetings.map((meeting, index) => (
+            <div key={meeting.id} className="animate-fade-up" style={{ animationDelay: `${index * 50}ms` }}>
+              <Card data-testid={`card-meeting-${meeting.id}`}>
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                        <Video className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-foreground">{meeting.title}</h3>
+                        <p className="text-sm text-muted-foreground">{meeting.clients?.name}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">
+                        {format(new Date(meeting.date), 'MMM d, yyyy h:mm a')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">by {meeting.profiles?.full_name}</p>
                     </div>
                   </div>
-                )}
 
-                {meeting.agenda && (
+                  {meeting.attendees && Array.isArray(meeting.attendees) && meeting.attendees.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-foreground mb-2">Attendees:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {meeting.attendees.map((attendee: string, idx: number) => (
+                          <Badge key={idx} variant="secondary" className="no-default-active-elevate no-default-hover-elevate">
+                            {attendee}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {meeting.agenda && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-foreground mb-1">Agenda:</p>
+                      <p className="text-muted-foreground">{meeting.agenda}</p>
+                    </div>
+                  )}
+
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-foreground mb-1">Agenda:</p>
-                    <p className="text-muted-foreground">{meeting.agenda}</p>
+                    <p className="text-sm font-medium text-foreground mb-1">Notes:</p>
+                    <p className="text-foreground whitespace-pre-wrap">{meeting.notes}</p>
                   </div>
-                )}
 
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-foreground mb-1">Notes:</p>
-                  <p className="text-foreground whitespace-pre-wrap">{meeting.notes}</p>
-                </div>
+                  {meeting.action_items && Array.isArray(meeting.action_items) && meeting.action_items.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm font-medium text-foreground mb-2">Action Items:</p>
+                      <ul className="space-y-2">
+                        {meeting.action_items.map((item: any, idx: number) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <span className="text-primary mt-0.5">
+                              <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-foreground">{item.task}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {item.assignee} - Due: {format(new Date(item.due_date), 'MMM d, yyyy')}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {meeting.action_items && Array.isArray(meeting.action_items) && meeting.action_items.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-foreground mb-2">Action Items:</p>
-                    <ul className="space-y-2">
-                      {meeting.action_items.map((item: any, idx: number) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm">
-                          <span className="text-primary mt-0.5">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          </span>
-                          <div className="flex-1">
-                            <p className="text-foreground">{item.task}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {item.assignee} - Due: {format(new Date(item.due_date), 'MMM d, yyyy')}
-                            </p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {meeting.next_meeting && (
-                  <p className="text-sm text-muted-foreground">
-                    Next meeting: {format(new Date(meeting.next_meeting), 'MMM d, yyyy h:mm a')}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                  {meeting.next_meeting && (
+                    <p className="text-sm text-muted-foreground">
+                      Next meeting: {format(new Date(meeting.next_meeting), 'MMM d, yyyy h:mm a')}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           ))}
 
           {meetings.length === 0 && (
             <Card>
-              <CardContent className="text-center py-12">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No meeting notes yet</h3>
-                <p className="text-muted-foreground">Create your first meeting note to track discussions</p>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Calendar className="h-8 w-8 opacity-40 mb-3" />
+                <p className="text-sm text-muted-foreground">No meeting notes yet. Create your first meeting note to track discussions.</p>
               </CardContent>
             </Card>
           )}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { Client, Service, ClientAssignment, WeeklyReport, ActivityMetrics } from '../../lib/database.types';
+import { Client, Service, ClientAssignment, WeeklyReport } from '../../lib/database.types';
 import { CheckCircle, ArrowLeft, Save, Clock, FileText, Plus, X, Calendar, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../contexts/ToastContext';
@@ -811,12 +811,12 @@ export function EnhancedReportSubmissionPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
           <Skeleton className="h-8 w-64 mb-2" />
           <Skeleton className="h-4 w-80" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-40" />
           ))}
@@ -853,15 +853,17 @@ export function EnhancedReportSubmissionPage() {
     }, {} as Record<string, { client: Client | undefined; services: AssignmentWithDetails[] }>);
 
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Submit Weekly Report</h1>
-            <p className="text-sm text-muted-foreground">Select a client and service to submit your report</p>
+      <div className="space-y-8">
+        <div className="animate-fade-up">
+          <div className="flex justify-between items-center gap-4 flex-wrap">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Submit Weekly Report</h1>
+              <p className="text-muted-foreground mt-1">Select a client and service to submit your report</p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
           {Object.values(groupedAssignments).map((group) => (
             <Card
               key={group.client?.id}
@@ -892,7 +894,8 @@ export function EnhancedReportSubmissionPage() {
           {assignments.length === 0 && (
             <Card className="col-span-full">
               <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">No assignments yet. Contact your admin.</p>
+                <FileText className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No assignments yet. Contact your admin.</p>
               </CardContent>
             </Card>
           )}
@@ -902,20 +905,22 @@ export function EnhancedReportSubmissionPage() {
   }
 
   return (
-    <div className="max-w-6xl space-y-6">
-      <Button
-        variant="ghost"
-        onClick={() => {
-          setSelectedAssignment(null);
-          resetForm();
-        }}
-        data-testid="button-back-to-assignments"
-      >
-        <ArrowLeft className="h-5 w-5 mr-2" />
-        Back to assignments
-      </Button>
+    <div className="max-w-6xl space-y-8">
+      <div className="animate-fade-up">
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setSelectedAssignment(null);
+            resetForm();
+          }}
+          data-testid="button-back-to-assignments"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to assignments
+        </Button>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up" style={{ animationDelay: "100ms" }}>
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>

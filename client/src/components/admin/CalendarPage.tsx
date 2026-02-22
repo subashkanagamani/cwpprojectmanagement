@@ -176,11 +176,11 @@ export function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Calendar</h1>
-          <p className="text-sm text-muted-foreground">Manage deadlines, meetings, and milestones</p>
+          <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
+          <p className="text-muted-foreground mt-1">Manage deadlines, meetings, and milestones</p>
         </div>
         <Button onClick={() => openModal()} data-testid="button-add-event">
           <Plus className="h-4 w-4 mr-2" />
@@ -188,7 +188,7 @@ export function CalendarPage() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <CardContent className="p-6">
           <div className="flex justify-between items-center gap-4 flex-wrap mb-6">
             <Button

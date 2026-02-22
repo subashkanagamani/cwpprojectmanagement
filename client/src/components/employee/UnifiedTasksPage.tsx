@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Clock, Target, Calendar, AlertCircle, Plus } from "lucide-react";
+import { CheckCircle, Clock, Target, AlertCircle, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Modal } from "../Modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -273,123 +274,148 @@ export default function UnifiedTasksPage() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading tasks...</div>;
+    return (
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28" />
+          ))}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">My Tasks</h1>
-          <p className="text-muted-foreground">Manage all your assigned and daily tasks</p>
-        </div>
-        <Button onClick={() => { resetForm(); setShowModal(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Task
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.inProgress}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completed}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="all" className="space-y-4">
+    <div className="space-y-8">
+      <div className="animate-fade-up">
         <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="all">All Tasks</TabsTrigger>
-            <TabsTrigger value="today">Today ({groupedTasks.today.length})</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming ({groupedTasks.upcoming.length})</TabsTrigger>
-            <TabsTrigger value="overdue">Overdue ({groupedTasks.overdue.length})</TabsTrigger>
-          </TabsList>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="blocked">Blocked</SelectItem>
-            </SelectContent>
-          </Select>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">My Tasks</h1>
+            <p className="text-muted-foreground mt-1">Manage all your assigned and daily tasks</p>
+          </div>
+          <Button onClick={() => { resetForm(); setShowModal(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Task
+          </Button>
         </div>
+      </div>
 
-        <TabsContent value="all" className="space-y-4">
-          <TaskList
-            tasks={tasks}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            getStatusBadge={getStatusBadge}
-            getPriorityBadge={getPriorityBadge}
-          />
-        </TabsContent>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">Total Tasks</p>
+            <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-orange-50 dark:bg-orange-950/30">
+                <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">Pending</p>
+            <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/30">
+                <AlertCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">In Progress</p>
+            <p className="text-2xl font-bold text-foreground">{stats.inProgress}</p>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-lg bg-green-50 dark:bg-green-950/30">
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-1">Completed</p>
+            <p className="text-2xl font-bold text-foreground">{stats.completed}</p>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="today" className="space-y-4">
-          <TaskList
-            tasks={groupedTasks.today}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            getStatusBadge={getStatusBadge}
-            getPriorityBadge={getPriorityBadge}
-          />
-        </TabsContent>
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Tabs defaultValue="all" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="all">All Tasks</TabsTrigger>
+              <TabsTrigger value="today">Today ({groupedTasks.today.length})</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming ({groupedTasks.upcoming.length})</TabsTrigger>
+              <TabsTrigger value="overdue">Overdue ({groupedTasks.overdue.length})</TabsTrigger>
+            </TabsList>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="blocked">Blocked</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <TabsContent value="upcoming" className="space-y-4">
-          <TaskList
-            tasks={groupedTasks.upcoming}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            getStatusBadge={getStatusBadge}
-            getPriorityBadge={getPriorityBadge}
-          />
-        </TabsContent>
+          <TabsContent value="all" className="space-y-4">
+            <TaskList
+              tasks={tasks}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              getStatusBadge={getStatusBadge}
+              getPriorityBadge={getPriorityBadge}
+            />
+          </TabsContent>
 
-        <TabsContent value="overdue" className="space-y-4">
-          <TaskList
-            tasks={groupedTasks.overdue}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
-            getStatusBadge={getStatusBadge}
-            getPriorityBadge={getPriorityBadge}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="today" className="space-y-4">
+            <TaskList
+              tasks={groupedTasks.today}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              getStatusBadge={getStatusBadge}
+              getPriorityBadge={getPriorityBadge}
+            />
+          </TabsContent>
+
+          <TabsContent value="upcoming" className="space-y-4">
+            <TaskList
+              tasks={groupedTasks.upcoming}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              getStatusBadge={getStatusBadge}
+              getPriorityBadge={getPriorityBadge}
+            />
+          </TabsContent>
+
+          <TabsContent value="overdue" className="space-y-4">
+            <TaskList
+              tasks={groupedTasks.overdue}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              getStatusBadge={getStatusBadge}
+              getPriorityBadge={getPriorityBadge}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <Modal
         isOpen={showModal}
@@ -514,24 +540,27 @@ function TaskList({ tasks, onStatusChange, onEdit, getStatusBadge, getPriorityBa
     return (
       <Card>
         <CardContent className="py-12">
-          <p className="text-center text-muted-foreground">No tasks found</p>
+          <div className="text-center">
+            <Target className="h-8 w-8 opacity-40 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No tasks found</p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {tasks.map((task) => (
         <div
           key={task.id}
-          className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+          className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border"
           onClick={() => onEdit(task)}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="font-semibold">{task.title}</h3>
+                <h3 className="font-semibold text-foreground">{task.title}</h3>
                 <Badge variant={getStatusBadge(task.status).variant}>
                   {getStatusBadge(task.status).label}
                 </Badge>

@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Layout, Plus, Edit2, Trash2, Eye, EyeOff, MoveVertical, Loader2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -236,7 +236,7 @@ export function DashboardCustomizationPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <Skeleton className="h-8 w-56 mb-2" />
@@ -255,44 +255,53 @@ export function DashboardCustomizationPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard Customization</h1>
-          <p className="text-sm text-muted-foreground">Customize your dashboard widgets and layout</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard Customization</h1>
+          <p className="text-muted-foreground mt-1">Customize your dashboard widgets and layout</p>
         </div>
         <Button
           onClick={() => openModal()}
           data-testid="button-add-widget"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Widget
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">Note:</strong> Customize which widgets appear on your dashboard. Use the visibility toggle to show/hide widgets,
-            and use the arrows to reorder them.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex gap-3">
+              <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
+                <Layout className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Note:</strong> Customize which widgets appear on your dashboard. Use the visibility toggle to show/hide widgets,
+                and use the arrows to reorder them.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
         {widgets.map((widget, index) => (
           <Card
             key={widget.id}
             className={widget.is_visible ? '' : 'opacity-50'}
             data-testid={`card-widget-${widget.id}`}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-5">
               <div className="flex justify-between items-start gap-4 flex-wrap">
                 <div className="flex items-start gap-4 flex-1">
-                  <Layout className="h-6 w-6 text-muted-foreground mt-1" />
+                  <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg mt-0.5">
+                    <Layout className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3 flex-wrap mb-2">
-                      <h3 className="text-lg font-semibold text-foreground" data-testid={`text-widget-name-${widget.id}`}>
+                      <h3 className="text-base font-semibold text-foreground" data-testid={`text-widget-name-${widget.id}`}>
                         {getWidgetLabel(widget.widget_type)}
                       </h3>
                       <Badge variant={getSizeVariant(widget.size)} className="no-default-active-elevate">
@@ -369,8 +378,8 @@ export function DashboardCustomizationPage() {
         {widgets.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
-              <Layout className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No widgets configured yet</p>
+              <Layout className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground mb-4">No widgets configured yet</p>
               <Button
                 variant="link"
                 onClick={() => openModal()}

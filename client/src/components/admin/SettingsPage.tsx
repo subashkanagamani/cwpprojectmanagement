@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -94,7 +94,7 @@ export function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-72" />
@@ -119,165 +119,173 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-            <Settings className="w-6 h-6" />
-            Settings
-          </h1>
-          <p className="text-sm text-muted-foreground">Manage your account preferences and notifications</p>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
+            <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          Settings
+        </h1>
+        <p className="text-muted-foreground mt-1">Manage your account preferences and notifications</p>
       </div>
 
-      <Card>
-        <CardContent className="p-6 space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-              <User className="w-5 h-5" />
-              Profile Information
-            </h2>
-            <div className="space-y-4 pl-7">
-              <div>
-                <Label htmlFor="full-name">Full Name</Label>
-                <Input
-                  id="full-name"
-                  data-testid="input-full-name"
-                  type="text"
-                  value={profile?.full_name || ''}
-                  disabled
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  data-testid="input-email"
-                  type="email"
-                  value={profile?.email || ''}
-                  disabled
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-              <Globe className="w-5 h-5" />
-              Regional Settings
-            </h2>
-            <div className="space-y-4 pl-7">
-              <div>
-                <Label>Language</Label>
-                <Select
-                  value={preferences.language}
-                  onValueChange={(value) => setPreferences({ ...preferences, language: value })}
-                >
-                  <SelectTrigger data-testid="select-language" className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                    <SelectItem value="de">German</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  Timezone
-                </Label>
-                <Select
-                  value={preferences.timezone}
-                  onValueChange={(value) => setPreferences({ ...preferences, timezone: value })}
-                >
-                  <SelectTrigger data-testid="select-timezone" className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="UTC">UTC</SelectItem>
-                    <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                    <SelectItem value="America/Chicago">Central Time</SelectItem>
-                    <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                    <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
-                    <SelectItem value="Europe/London">London</SelectItem>
-                    <SelectItem value="Europe/Paris">Paris</SelectItem>
-                    <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Date Format</Label>
-                <Select
-                  value={preferences.date_format}
-                  onValueChange={(value) => setPreferences({ ...preferences, date_format: value })}
-                >
-                  <SelectTrigger data-testid="select-date-format" className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-              <Bell className="w-5 h-5" />
-              Notification Preferences
-            </h2>
-            <div className="space-y-4 pl-7">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <Label className="text-sm font-medium text-foreground">Email Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Receive notifications via email</p>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardContent className="p-6 space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <div className="p-1.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <Switch
-                  data-testid="switch-email-notifications"
-                  checked={preferences.email_notifications}
-                  onCheckedChange={(checked) => setPreferences({ ...preferences, email_notifications: checked })}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+                Profile Information
+              </h2>
+              <div className="space-y-4 pl-7">
                 <div>
-                  <Label className="text-sm font-medium text-foreground">Push Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Receive push notifications in the app</p>
+                  <Label htmlFor="full-name">Full Name</Label>
+                  <Input
+                    id="full-name"
+                    data-testid="input-full-name"
+                    type="text"
+                    value={profile?.full_name || ''}
+                    disabled
+                    className="mt-1"
+                  />
                 </div>
-                <Switch
-                  data-testid="switch-push-notifications"
-                  checked={preferences.push_notifications}
-                  onCheckedChange={(checked) => setPreferences({ ...preferences, push_notifications: checked })}
-                />
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    data-testid="input-email"
+                    type="email"
+                    value={profile?.email || ''}
+                    disabled
+                    className="mt-1"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <Separator />
+            <Separator />
 
-          <div className="flex justify-end gap-4 flex-wrap">
-            <Button
-              data-testid="button-save-settings"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              <Save className="w-4 h-4" />
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <div className="p-1.5 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                  <Globe className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                Regional Settings
+              </h2>
+              <div className="space-y-4 pl-7">
+                <div>
+                  <Label>Language</Label>
+                  <Select
+                    value={preferences.language}
+                    onValueChange={(value) => setPreferences({ ...preferences, language: value })}
+                  >
+                    <SelectTrigger data-testid="select-language" className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    Timezone
+                  </Label>
+                  <Select
+                    value={preferences.timezone}
+                    onValueChange={(value) => setPreferences({ ...preferences, timezone: value })}
+                  >
+                    <SelectTrigger data-testid="select-timezone" className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                      <SelectItem value="America/Chicago">Central Time</SelectItem>
+                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="Europe/London">London</SelectItem>
+                      <SelectItem value="Europe/Paris">Paris</SelectItem>
+                      <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Date Format</Label>
+                  <Select
+                    value={preferences.date_format}
+                    onValueChange={(value) => setPreferences({ ...preferences, date_format: value })}
+                  >
+                    <SelectTrigger data-testid="select-date-format" className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
+                <div className="p-1.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
+                  <Bell className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                </div>
+                Notification Preferences
+              </h2>
+              <div className="space-y-4 pl-7">
+                <div className="flex items-center justify-between gap-4 flex-wrap p-3.5 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">Email Notifications</Label>
+                    <p className="text-xs text-muted-foreground">Receive notifications via email</p>
+                  </div>
+                  <Switch
+                    data-testid="switch-email-notifications"
+                    checked={preferences.email_notifications}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, email_notifications: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-4 flex-wrap p-3.5 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">Push Notifications</Label>
+                    <p className="text-xs text-muted-foreground">Receive push notifications in the app</p>
+                  </div>
+                  <Switch
+                    data-testid="switch-push-notifications"
+                    checked={preferences.push_notifications}
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, push_notifications: checked })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex justify-end gap-4 flex-wrap">
+              <Button
+                data-testid="button-save-settings"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -181,12 +181,12 @@ export function TeamProgressTracker() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <Skeleton className="h-8 w-64 mb-2" />
           <Skeleton className="h-4 w-96" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-28" />
           ))}
@@ -201,9 +201,9 @@ export function TeamProgressTracker() {
       <div className="max-w-7xl mx-auto">
         <Card>
           <CardContent className="p-12 text-center">
-            <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <Users className="h-8 w-8 opacity-40 mx-auto mb-4" />
             <p className="text-foreground text-lg font-medium">Not an Account Manager</p>
-            <p className="text-muted-foreground text-sm mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               You are not set as an account manager for any clients. Contact your admin if this is incorrect.
             </p>
           </CardContent>
@@ -213,11 +213,11 @@ export function TeamProgressTracker() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-start gap-4 flex-wrap">
+    <div className="max-w-7xl mx-auto space-y-8">
+      <div className="flex justify-between items-start gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Team Progress Tracker</h1>
-          <p className="text-sm text-muted-foreground">Monitor your team's daily progress on managed clients</p>
+          <h1 className="text-2xl font-bold text-foreground">Team Progress Tracker</h1>
+          <p className="text-muted-foreground mt-1">Monitor your team's daily progress on managed clients</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={() => navigateDate(-1)}>
@@ -233,51 +233,51 @@ export function TeamProgressTracker() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient green">
           <CardContent className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm text-muted-foreground font-medium mb-1">Submitted</p>
-                <p className="text-2xl font-semibold tracking-tight text-foreground">{totalSubmitted}</p>
+                <p className="text-2xl font-bold text-foreground">{totalSubmitted}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/40">
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
                 <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card-gradient blue">
           <CardContent className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm text-muted-foreground font-medium mb-1">In Progress</p>
-                <p className="text-2xl font-semibold tracking-tight text-foreground">{totalInProgress}</p>
+                <p className="text-2xl font-bold text-foreground">{totalInProgress}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
                 <PlayCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card-gradient orange">
           <CardContent className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm text-muted-foreground font-medium mb-1">Not Started</p>
-                <p className="text-2xl font-semibold tracking-tight text-foreground">{totalNotStarted}</p>
+                <p className="text-2xl font-bold text-foreground">{totalNotStarted}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-muted">
-                <CircleIcon className="h-5 w-5 text-muted-foreground" />
+              <div className="rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/30">
+                <CircleIcon className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
         {clientsArray.map((clientGroup) => {
           const employeesArray = Object.values(clientGroup.employees) as any[];
           const isExpanded = expandedClients.has(clientGroup.client_id);
@@ -316,7 +316,7 @@ export function TeamProgressTracker() {
                         <div key={emp.employee_id} className="border rounded-lg bg-card">
                           <div className="p-4 border-b bg-muted/20">
                             <div className="flex items-center gap-3">
-                              <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/40">
+                              <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/30">
                                 <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               </div>
                               <div>
@@ -331,7 +331,7 @@ export function TeamProgressTracker() {
                           <div className="p-4">
                             <div className="space-y-3">
                               {emp.tasks.map((task: TeamProgress) => (
-                                <div key={task.assignment_id} className="border rounded-lg p-3 bg-muted/5">
+                                <div key={task.assignment_id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border">
                                   <div className="flex items-start justify-between gap-4 mb-2">
                                     <div className="flex items-center gap-2 flex-1">
                                       <Briefcase className="h-4 w-4 text-muted-foreground flex-shrink-0" />

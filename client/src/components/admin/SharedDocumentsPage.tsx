@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Trash2, Plus, Search, Loader2, Upload } from 'lucide-react';
+import { Download, Trash2, Plus, Search, Loader2, Upload, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FileUpload } from '../FileUpload';
 
 interface SharedDocument {
@@ -215,10 +216,10 @@ export default function SharedDocumentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Shared Documents</h1>
+          <h1 className="text-2xl font-bold text-foreground">Shared Documents</h1>
           <p className="text-muted-foreground mt-1">Manage client documents and files</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)}>
@@ -227,92 +228,143 @@ export default function SharedDocumentsPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search documents..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
-              />
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-3 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Documents</p>
+                <p className="text-2xl font-bold text-foreground">{documents.length}</p>
+              </div>
             </div>
-            <Select value={selectedClient} onValueChange={setSelectedClient}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All clients" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All clients</SelectItem>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <Download className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Downloadable</p>
+                <p className="text-2xl font-bold text-foreground">{documents.filter(d => d.permissions === 'download').length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                <Upload className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">View Only</p>
+                <p className="text-2xl font-bold text-foreground">{documents.filter(d => d.permissions === 'view').length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search documents..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 max-w-md"
+                />
+              </div>
+              <Select value={selectedClient} onValueChange={setSelectedClient}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All clients" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All clients</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : filteredDocuments.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No documents found
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Upload className="h-5 w-5 text-muted-foreground" />
-                        <span className="font-medium">{doc.file_name}</span>
+              </div>
+            ) : filteredDocuments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <FileText className="h-8 w-8 opacity-40 mb-3" />
+                <p className="text-sm text-muted-foreground">No documents found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredDocuments.map((doc, index) => (
+                  <div
+                    key={doc.id}
+                    className="animate-fade-up flex items-center justify-between p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                    style={{ animationDelay: `${index * 30}ms` }}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/30">
+                          <Upload className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{doc.file_name}</span>
+                        </div>
+                        <Badge variant="outline">{doc.clients.name}</Badge>
+                        <Badge variant={doc.permissions === 'download' ? 'default' : 'secondary'}>
+                          {doc.permissions}
+                        </Badge>
                       </div>
-                      <Badge variant="outline">{doc.clients.name}</Badge>
-                      <Badge variant={doc.permissions === 'download' ? 'default' : 'secondary'}>
-                        {doc.permissions}
-                      </Badge>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground ml-11">
+                        <span>{formatFileSize(doc.file_size)}</span>
+                        <span>Uploaded by {doc.profiles.full_name}</span>
+                        <span>{new Date(doc.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {doc.description && (
+                        <p className="mt-2 text-sm text-muted-foreground ml-11">{doc.description}</p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span>{formatFileSize(doc.file_size)}</span>
-                      <span>Uploaded by {doc.profiles.full_name}</span>
-                      <span>{new Date(doc.created_at).toLocaleDateString()}</span>
-                    </div>
-                    {doc.description && (
-                      <p className="mt-2 text-sm text-muted-foreground">{doc.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {doc.permissions === 'download' && (
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {doc.permissions === 'download' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(doc)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownload(doc)}
+                        onClick={() => handleDelete(doc)}
                       >
-                        <Download className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(doc)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-2xl">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { TrendingUp, TrendingDown, DollarSign, Target, Award, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, Award, Users, ArrowUp, ArrowDown, BarChart3 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -194,35 +194,44 @@ export function EnhancedAnalyticsPage() {
     }
   };
 
+  const metricConfigs: Record<string, { gradient: string; bg: string; color: string }> = {
+    'total-revenue': { gradient: 'blue', bg: 'bg-blue-50 dark:bg-blue-950/30', color: 'text-blue-600 dark:text-blue-400' },
+    'active-projects': { gradient: 'green', bg: 'bg-emerald-50 dark:bg-emerald-950/30', color: 'text-emerald-600 dark:text-emerald-400' },
+    'client-satisfaction': { gradient: 'orange', bg: 'bg-amber-50 dark:bg-amber-950/30', color: 'text-amber-600 dark:text-amber-400' },
+    'reports-submitted': { gradient: 'purple', bg: 'bg-violet-50 dark:bg-violet-950/30', color: 'text-violet-600 dark:text-violet-400' },
+  };
+
   const MetricCard = ({ title, value, change, icon: Icon, prefix = '', suffix = '' }: any) => {
     const isPositive = change >= 0;
+    const key = title.toLowerCase().replace(/\s+/g, '-');
+    const config = metricConfigs[key] || metricConfigs['total-revenue'];
     return (
-      <Card data-testid={`card-metric-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-        <CardContent className="p-6">
+      <Card className={`stat-card-gradient ${config.gradient}`} data-testid={`card-metric-${key}`}>
+        <CardContent className="p-5">
           <div className="flex items-center justify-between gap-4 mb-4">
             <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-            <div className="rounded-lg p-2.5 bg-primary/10">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className={`rounded-lg p-2.5 ${config.bg}`}>
+              <Icon className={`h-5 w-5 ${config.color}`} />
             </div>
           </div>
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-2xl font-semibold tracking-tight text-foreground" data-testid={`text-metric-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+              <p className="text-2xl font-semibold tracking-tight text-foreground" data-testid={`text-metric-${key}`}>
                 {prefix}
                 {typeof value === 'number' ? value.toFixed(value % 1 === 0 ? 0 : 1) : value}
                 {suffix}
               </p>
-              <div
-                className={`flex items-center gap-1 mt-2 text-sm ${
-                  isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                }`}
-              >
-                {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                <span className="font-medium">
+              <div className="flex items-center gap-1.5 mt-2">
+                <span
+                  className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                    isPositive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400'
+                  }`}
+                >
+                  {isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                   {isPositive ? '+' : ''}
                   {change.toFixed(1)}%
                 </span>
-                <span className="text-muted-foreground">vs previous period</span>
+                <span className="text-xs text-muted-foreground">vs previous</span>
               </div>
             </div>
           </div>
@@ -233,28 +242,36 @@ export function EnhancedAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Skeleton className="h-36" />
-          <Skeleton className="h-36" />
-          <Skeleton className="h-36" />
-          <Skeleton className="h-36" />
+      <div className="space-y-8" data-testid="analytics-loading">
+        <div>
+          <Skeleton className="h-9 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-5">
+                <Skeleton className="h-4 w-24 mb-4" />
+                <Skeleton className="h-9 w-20 mb-2" />
+                <Skeleton className="h-3 w-16" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
+          <Card><CardContent className="p-6"><Skeleton className="h-[300px]" /></CardContent></Card>
+          <Card><CardContent className="p-6"><Skeleton className="h-[300px]" /></CardContent></Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Analytics</h1>
-          <p className="text-sm text-muted-foreground">Track performance and insights</p>
+          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+          <p className="text-muted-foreground mt-1">Track performance and insights</p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]" data-testid="select-time-range">
@@ -268,7 +285,7 @@ export function EnhancedAnalyticsPage() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
         <MetricCard
           title="Total Revenue"
           value={metrics.totalRevenue.current}
@@ -297,10 +314,10 @@ export function EnhancedAnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up" style={{ animationDelay: "200ms" }}>
         <Card>
           <CardHeader>
-            <CardTitle>Weekly Trend</CardTitle>
+            <CardTitle className="text-base">Weekly Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -319,7 +336,7 @@ export function EnhancedAnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Client Health Status</CardTitle>
+            <CardTitle className="text-base">Client Health Status</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -345,10 +362,10 @@ export function EnhancedAnalyticsPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
         <Card>
           <CardHeader>
-            <CardTitle>Service Performance</CardTitle>
+            <CardTitle className="text-base">Service Performance</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -367,12 +384,12 @@ export function EnhancedAnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Performers</CardTitle>
+            <CardTitle className="text-base">Top Performers</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-1">
               {topPerformers.map((performer, index) => (
-                <div key={index} className="flex items-center justify-between gap-4 p-4 bg-muted rounded-md flex-wrap" data-testid={`row-performer-${index}`}>
+                <div key={index} className="flex items-center justify-between gap-4 p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group flex-wrap" data-testid={`row-performer-${index}`}>
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm">
                       {index + 1}
@@ -389,7 +406,10 @@ export function EnhancedAnalyticsPage() {
                 </div>
               ))}
               {topPerformers.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">No performance data yet</p>
+                <div className="flex flex-col items-center justify-center py-8">
+                  <Award className="h-8 w-8 opacity-40 mb-2" />
+                  <p className="text-sm text-muted-foreground">No performance data yet</p>
+                </div>
               )}
             </div>
           </CardContent>

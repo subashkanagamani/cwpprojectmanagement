@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Calendar, User, Briefcase, Download, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -222,21 +223,41 @@ ${idx + 1}. ${r.title}
   };
 
   if (loading) {
-    return <div className="p-6">Loading consolidated reports...</div>;
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-72" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-[300px]" />
+          <Skeleton className="h-10 w-[180px]" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between animate-fade-up">
         <div>
-          <h1 className="text-3xl font-bold">Consolidated Client Reports</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold text-foreground">Consolidated Client Reports</h1>
+          <p className="text-muted-foreground mt-1">
             View all employee reports grouped by client
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
         <div className="flex-1">
           <Select value={selectedClient} onValueChange={setSelectedClient}>
             <SelectTrigger className="w-[300px]">
@@ -265,43 +286,56 @@ ${idx + 1}. ${r.title}
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{consolidatedReports.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {consolidatedReports.reduce((sum, cr) => sum + cr.totalReports, 0)}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Active Clients</p>
+                <p className="text-2xl font-bold text-foreground">{consolidatedReports.length}</p>
+              </div>
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Date Range</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dateRange} days</div>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Total Reports</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {consolidatedReports.reduce((sum, cr) => sum + cr.totalReports, 0)}
+                </p>
+              </div>
+              <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
+                <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Date Range</p>
+                <p className="text-2xl font-bold text-foreground">{dateRange} days</p>
+              </div>
+              <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
         {consolidatedReports.length === 0 ? (
           <Card>
-            <CardContent className="py-12">
-              <p className="text-center text-muted-foreground">
+            <CardContent className="py-12 text-center">
+              <FileText className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
                 No reports found for the selected period
               </p>
             </CardContent>
@@ -338,7 +372,7 @@ ${idx + 1}. ${r.title}
                   {clientReport.reports.map((report) => (
                     <div
                       key={report.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                      className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">

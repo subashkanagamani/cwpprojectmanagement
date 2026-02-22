@@ -244,13 +244,13 @@ export function EmployeeWorkloadDashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-workload-title">
+          <h1 className="text-2xl font-bold text-foreground" data-testid="text-workload-title">
             Team Workload
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1">
             Overview of each team member's client assignments and service responsibilities
           </p>
         </div>
@@ -260,10 +260,10 @@ export function EmployeeWorkloadDashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card data-testid="card-stat-team">
-          <CardContent className="flex items-center gap-3 p-6">
-            <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue" data-testid="card-stat-team">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
               <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
@@ -272,9 +272,9 @@ export function EmployeeWorkloadDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-high">
-          <CardContent className="flex items-center gap-3 p-6">
-            <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/40">
+        <Card className="stat-card-gradient orange" data-testid="card-stat-high">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/30">
               <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
             </div>
             <div>
@@ -283,9 +283,9 @@ export function EmployeeWorkloadDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-assignments">
-          <CardContent className="flex items-center gap-3 p-6">
-            <div className="rounded-lg p-2.5 bg-violet-50 dark:bg-violet-950/40">
+        <Card className="stat-card-gradient purple" data-testid="card-stat-assignments">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-lg p-2.5 bg-violet-50 dark:bg-violet-950/30">
               <Layers className="h-4 w-4 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
@@ -294,9 +294,9 @@ export function EmployeeWorkloadDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-clients">
-          <CardContent className="flex items-center gap-3 p-6">
-            <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
+        <Card className="stat-card-gradient green" data-testid="card-stat-clients">
+          <CardContent className="flex items-center gap-3 p-5">
+            <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
               <Briefcase className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
@@ -307,7 +307,7 @@ export function EmployeeWorkloadDashboard() {
         </Card>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap animate-fade-up" style={{ animationDelay: "200ms" }}>
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -353,12 +353,12 @@ export function EmployeeWorkloadDashboard() {
       {sortedAndFiltered.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <UserCheck className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">No team members found matching your search.</p>
+            <UserCheck className="h-8 w-8 opacity-40 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No team members found matching your search.</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "300ms" }}>
           {sortedAndFiltered.map((emp, index) => {
             const level = getWorkloadLevel(emp.total_services, maxServices);
             const isExpanded = expandedCards.has(emp.id);
@@ -479,7 +479,7 @@ export function EmployeeWorkloadDashboard() {
         </div>
       )}
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "400ms" }}>
         <CardContent className="p-6">
           <div className="flex items-center gap-2 flex-wrap mb-3">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />

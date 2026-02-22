@@ -319,25 +319,25 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
   }
 
   return (
-    <div className="space-y-6" data-testid="client-detail-page">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+    <div className="space-y-8" data-testid="client-detail-page">
+      <div className="animate-fade-up flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
           <Button variant="ghost" size="icon" onClick={onBack} data-testid="button-back-to-clients">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight" data-testid="text-client-name">
+              <h1 className="text-2xl font-bold text-foreground" data-testid="text-client-name">
                 {client.name}
               </h1>
-              <Badge variant={getStatusVariant(client.status)} data-testid="badge-client-status">
+              <Badge variant={getStatusVariant(client.status)} className="text-[11px]" data-testid="badge-client-status">
                 {client.status}
               </Badge>
-              <Badge variant={getHealthVariant(client.health_status)} data-testid="badge-client-health">
+              <Badge variant={getHealthVariant(client.health_status)} className="text-[11px]" data-testid="badge-client-health">
                 {getHealthLabel(client.health_status)}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-muted-foreground mt-1">
               {client.industry || 'No industry'} {client.start_date && `\u00B7 Since ${format(new Date(client.start_date), 'MMM yyyy')}`}
             </p>
           </div>
@@ -354,8 +354,8 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card data-testid="card-stat-team-size">
+      <div className="animate-fade-up grid grid-cols-2 lg:grid-cols-4 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue" data-testid="card-stat-team-size">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
@@ -363,13 +363,13 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
                 <p className="text-3xl font-semibold mt-1 tracking-tight">{assignments.length}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{uniqueServices.size} service{uniqueServices.size !== 1 ? 's' : ''}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
                 <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-reports">
+        <Card className="stat-card-gradient green" data-testid="card-stat-reports">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
@@ -377,13 +377,13 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
                 <p className="text-3xl font-semibold mt-1 tracking-tight">{reports.length}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{onTrackCount} on track</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
-                <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-on-track">
+        <Card className="stat-card-gradient purple" data-testid="card-stat-on-track">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
@@ -395,13 +395,13 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
                   </p>
                 )}
               </div>
-              <div className="rounded-lg p-2.5 bg-amber-50 dark:bg-amber-950/40">
-                <CheckCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="rounded-lg p-2.5 bg-purple-50 dark:bg-purple-950/30">
+                <CheckCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card data-testid="card-stat-attention">
+        <Card className="stat-card-gradient orange" data-testid="card-stat-attention">
           <CardContent className="p-5">
             <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
@@ -409,8 +409,8 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
                 <p className="text-3xl font-semibold mt-1 tracking-tight">{needsAttentionCount}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">delayed or flagged</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/40">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <div className="rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/30">
+                <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </CardContent>
@@ -418,7 +418,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
       </div>
 
       {(client.contact_name || client.contact_email || client.contact_phone || client.website) && (
-        <Card>
+        <Card className="animate-fade-up" style={{ animationDelay: "200ms" }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-[15px] font-semibold">Contact Information</CardTitle>
           </CardHeader>
@@ -474,7 +474,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
       )}
 
       {client.notes && (
-        <Card>
+        <Card className="animate-fade-up" style={{ animationDelay: "250ms" }}>
           <CardHeader className="pb-3">
             <CardTitle className="text-[15px] font-semibold">Notes</CardTitle>
           </CardHeader>
@@ -484,7 +484,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         </Card>
       )}
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <CardTitle className="text-[15px] font-semibold">Assigned Team</CardTitle>
@@ -494,7 +494,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         <CardContent>
           {assignments.length === 0 ? (
             <div className="text-center py-8">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <Users className="h-8 w-8 opacity-40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground mb-3">No employees assigned yet</p>
               <Button variant="outline" size="sm" onClick={() => setShowAssignModal(true)} data-testid="button-assign-first">
                 <Plus className="h-4 w-4 mr-2" />
@@ -502,19 +502,18 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {assignments.map((assignment, idx) => {
-                const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {assignments.map((assignment) => {
                 return (
                   <div
                     key={assignment.id}
-                    className="rounded-md border p-4 space-y-3"
+                    className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border"
                     data-testid={`card-assignment-${assignment.id}`}
                   >
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="h-9 w-9 shrink-0">
-                          <AvatarFallback className={`${color} text-white text-xs font-medium`}>
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
                             {assignment.employee ? getInitials(assignment.employee.full_name) : '??'}
                           </AvatarFallback>
                         </Avatar>
@@ -536,7 +535,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Badge variant="secondary" data-testid={`badge-service-${assignment.id}`}>
+                    <Badge variant="secondary" className="text-[11px]" data-testid={`badge-service-${assignment.id}`}>
                       {assignment.service?.name || 'No service'}
                     </Badge>
                   </div>
@@ -547,7 +546,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "400ms" }}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <CardTitle className="text-[15px] font-semibold">Work Reports</CardTitle>
@@ -557,7 +556,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
         <CardContent className="p-0">
           {reports.length === 0 ? (
             <div className="text-center py-8 px-4">
-              <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <FileText className="h-8 w-8 opacity-40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">No reports submitted yet</p>
             </div>
           ) : (

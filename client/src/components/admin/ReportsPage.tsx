@@ -359,11 +359,11 @@ export function ReportsPage() {
   }
 
   return (
-    <div data-testid="reports-page" className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div data-testid="reports-page" className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-page-title">Reports Overview</h1>
-          <p className="text-sm text-muted-foreground" data-testid="text-page-description">View and download client weekly reports</p>
+          <h1 className="text-2xl font-bold text-foreground" data-testid="text-page-title">Reports Overview</h1>
+          <p className="text-muted-foreground mt-1" data-testid="text-page-description">View and download client weekly reports</p>
         </div>
         <Button
           data-testid="button-export-reports"
@@ -397,7 +397,7 @@ export function ReportsPage() {
         }
       />
 
-      <Card data-testid="reports-filter-card">
+      <Card data-testid="reports-filter-card" className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <CardContent className="pt-4 pb-4">
           <div className="flex items-center gap-4 flex-wrap">
             <Filter className="h-5 w-5 text-muted-foreground" />
@@ -432,7 +432,7 @@ export function ReportsPage() {
         </CardContent>
       </Card>
 
-      <ScrollArea>
+      <ScrollArea className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <div className="space-y-6">
           {Object.values(groupedReports).map(({ client, week, reports: clientReports }) => {
             if (!client) return null;
@@ -458,8 +458,7 @@ export function ReportsPage() {
                 <CardContent className="pt-4">
                   <div className="space-y-4">
                     {clientReports.map((report) => (
-                      <Card key={report.id} className="bg-muted/50" data-testid={`card-report-${report.id}`}>
-                        <CardContent className="pt-4 pb-4">
+                      <div key={report.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group" data-testid={`card-report-${report.id}`}>
                           <div className="flex justify-between items-start gap-4 flex-wrap mb-3">
                             <div>
                               <h4 className="font-semibold text-foreground" data-testid={`text-service-name-${report.id}`}>
@@ -479,8 +478,7 @@ export function ReportsPage() {
                           <p className="text-sm text-muted-foreground" data-testid={`text-work-summary-${report.id}`}>
                             {report.work_summary}
                           </p>
-                        </CardContent>
-                      </Card>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
@@ -491,8 +489,8 @@ export function ReportsPage() {
           {Object.keys(groupedReports).length === 0 && (
             <Card data-testid="reports-empty-state">
               <CardContent className="py-12 text-center">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground" data-testid="text-empty-message">No reports found for the selected filters.</p>
+                <FileText className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground" data-testid="text-empty-message">No reports found for the selected filters.</p>
               </CardContent>
             </Card>
           )}

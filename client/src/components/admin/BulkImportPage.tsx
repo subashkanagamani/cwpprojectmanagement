@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 
 type ImportType = 'clients' | 'employees' | 'time_entries' | 'goals';
 
@@ -348,151 +346,163 @@ export function BulkImportPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Bulk Import</h1>
-          <p className="text-sm text-muted-foreground">Import multiple records from CSV files</p>
-        </div>
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground">Bulk Import</h1>
+        <p className="text-muted-foreground mt-1">Import multiple records from CSV files</p>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-2">
-            <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium mb-1 text-foreground">Important Notes:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Download the template CSV file for the correct format</li>
-                <li>Ensure all required fields are filled</li>
-                <li>For employees, accounts will be created automatically</li>
-                <li>For time entries and goals, referenced entities must exist</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Import Configuration</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="import-type">
-              Import Type <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              value={importType}
-              onValueChange={(value) => setImportType(value as ImportType)}
-            >
-              <SelectTrigger data-testid="select-import-type">
-                <SelectValue placeholder="Select import type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="clients">Clients</SelectItem>
-                <SelectItem value="employees">Employees</SelectItem>
-                <SelectItem value="time_entries">Time Entries</SelectItem>
-                <SelectItem value="goals">Goals</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              onClick={downloadTemplate}
-              data-testid="button-download-template"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download CSV Template
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Download a template with the correct headers and example data
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label>
-              Select CSV File <span className="text-destructive">*</span>
-            </Label>
-            <div className="border-2 border-dashed border-border rounded-md p-8 text-center">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                className="hidden"
-                id="csv-upload"
-                data-testid="input-csv-upload"
-              />
-              <label htmlFor="csv-upload" className="cursor-pointer">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                {file ? (
-                  <p className="text-sm text-foreground font-medium" data-testid="text-file-name">{file.name}</p>
-                ) : (
-                  <>
-                    <p className="text-sm text-foreground font-medium">Click to upload CSV file</p>
-                    <p className="text-xs text-muted-foreground mt-1">or drag and drop</p>
-                  </>
-                )}
-              </label>
-            </div>
-          </div>
-
-          <Button
-            onClick={handleImport}
-            disabled={!file || importing}
-            className="w-full"
-            data-testid="button-import-data"
-          >
-            {importing ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4 mr-2" />
-            )}
-            {importing ? 'Importing...' : 'Import Data'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {result && (
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <Card>
-          <CardHeader>
-            <CardTitle>Import Results</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 rounded-md">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-              <div>
-                <p className="font-medium text-foreground" data-testid="text-import-success">Successfully Imported</p>
-                <p className="text-sm text-muted-foreground">{result.success} records</p>
+          <CardContent className="p-5">
+            <div className="flex gap-3">
+              <div className="p-2 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p className="font-medium mb-1 text-foreground">Important Notes:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Download the template CSV file for the correct format</li>
+                  <li>Ensure all required fields are filled</li>
+                  <li>For employees, accounts will be created automatically</li>
+                  <li>For time entries and goals, referenced entities must exist</li>
+                </ul>
               </div>
             </div>
-
-            {result.failed > 0 && (
-              <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-md">
-                <div className="flex items-center gap-3 mb-3">
-                  <X className="h-6 w-6 text-destructive" />
-                  <div>
-                    <p className="font-medium text-foreground" data-testid="text-import-failed">Failed to Import</p>
-                    <p className="text-sm text-muted-foreground">{result.failed} records</p>
-                  </div>
-                </div>
-
-                {result.errors.length > 0 && (
-                  <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
-                    <p className="text-sm font-medium text-foreground">Errors:</p>
-                    {result.errors.map((error, index) => (
-                      <div key={index} className="text-xs text-destructive bg-destructive/10 p-2 rounded-md" data-testid={`text-error-${index}`}>
-                        Row {error.row}: {error.error}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Import Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="import-type">
+                Import Type <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={importType}
+                onValueChange={(value) => setImportType(value as ImportType)}
+              >
+                <SelectTrigger data-testid="select-import-type">
+                  <SelectValue placeholder="Select import type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clients">Clients</SelectItem>
+                  <SelectItem value="employees">Employees</SelectItem>
+                  <SelectItem value="time_entries">Time Entries</SelectItem>
+                  <SelectItem value="goals">Goals</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                onClick={downloadTemplate}
+                data-testid="button-download-template"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download CSV Template
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Download a template with the correct headers and example data
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Select CSV File <span className="text-destructive">*</span>
+              </Label>
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted/50 transition-colors">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="csv-upload"
+                  data-testid="input-csv-upload"
+                />
+                <label htmlFor="csv-upload" className="cursor-pointer">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg w-fit mx-auto mb-4">
+                    <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  {file ? (
+                    <p className="text-sm text-foreground font-medium" data-testid="text-file-name">{file.name}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-foreground font-medium">Click to upload CSV file</p>
+                      <p className="text-xs text-muted-foreground mt-1">or drag and drop</p>
+                    </>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleImport}
+              disabled={!file || importing}
+              className="w-full"
+              data-testid="button-import-data"
+            >
+              {importing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              {importing ? 'Importing...' : 'Import Data'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {result && (
+        <div className="animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Import Results</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground" data-testid="text-import-success">Successfully Imported</p>
+                  <p className="text-sm text-muted-foreground">{result.success} records</p>
+                </div>
+              </div>
+
+              {result.failed > 0 && (
+                <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <X className="h-5 w-5 text-destructive" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground" data-testid="text-import-failed">Failed to Import</p>
+                      <p className="text-sm text-muted-foreground">{result.failed} records</p>
+                    </div>
+                  </div>
+
+                  {result.errors.length > 0 && (
+                    <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+                      <p className="text-sm font-medium text-foreground">Errors:</p>
+                      {result.errors.map((error, index) => (
+                        <div key={index} className="text-xs text-destructive bg-destructive/10 p-2.5 rounded-lg" data-testid={`text-error-${index}`}>
+                          Row {error.row}: {error.error}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

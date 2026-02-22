@@ -172,11 +172,11 @@ export function PerformanceBenchmarksPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Performance Benchmarks</h1>
-          <p className="text-sm text-muted-foreground">Industry benchmarks for performance comparison</p>
+          <h1 className="text-2xl font-bold text-foreground">Performance Benchmarks</h1>
+          <p className="text-muted-foreground mt-1">Industry benchmarks for performance comparison</p>
         </div>
         <Button data-testid="button-add-benchmark" onClick={() => openModal()}>
           <Plus className="h-4 w-4" />
@@ -184,122 +184,126 @@ export function PerformanceBenchmarksPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <Input
-                data-testid="input-search-benchmarks"
-                type="text"
-                placeholder="Search benchmarks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Input
+                  data-testid="input-search-benchmarks"
+                  type="text"
+                  placeholder="Search benchmarks..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={filterIndustry} onValueChange={setFilterIndustry}>
+                <SelectTrigger data-testid="select-filter-industry" className="w-[200px]">
+                  <SelectValue placeholder="All Industries" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Industries</SelectItem>
+                  {industries.map((industry) => (
+                    <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={filterIndustry} onValueChange={setFilterIndustry}>
-              <SelectTrigger data-testid="select-filter-industry" className="w-[200px]">
-                <SelectValue placeholder="All Industries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Industries</SelectItem>
-                {industries.map((industry) => (
-                  <SelectItem key={industry} value={industry}>{industry}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      {loading ? (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-          </CardContent>
-        </Card>
-      ) : filteredBenchmarks.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg text-muted-foreground">No benchmarks found</p>
-            <p className="text-sm text-muted-foreground mt-1">Add your first industry benchmark to start tracking</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Metric</TableHead>
-                  <TableHead>Average</TableHead>
-                  <TableHead>Top Quartile</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Period</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredBenchmarks.map((benchmark) => (
-                  <TableRow key={benchmark.id} data-testid={`row-benchmark-${benchmark.id}`}>
-                    <TableCell className="font-medium text-foreground">
-                      {benchmark.industry}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {benchmark.service?.name}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {benchmark.metric_name}
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground">
-                      {benchmark.average_value}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {benchmark.top_quartile_value || '-'}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {benchmark.data_source || '-'}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(benchmark.period).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          data-testid={`button-edit-benchmark-${benchmark.id}`}
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => openModal(benchmark)}
-                          aria-label="Edit benchmark"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          data-testid={`button-delete-benchmark-${benchmark.id}`}
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleDelete(benchmark.id)}
-                          aria-label="Delete benchmark"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        {loading ? (
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </CardContent>
+          </Card>
+        ) : filteredBenchmarks.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <TrendingUp className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No benchmarks found</p>
+              <p className="text-sm text-muted-foreground mt-1">Add your first industry benchmark to start tracking</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Industry</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Metric</TableHead>
+                    <TableHead>Average</TableHead>
+                    <TableHead>Top Quartile</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+                </TableHeader>
+                <TableBody>
+                  {filteredBenchmarks.map((benchmark) => (
+                    <TableRow key={benchmark.id} data-testid={`row-benchmark-${benchmark.id}`} className="hover:bg-muted/50 transition-colors cursor-pointer group">
+                      <TableCell className="font-medium text-foreground">
+                        {benchmark.industry}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {benchmark.service?.name}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {benchmark.metric_name}
+                      </TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        {benchmark.average_value}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {benchmark.top_quartile_value || '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {benchmark.data_source || '-'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(benchmark.period).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            data-testid={`button-edit-benchmark-${benchmark.id}`}
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => openModal(benchmark)}
+                            aria-label="Edit benchmark"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            data-testid={`button-delete-benchmark-${benchmark.id}`}
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => handleDelete(benchmark.id)}
+                            aria-label="Delete benchmark"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

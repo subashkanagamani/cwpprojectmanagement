@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInDays } from 'date-fns';
 
 interface TimeOffRequest {
@@ -210,12 +211,16 @@ export function TimeOffPage() {
     return days;
   };
 
+  const pendingCount = requests.length;
+  const approvedCount = myRequests.filter(r => r.status === 'approved').length;
+  const totalRequests = myRequests.length;
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Time Off</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold text-foreground">Time Off</h1>
+          <p className="text-muted-foreground mt-1">
             {isAdmin ? 'Manage team time off requests' : 'Request and manage your time off'}
           </p>
         </div>
@@ -225,178 +230,220 @@ export function TimeOffPage() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full max-w-md ${isAdmin ? 'grid-cols-3' : 'grid-cols-1'}`}>
-          {isAdmin && (
-            <TabsTrigger value="pending" className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Pending
-              {requests.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                  {requests.length}
-                </span>
-              )}
-            </TabsTrigger>
-          )}
-          {isAdmin && (
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              All Requests
-            </TabsTrigger>
-          )}
-          <TabsTrigger value="my-requests" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            My Requests
-          </TabsTrigger>
-        </TabsList>
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-3 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
+                <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Requests</p>
+                <p className="text-2xl font-bold text-foreground">{totalRequests}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-orange-50 dark:bg-orange-950/30">
+                <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-2xl font-bold text-foreground">{approvedCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-        {isAdmin && (
-          <TabsContent value="pending" className="mt-6">
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className={`grid w-full max-w-md ${isAdmin ? 'grid-cols-3' : 'grid-cols-1'}`}>
+            {isAdmin && (
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Pending
+                {requests.length > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                    {requests.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="all" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                All Requests
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="my-requests" className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              My Requests
+            </TabsTrigger>
+          </TabsList>
+
+          {isAdmin && (
+            <TabsContent value="pending" className="mt-6">
+              <div className="space-y-4">
+                {requests.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Clock className="h-8 w-8 opacity-40 mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        No pending requests. All time off requests have been reviewed.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  requests.map((request, index) => (
+                    <div key={request.id} className="animate-fade-up" style={{ animationDelay: `${index * 50}ms` }}>
+                      <Card>
+                        <CardContent className="p-5">
+                          <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="font-semibold text-lg text-foreground">
+                                  {request.employee?.full_name}
+                                </div>
+                                {getStatusBadge(request.status)}
+                                <Badge variant="outline">{getTypeLabel(request.type)}</Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground mb-3">
+                                {request.employee?.role} • {request.employee?.email}
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 mb-3">
+                                <div>
+                                  <div className="text-xs text-muted-foreground mb-1">Start Date</div>
+                                  <div className="text-sm font-medium">
+                                    {format(new Date(request.start_date), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-xs text-muted-foreground mb-1">End Date</div>
+                                  <div className="text-sm font-medium">
+                                    {format(new Date(request.end_date), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Duration: {getDaysCount(request)} day{getDaysCount(request) > 1 ? 's' : ''}
+                              </div>
+                              {request.reason && (
+                                <div className="mt-3 p-3 bg-muted rounded-md">
+                                  <div className="text-xs text-muted-foreground mb-1">Reason</div>
+                                  <p className="text-sm">{request.reason}</p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-green-200 text-green-700 hover:bg-green-50"
+                                onClick={() => handleApprove(request.id)}
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-200 text-red-700 hover:bg-red-50"
+                                onClick={() => handleReject(request.id)}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          )}
+
+          <TabsContent value="my-requests" className="mt-6">
             <div className="space-y-4">
-              {requests.length === 0 ? (
+              {myRequests.length === 0 ? (
                 <Card>
-                  <CardContent className="text-center py-12">
-                    <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">
-                      No pending requests
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      All time off requests have been reviewed
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Calendar className="h-8 w-8 opacity-40 mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      No time off requests. Click "Request Time Off" to submit your first request.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
-                requests.map((request) => (
-                  <Card key={request.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4 flex-wrap">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="font-semibold text-lg text-foreground">
-                              {request.employee?.full_name}
+                myRequests.map((request, index) => (
+                  <div key={request.id} className="animate-fade-up" style={{ animationDelay: `${index * 50}ms` }}>
+                    <Card>
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between gap-4 flex-wrap">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              {getStatusBadge(request.status)}
+                              <Badge variant="outline">{getTypeLabel(request.type)}</Badge>
                             </div>
-                            {getStatusBadge(request.status)}
-                            <Badge variant="outline">{getTypeLabel(request.type)}</Badge>
-                          </div>
-                          <div className="text-sm text-muted-foreground mb-3">
-                            {request.employee?.role} • {request.employee?.email}
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 mb-3">
-                            <div>
-                              <div className="text-xs text-muted-foreground mb-1">Start Date</div>
-                              <div className="text-sm font-medium">
-                                {format(new Date(request.start_date), 'MMM d, yyyy')}
+                            <div className="grid grid-cols-2 gap-4 mb-3">
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">Start Date</div>
+                                <div className="text-sm font-medium">
+                                  {format(new Date(request.start_date), 'MMM d, yyyy')}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-xs text-muted-foreground mb-1">End Date</div>
+                                <div className="text-sm font-medium">
+                                  {format(new Date(request.end_date), 'MMM d, yyyy')}
+                                </div>
                               </div>
                             </div>
-                            <div>
-                              <div className="text-xs text-muted-foreground mb-1">End Date</div>
-                              <div className="text-sm font-medium">
-                                {format(new Date(request.end_date), 'MMM d, yyyy')}
+                            <div className="text-sm text-muted-foreground mb-2">
+                              Duration: {getDaysCount(request)} day{getDaysCount(request) > 1 ? 's' : ''}
+                            </div>
+                            {request.reason && (
+                              <div className="p-3 bg-muted rounded-md mb-2">
+                                <div className="text-xs text-muted-foreground mb-1">Reason</div>
+                                <p className="text-sm">{request.reason}</p>
                               </div>
-                            </div>
+                            )}
+                            {request.status !== 'pending' && request.approver && (
+                              <div className="text-xs text-muted-foreground">
+                                {request.status === 'approved' ? 'Approved' : 'Rejected'} by{' '}
+                                {request.approver.full_name} on{' '}
+                                {format(new Date(request.approved_at!), 'MMM d, yyyy')}
+                              </div>
+                            )}
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            Duration: {getDaysCount(request)} day{getDaysCount(request) > 1 ? 's' : ''}
-                          </div>
-                          {request.reason && (
-                            <div className="mt-3 p-3 bg-muted rounded-md">
-                              <div className="text-xs text-muted-foreground mb-1">Reason</div>
-                              <p className="text-sm">{request.reason}</p>
-                            </div>
-                          )}
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-green-200 text-green-700 hover:bg-green-50"
-                            onClick={() => handleApprove(request.id)}
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-red-200 text-red-700 hover:bg-red-50"
-                            onClick={() => handleReject(request.id)}
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
                 ))
               )}
             </div>
           </TabsContent>
-        )}
-
-        <TabsContent value="my-requests" className="mt-6">
-          <div className="space-y-4">
-            {myRequests.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    No time off requests
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Click "Request Time Off" to submit your first request
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              myRequests.map((request) => (
-                <Card key={request.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-4 flex-wrap">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          {getStatusBadge(request.status)}
-                          <Badge variant="outline">{getTypeLabel(request.type)}</Badge>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mb-3">
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Start Date</div>
-                            <div className="text-sm font-medium">
-                              {format(new Date(request.start_date), 'MMM d, yyyy')}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">End Date</div>
-                            <div className="text-sm font-medium">
-                              {format(new Date(request.end_date), 'MMM d, yyyy')}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-sm text-muted-foreground mb-2">
-                          Duration: {getDaysCount(request)} day{getDaysCount(request) > 1 ? 's' : ''}
-                        </div>
-                        {request.reason && (
-                          <div className="p-3 bg-muted rounded-md mb-2">
-                            <div className="text-xs text-muted-foreground mb-1">Reason</div>
-                            <p className="text-sm">{request.reason}</p>
-                          </div>
-                        )}
-                        {request.status !== 'pending' && request.approver && (
-                          <div className="text-xs text-muted-foreground">
-                            {request.status === 'approved' ? 'Approved' : 'Rejected'} by{' '}
-                            {request.approver.full_name} on{' '}
-                            {format(new Date(request.approved_at!), 'MMM d, yyyy')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-md">

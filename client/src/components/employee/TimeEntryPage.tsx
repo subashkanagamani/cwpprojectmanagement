@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Save, Send } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TimeEntry {
   id?: string;
@@ -143,35 +143,50 @@ export default function TimeEntryPage() {
     return entries.reduce((sum, e) => sum + (e.hours || 0), 0);
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+  if (loading) {
+    return (
+      <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Time Entry</h1>
-          <p className="text-muted-foreground mt-1">Track your time for the week</p>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => setWeekStart(addDays(weekStart, -7))}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-center">
-            <div className="font-semibold">
-              {format(weekStart, 'MMM d')} - {format(addDays(weekStart, 6), 'MMM d, yyyy')}
-            </div>
-            <div className="text-sm text-muted-foreground">{getTotalHours()} hours total</div>
+        <Skeleton className="h-64" />
+        <Skeleton className="h-40" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Time Entry</h1>
+            <p className="text-muted-foreground mt-1">Track your time for the week</p>
           </div>
-          <Button variant="outline" size="icon" onClick={() => setWeekStart(addDays(weekStart, 7))}>
-            <ChevronRight className="h-4 w-4" />
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => setWeekStart(addDays(weekStart, -7))}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="text-center">
+              <div className="font-semibold text-foreground">
+                {format(weekStart, 'MMM d')} - {format(addDays(weekStart, 6), 'MMM d, yyyy')}
+              </div>
+              <div className="text-sm text-muted-foreground">{getTotalHours()} hours total</div>
+            </div>
+            <Button variant="outline" size="icon" onClick={() => setWeekStart(addDays(weekStart, 7))}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button onClick={handleSave} disabled={saving}>
+            <Save className="h-4 w-4 mr-2" />
+            Save Time
           </Button>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          Save Time
-        </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
+      <Card className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <CardContent className="p-5">
           <div className="space-y-4">
             {[0, 1, 2].map((rowIndex) => (
               <div key={rowIndex} className="grid grid-cols-10 gap-4 items-start">
@@ -239,13 +254,13 @@ export default function TimeEntryPage() {
 
             <div className="pt-4 border-t">
               <div className="grid grid-cols-10 gap-4 font-semibold">
-                <div className="col-span-4">Daily Totals:</div>
+                <div className="col-span-4 text-foreground">Daily Totals:</div>
                 {weekDays.map((day, dayIndex) => {
                   const dayTotal = entries
                     .filter(e => isSameDay(parseISO(e.date), day))
                     .reduce((sum, e) => sum + (e.hours || 0), 0);
                   return (
-                    <div key={dayIndex} className="text-center">
+                    <div key={dayIndex} className="text-center text-foreground">
                       {dayTotal > 0 ? dayTotal.toFixed(1) : '-'}
                     </div>
                   );
@@ -256,7 +271,7 @@ export default function TimeEntryPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <CardHeader>
           <CardTitle>Notes & Details</CardTitle>
         </CardHeader>

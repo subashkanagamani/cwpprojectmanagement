@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Client, Profile, ClientAssignment } from '../../lib/database.types';
-import { Users, CheckSquare, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import { Client, Profile } from '../../lib/database.types';
+import { Users, CheckSquare, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -172,7 +172,7 @@ export function BulkOperationsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-72" />
@@ -187,44 +187,44 @@ export function BulkOperationsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Bulk Operations</h1>
-          <p className="text-sm text-muted-foreground">Perform actions on multiple items at once</p>
-        </div>
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground">Bulk Operations</h1>
+        <p className="text-muted-foreground mt-1">Perform actions on multiple items at once</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Operation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={operation}
-            onValueChange={(value) => setOperation(value)}
-          >
-            <SelectTrigger data-testid="select-operation">
-              <SelectValue placeholder="Choose an operation..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Client Operations</SelectLabel>
-                <SelectItem value="activate_clients">Activate Selected Clients</SelectItem>
-                <SelectItem value="pause_clients">Pause Selected Clients</SelectItem>
-                <SelectItem value="archive_clients">Archive Selected Clients</SelectItem>
-                <SelectItem value="delete_clients">Delete Selected Clients</SelectItem>
-              </SelectGroup>
-              <SelectGroup>
-                <SelectLabel>Employee Operations</SelectLabel>
-                <SelectItem value="deactivate_employees">Deactivate Selected Employees</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Operation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Select
+              value={operation}
+              onValueChange={(value) => setOperation(value)}
+            >
+              <SelectTrigger data-testid="select-operation">
+                <SelectValue placeholder="Choose an operation..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Client Operations</SelectLabel>
+                  <SelectItem value="activate_clients">Activate Selected Clients</SelectItem>
+                  <SelectItem value="pause_clients">Pause Selected Clients</SelectItem>
+                  <SelectItem value="archive_clients">Archive Selected Clients</SelectItem>
+                  <SelectItem value="delete_clients">Delete Selected Clients</SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Employee Operations</SelectLabel>
+                  <SelectItem value="deactivate_employees">Deactivate Selected Employees</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-up" style={{ animationDelay: "200ms" }}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap space-y-0">
             <CardTitle>Clients</CardTitle>
@@ -239,11 +239,11 @@ export function BulkOperationsPage() {
             </Button>
           </CardHeader>
           <CardContent className="max-h-96 overflow-y-auto">
-            <div className="space-y-2">
+            <div className="space-y-1">
               {clients.map((client) => (
                 <label
                   key={client.id}
-                  className="flex items-center gap-3 p-3 hover-elevate rounded-md cursor-pointer"
+                  className="flex items-center gap-3 p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                   data-testid={`checkbox-client-${client.id}`}
                 >
                   <Checkbox
@@ -259,11 +259,14 @@ export function BulkOperationsPage() {
                 </label>
               ))}
               {clients.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">No clients available</p>
+                <div className="text-center py-8">
+                  <Users className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No clients available</p>
+                </div>
               )}
             </div>
           </CardContent>
-          <div className="p-4 border-t border-border bg-muted/50">
+          <div className="p-4 border-t border-border bg-muted/30 rounded-b-lg">
             <p className="text-sm text-muted-foreground" data-testid="text-clients-selected">
               {selectedClients.size} of {clients.length} selected
             </p>
@@ -284,11 +287,11 @@ export function BulkOperationsPage() {
             </Button>
           </CardHeader>
           <CardContent className="max-h-96 overflow-y-auto">
-            <div className="space-y-2">
+            <div className="space-y-1">
               {employees.map((employee) => (
                 <label
                   key={employee.id}
-                  className="flex items-center gap-3 p-3 hover-elevate rounded-md cursor-pointer"
+                  className="flex items-center gap-3 p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                   data-testid={`checkbox-employee-${employee.id}`}
                 >
                   <Checkbox
@@ -302,11 +305,14 @@ export function BulkOperationsPage() {
                 </label>
               ))}
               {employees.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">No employees available</p>
+                <div className="text-center py-8">
+                  <Users className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No employees available</p>
+                </div>
               )}
             </div>
           </CardContent>
-          <div className="p-4 border-t border-border bg-muted/50">
+          <div className="p-4 border-t border-border bg-muted/30 rounded-b-lg">
             <p className="text-sm text-muted-foreground" data-testid="text-employees-selected">
               {selectedEmployees.size} of {employees.length} selected
             </p>
@@ -314,7 +320,7 @@ export function BulkOperationsPage() {
         </Card>
       </div>
 
-      <div className="flex justify-end gap-3 flex-wrap">
+      <div className="flex justify-end gap-3 flex-wrap animate-fade-up" style={{ animationDelay: "300ms" }}>
         <Button
           variant="outline"
           onClick={() => {
@@ -337,18 +343,22 @@ export function BulkOperationsPage() {
       </div>
 
       {operation && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Warning:</span> This operation will affect{' '}
-                {operation.includes('client') ? selectedClients.size : selectedEmployees.size} items.
-                Please review your selection carefully.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="animate-fade-up" style={{ animationDelay: "400ms" }}>
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex gap-3">
+                <div className="p-2 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Warning:</span> This operation will affect{' '}
+                  {operation.includes('client') ? selectedClients.size : selectedEmployees.size} items.
+                  Please review your selection carefully.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

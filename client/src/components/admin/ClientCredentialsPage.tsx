@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -158,7 +157,6 @@ export function ClientCredentialsPage() {
       newVisible.delete(credentialId);
     } else {
       newVisible.add(credentialId);
-      // Decrypt if not already decrypted
       if (!decryptedPasswords.has(credentialId)) {
         const decrypted = await decryptPassword(credential.encrypted_password);
         setDecryptedPasswords((prev) => new Map(prev).set(credentialId, decrypted));
@@ -318,7 +316,7 @@ export function ClientCredentialsPage() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <Skeleton className="h-8 w-48 mb-2" />
@@ -337,11 +335,11 @@ export function ClientCredentialsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="max-w-7xl mx-auto space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Client Credentials</h1>
-          <p className="text-sm text-muted-foreground">Securely manage client access credentials</p>
+          <h1 className="text-2xl font-bold text-foreground">Client Credentials</h1>
+          <p className="text-muted-foreground mt-1">Securely manage client access credentials</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <Button
@@ -349,7 +347,7 @@ export function ClientCredentialsPage() {
             onClick={loadData}
             data-testid="button-refresh-credentials"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           {canEdit && (
@@ -357,57 +355,63 @@ export function ClientCredentialsPage() {
               onClick={() => setShowAddModal(true)}
               data-testid="button-add-credential"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-2" />
               Add Credential
             </Button>
           )}
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-foreground text-sm mb-1">Security Notice</p>
-              <p className="text-sm text-muted-foreground">
-                You can only view credentials for clients you are assigned to. Access is automatically
-                granted based on your client assignments and revoked when you are removed from a project.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {groupedCredentials.length === 0 ? (
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <Card>
-          <CardContent className="p-12 text-center">
-            <Key className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No credentials found</h3>
-            <p className="text-muted-foreground mb-6">
-              {canEdit
-                ? 'Get started by adding your first client credential.'
-                : 'No credentials available for your assigned clients.'}
-            </p>
-            {canEdit && (
-              <Button
-                onClick={() => setShowAddModal(true)}
-                data-testid="button-add-first-credential"
-              >
-                <Plus className="h-5 w-5" />
-                Add First Credential
-              </Button>
-            )}
+          <CardContent className="p-5">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-sm mb-1">Security Notice</p>
+                <p className="text-sm text-muted-foreground">
+                  You can only view credentials for clients you are assigned to. Access is automatically
+                  granted based on your client assignments and revoked when you are removed from a project.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+      </div>
+
+      {groupedCredentials.length === 0 ? (
+        <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Key className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No credentials found</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                {canEdit
+                  ? 'Get started by adding your first client credential.'
+                  : 'No credentials available for your assigned clients.'}
+              </p>
+              {canEdit && (
+                <Button
+                  onClick={() => setShowAddModal(true)}
+                  data-testid="button-add-first-credential"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add First Credential
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-up" style={{ animationDelay: "200ms" }}>
           {groupedCredentials.map((group) => (
             <Card key={group.clientId} data-testid={`card-client-group-${group.clientId}`}>
-              <CardHeader className="bg-muted/50 border-b border-border pb-4">
+              <CardHeader className="bg-muted/30 border-b border-border pb-4">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <div className="p-2 bg-muted rounded-md">
-                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                  <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded-lg">
+                    <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <CardTitle className="text-lg" data-testid={`text-client-name-${group.clientId}`}>{group.clientName}</CardTitle>
@@ -423,11 +427,11 @@ export function ClientCredentialsPage() {
                     const decryptedPassword = decryptedPasswords.get(credential.id) || '';
 
                     return (
-                      <div key={credential.id} className="p-6" data-testid={`card-credential-${credential.id}`}>
+                      <div key={credential.id} className="p-5 hover:bg-muted/30 transition-colors" data-testid={`card-credential-${credential.id}`}>
                         <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-muted rounded-md">
-                              <Key className="h-5 w-5 text-muted-foreground" />
+                            <div className="p-2 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
+                              <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                             </div>
                             <div>
                               <h3 className="font-semibold text-foreground text-lg" data-testid={`text-tool-name-${credential.id}`}>
@@ -469,7 +473,7 @@ export function ClientCredentialsPage() {
                             <Label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">
                               Username
                             </Label>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-md">
+                            <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/50 rounded-lg">
                               <span className="font-mono text-sm text-foreground select-none" data-testid={`text-username-${credential.id}`}>
                                 {credential.username}
                               </span>
@@ -481,7 +485,7 @@ export function ClientCredentialsPage() {
                               Password
                             </Label>
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-muted rounded-md">
+                              <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-muted/50 rounded-lg">
                                 <Lock className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-mono text-sm text-foreground select-none flex-1" data-testid={`text-password-${credential.id}`}>
                                   {isPasswordVisible ? decryptedPassword : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}
@@ -507,7 +511,7 @@ export function ClientCredentialsPage() {
                               <Label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">
                                 Notes
                               </Label>
-                              <div className="px-4 py-2 bg-muted rounded-md border border-border">
+                              <div className="px-4 py-2.5 bg-muted/50 rounded-lg border border-border">
                                 <p className="text-sm text-foreground" data-testid={`text-notes-${credential.id}`}>{credential.notes}</p>
                               </div>
                             </div>
@@ -623,7 +627,7 @@ export function ClientCredentialsPage() {
               disabled={submitting}
               data-testid="button-submit-add"
             >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Add Credential
             </Button>
           </DialogFooter>
@@ -699,7 +703,7 @@ export function ClientCredentialsPage() {
               disabled={submitting}
               data-testid="button-submit-edit"
             >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Update Credential
             </Button>
           </DialogFooter>
@@ -737,7 +741,7 @@ export function ClientCredentialsPage() {
               disabled={submitting}
               data-testid="button-confirm-delete"
             >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete
             </Button>
           </DialogFooter>

@@ -536,6 +536,574 @@ export interface Database {
           updated_at?: string
         }
       }
+      client_budgets: {
+        Row: {
+          id: string
+          client_id: string
+          service_id: string
+          monthly_budget: number
+          actual_spending: number
+          budget_utilization: number
+          currency: string
+          start_date: string
+          end_date: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          service_id: string
+          monthly_budget: number
+          actual_spending?: number
+          budget_utilization?: number
+          currency?: string
+          start_date: string
+          end_date?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          service_id?: string
+          monthly_budget?: number
+          actual_spending?: number
+          budget_utilization?: number
+          currency?: string
+          start_date?: string
+          end_date?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      performance_benchmarks: {
+        Row: {
+          id: string
+          service_id: string
+          industry: string
+          metric_name: string
+          benchmark_value: number
+          period: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          service_id: string
+          industry: string
+          metric_name: string
+          benchmark_value: number
+          period?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          service_id?: string
+          industry?: string
+          metric_name?: string
+          benchmark_value?: number
+          period?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      custom_metrics: {
+        Row: {
+          id: string
+          service_id: string
+          metric_name: string
+          metric_type: string
+          description: string | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          service_id: string
+          metric_name: string
+          metric_type: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          service_id?: string
+          metric_name?: string
+          metric_type?: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      time_entries: {
+        Row: {
+          id: string
+          employee_id: string
+          client_id: string
+          service_id: string | null
+          hours: number
+          date: string
+          description: string | null
+          is_billable: boolean
+          hourly_rate: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          client_id: string
+          service_id?: string | null
+          hours: number
+          date: string
+          description?: string | null
+          is_billable?: boolean
+          hourly_rate?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          client_id?: string
+          service_id?: string | null
+          hours?: number
+          date?: string
+          description?: string | null
+          is_billable?: boolean
+          hourly_rate?: number | null
+          created_at?: string
+        }
+      }
+      timesheets: {
+        Row: {
+          id: string
+          employee_id: string
+          week_start: string
+          status: string
+          total_hours: number
+          submitted_at: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          week_start: string
+          status?: string
+          total_hours?: number
+          submitted_at?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          week_start?: string
+          status?: string
+          total_hours?: number
+          submitted_at?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      goals: {
+        Row: {
+          id: string
+          client_id: string
+          service_id: string | null
+          title: string
+          description: string | null
+          target_value: number | null
+          current_value: number
+          unit: string | null
+          start_date: string
+          target_date: string
+          status: string
+          priority: string
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          service_id?: string | null
+          title: string
+          description?: string | null
+          target_value?: number | null
+          current_value?: number
+          unit?: string | null
+          start_date: string
+          target_date: string
+          status?: string
+          priority?: string
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          service_id?: string | null
+          title?: string
+          description?: string | null
+          target_value?: number | null
+          current_value?: number
+          unit?: string | null
+          start_date?: string
+          target_date?: string
+          status?: string
+          priority?: string
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: string
+          is_read: boolean
+          link: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type?: string
+          is_read?: boolean
+          link?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: string
+          is_read?: boolean
+          link?: string | null
+          created_at?: string
+        }
+      }
+      activity_metrics: {
+        Row: {
+          id: string
+          report_id: string
+          metric_type: string | null
+          connections_sent: number
+          connections_accepted: number
+          responses_received: number
+          positive_responses: number
+          meetings_booked: number
+          meeting_dates: Json
+          custom_metrics: Json
+          metric_name: string | null
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          id?: string
+          report_id: string
+          metric_type?: string | null
+          connections_sent?: number
+          connections_accepted?: number
+          responses_received?: number
+          positive_responses?: number
+          meetings_booked?: number
+          meeting_dates?: Json
+          custom_metrics?: Json
+          metric_name?: string | null
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Update: {
+          id?: string
+          report_id?: string
+          metric_type?: string | null
+          connections_sent?: number
+          connections_accepted?: number
+          responses_received?: number
+          positive_responses?: number
+          meetings_booked?: number
+          meeting_dates?: Json
+          custom_metrics?: Json
+          metric_name?: string | null
+          metric_value?: number
+          recorded_at?: string | null
+        }
+      }
+      user_preferences: {
+        Row: {
+          user_id: string
+          theme: string
+          language: string
+          timezone: string
+          date_format: string
+          time_format: string
+          items_per_page: number
+          default_view: string
+          preferences: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          theme?: string
+          language?: string
+          timezone?: string
+          date_format?: string
+          time_format?: string
+          items_per_page?: number
+          default_view?: string
+          preferences?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          theme?: string
+          language?: string
+          timezone?: string
+          date_format?: string
+          time_format?: string
+          items_per_page?: number
+          default_view?: string
+          preferences?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      client_portal_users: {
+        Row: {
+          id: string
+          client_id: string
+          email: string
+          full_name: string
+          user_id: number | null
+          is_active: boolean
+          last_login_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          email: string
+          full_name: string
+          user_id?: number | null
+          is_active?: boolean
+          last_login_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          email?: string
+          full_name?: string
+          user_id?: number | null
+          is_active?: boolean
+          last_login_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      client_credentials: {
+        Row: {
+          id: string
+          client_id: string
+          tool_name: string
+          username: string
+          encrypted_password: string
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          tool_name: string
+          username: string
+          encrypted_password: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          tool_name?: string
+          username?: string
+          encrypted_password?: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      dashboard_widgets: {
+        Row: {
+          id: string
+          user_id: string
+          widget_type: string
+          position: number
+          size: string
+          config: Json
+          is_visible: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          widget_type: string
+          position: number
+          size?: string
+          config?: Json
+          is_visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          widget_type?: string
+          position?: number
+          size?: string
+          config?: Json
+          is_visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      report_drafts: {
+        Row: {
+          id: string
+          employee_id: string
+          client_id: string
+          service_id: string
+          week_start_date: string
+          draft_data: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          employee_id: string
+          client_id: string
+          service_id: string
+          week_start_date: string
+          draft_data: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          employee_id?: string
+          client_id?: string
+          service_id?: string
+          week_start_date?: string
+          draft_data?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      benchmarks: {
+        Row: {
+          id: string
+          service_id: string
+          industry: string
+          metric_name: string
+          average_value: number
+          top_quartile_value: number | null
+          data_source: string | null
+          period: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          service_id: string
+          industry: string
+          metric_name: string
+          average_value: number
+          top_quartile_value?: number | null
+          data_source?: string | null
+          period?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          service_id?: string
+          industry?: string
+          metric_name?: string
+          average_value?: number
+          top_quartile_value?: number | null
+          data_source?: string | null
+          period?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_managed_clients: {
+        Args: Record<string, never>
+        Returns: {
+          client_id: string
+          client_name: string
+          employee_count: number
+        }[]
+      }
+      get_team_daily_progress: {
+        Args: {
+          p_log_date: string
+        }
+        Returns: {
+          employee_id: string
+          employee_name: string
+          client_id: string
+          client_name: string
+          service_id: string
+          service_name: string
+          assignment_id: string
+          log_id: string | null
+          notes: string | null
+          work_status: string | null
+          submission_status: string | null
+          submitted_at: string | null
+          metrics: Json | null
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

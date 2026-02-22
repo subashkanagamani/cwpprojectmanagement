@@ -252,7 +252,7 @@ export function TeamMonitoringPage() {
 
   const getPerformanceBadge = (stats: TeamMemberStats) => {
     if (stats.total_tasks === 0) {
-      return { label: 'No Tasks', variant: 'outline' as const, color: 'text-gray-600' };
+      return { label: 'No Tasks', variant: 'outline' as const, color: 'text-muted-foreground' };
     }
 
     const completionRate = (stats.completed_tasks / stats.total_tasks) * 100;
@@ -288,13 +288,13 @@ export function TeamMonitoringPage() {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold text-foreground">
             Team Monitoring
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Monitor and support your team members' work and progress
           </p>
         </div>
@@ -307,7 +307,7 @@ export function TeamMonitoringPage() {
       {teamMembers.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Users className="h-16 w-16 text-muted-foreground mb-4" />
+            <Users className="h-8 w-8 opacity-40 mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Team Members</h3>
             <p className="text-sm text-muted-foreground text-center max-w-md">
               You don't have any team members assigned to you yet. Contact your administrator to set up your team.
@@ -316,11 +316,11 @@ export function TeamMonitoringPage() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+            <Card className="stat-card-gradient blue">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40">
+                  <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
                     <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
@@ -331,10 +331,10 @@ export function TeamMonitoringPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="stat-card-gradient green">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
+                  <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/30">
                     <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
@@ -345,10 +345,10 @@ export function TeamMonitoringPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="stat-card-gradient orange">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg p-2.5 bg-amber-50 dark:bg-amber-950/40">
+                  <div className="rounded-lg p-2.5 bg-amber-50 dark:bg-amber-950/30">
                     <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
@@ -359,10 +359,10 @@ export function TeamMonitoringPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="stat-card-gradient purple">
+              <CardContent className="p-5">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/40">
+                  <div className="rounded-lg p-2.5 bg-red-50 dark:bg-red-950/30">
                     <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                   </div>
                   <div>
@@ -374,7 +374,7 @@ export function TeamMonitoringPage() {
             </Card>
           </div>
 
-          <Tabs defaultValue="overview" className="space-y-4">
+          <Tabs defaultValue="overview" className="space-y-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
             <TabsList>
               <TabsTrigger value="overview">
                 <BarChart3 className="h-4 w-4 mr-2" />
@@ -406,7 +406,7 @@ export function TeamMonitoringPage() {
                     return (
                       <div
                         key={stats.employee_id}
-                        className="border rounded-lg p-4 space-y-3"
+                        className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border space-y-3"
                       >
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-3">
@@ -496,12 +496,12 @@ export function TeamMonitoringPage() {
                 <CardContent className="space-y-4">
                   {weeklyReports.length === 0 ? (
                     <div className="text-center py-8">
-                      <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                      <p className="text-muted-foreground">No weekly reports yet</p>
+                      <FileText className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">No weekly reports yet</p>
                     </div>
                   ) : (
                     weeklyReports.map((report) => (
-                      <div key={report.id} className="border rounded-lg p-4 space-y-3">
+                      <div key={report.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border space-y-3">
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
@@ -564,12 +564,12 @@ export function TeamMonitoringPage() {
                 <CardContent className="space-y-4">
                   {dailyLogs.length === 0 ? (
                     <div className="text-center py-8">
-                      <Calendar className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                      <p className="text-muted-foreground">No daily logs yet</p>
+                      <Calendar className="h-8 w-8 opacity-40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">No daily logs yet</p>
                     </div>
                   ) : (
                     dailyLogs.map((log) => (
-                      <div key={log.id} className="border rounded-lg p-4 space-y-2">
+                      <div key={log.id} className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border space-y-2">
                         <div className="flex items-center justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">

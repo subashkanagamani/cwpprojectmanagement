@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, TrendingUp, DollarSign, Target, CheckCircle2, XCircle, Trash2, Edit2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, TrendingUp, DollarSign, Target, CheckCircle2, XCircle, Trash2, Edit2, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Modal } from "../Modal";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +46,7 @@ interface Employee {
 }
 
 const stages = [
-  { value: 'prospecting', label: 'Prospecting', color: 'bg-gray-500' },
+  { value: 'prospecting', label: 'Prospecting', color: 'bg-muted-foreground' },
   { value: 'qualified', label: 'Qualified', color: 'bg-blue-500' },
   { value: 'proposal', label: 'Proposal', color: 'bg-yellow-500' },
   { value: 'negotiation', label: 'Negotiation', color: 'bg-orange-500' },
@@ -252,7 +253,7 @@ export default function DealsPage() {
 
   const getStageBadgeColor = (stage: string) => {
     const stageObj = stages.find(s => s.value === stage);
-    return stageObj?.color || 'bg-gray-500';
+    return stageObj?.color || 'bg-muted-foreground';
   };
 
   const calculatePipelineMetrics = () => {
@@ -268,15 +269,38 @@ export default function DealsPage() {
   const metrics = calculatePipelineMetrics();
 
   if (loading) {
-    return <div className="p-6">Loading deals...</div>;
+    return (
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map(i => (
+            <Card key={i}>
+              <CardContent className="p-5">
+                <Skeleton className="h-4 w-20 mb-3" />
+                <Skeleton className="h-8 w-24" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-5">
+            <Skeleton className="h-5 w-40 mb-4" />
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 mb-3" />)}
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Deals Pipeline</h1>
-          <p className="text-muted-foreground">Manage your sales pipeline and track deal progress</p>
+          <h1 className="text-2xl font-bold text-foreground">Deals Pipeline</h1>
+          <p className="text-muted-foreground mt-1">Manage your sales pipeline and track deal progress</p>
         </div>
         <Button onClick={() => { resetForm(); setShowModal(true); }}>
           <Plus className="w-4 h-4 mr-2" />
@@ -284,46 +308,62 @@ export default function DealsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Deals</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.activeCount}</div>
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-4 gap-5" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Active Deals</p>
+                <p className="text-2xl font-bold text-foreground">{metrics.activeCount}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pipeline Value</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${metrics.totalValue.toLocaleString()}</div>
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Pipeline Value</p>
+                <p className="text-2xl font-bold text-foreground">${metrics.totalValue.toLocaleString()}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30">
+                <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weighted Value</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${metrics.weightedValue.toLocaleString()}</div>
+        <Card className="stat-card-gradient purple">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Weighted Value</p>
+                <p className="text-2xl font-bold text-foreground">${metrics.weightedValue.toLocaleString()}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30">
+                <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Won Deals</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${metrics.wonValue.toLocaleString()}</div>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Won Deals</p>
+                <p className="text-2xl font-bold text-foreground">${metrics.wonValue.toLocaleString()}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/30">
+                <CheckCircle2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Pipeline Overview</CardTitle>
@@ -357,53 +397,56 @@ export default function DealsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {deals.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No deals found</p>
+              <div className="text-center py-12">
+                <Target className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No deals found</p>
+              </div>
             ) : (
               deals.map((deal) => (
                 <div
                   key={deal.id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 cursor-pointer" onClick={() => handleEdit(deal)}>
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg">{deal.deal_name}</h3>
-                        <Badge className={getStageBadgeColor(deal.stage) + " text-white"}>
+                        <h3 className="font-semibold text-lg text-foreground">{deal.deal_name}</h3>
+                        <Badge className={`${getStageBadgeColor(deal.stage)} text-white text-[11px]`}>
                           {stages.find(s => s.value === deal.stage)?.label}
                         </Badge>
                         {deal.status !== 'active' && (
-                          <Badge variant="outline">{deal.status}</Badge>
+                          <Badge variant="outline" className="text-[11px]">{deal.status}</Badge>
                         )}
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                         <div>
-                          <span className="font-medium">Client:</span> {deal.clients?.name}
+                          <span className="font-medium text-foreground">Client:</span> {deal.clients?.name}
                         </div>
                         <div>
-                          <span className="font-medium">Value:</span> ${deal.deal_value.toLocaleString()}
+                          <span className="font-medium text-foreground">Value:</span> ${deal.deal_value.toLocaleString()}
                         </div>
                         <div>
-                          <span className="font-medium">Probability:</span> {deal.probability}%
+                          <span className="font-medium text-foreground">Probability:</span> {deal.probability}%
                         </div>
                         <div>
-                          <span className="font-medium">Owner:</span> {deal.profiles?.full_name}
+                          <span className="font-medium text-foreground">Owner:</span> {deal.profiles?.full_name}
                         </div>
                       </div>
                       {deal.expected_close_date && (
                         <div className="mt-2 text-sm text-muted-foreground">
-                          <span className="font-medium">Expected Close:</span>{" "}
+                          <span className="font-medium text-foreground">Expected Close:</span>{" "}
                           {new Date(deal.expected_close_date).toLocaleDateString()}
                         </div>
                       )}
                       {deal.notes && (
                         <div className="mt-2 text-sm text-muted-foreground">
-                          <span className="font-medium">Notes:</span> {deal.notes}
+                          <span className="font-medium text-foreground">Notes:</span> {deal.notes}
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex items-center gap-2 ml-4">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -424,6 +467,7 @@ export default function DealsPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 </div>

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Client, ClientPortalUser } from '../../lib/database.types';
-import { Plus, Trash2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Users } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,7 +67,6 @@ export function ClientPortalPage() {
     e.preventDefault();
 
     try {
-      // Create portal user via server endpoint
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
@@ -129,7 +128,7 @@ export function ClientPortalPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <Skeleton className="h-8 w-40 mb-2" />
@@ -144,11 +143,11 @@ export function ClientPortalPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Client Portal</h1>
-          <p className="text-sm text-muted-foreground">Manage client-side user access</p>
+          <h1 className="text-2xl font-bold text-foreground">Client Portal</h1>
+          <p className="text-muted-foreground mt-1">Manage client-side user access</p>
         </div>
         <Button
           onClick={() => setShowModal(true)}
@@ -159,76 +158,88 @@ export function ClientPortalPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-foreground mb-2">About Client Portal</h3>
-          <p className="text-sm text-muted-foreground">
-            Client portal users have read-only access to view their reports and performance data. They
-            cannot edit anything or view other clients' information.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-1">About Client Portal</h3>
+                <p className="text-sm text-muted-foreground">
+                  Client portal users have read-only access to view their reports and performance data. They
+                  cannot edit anything or view other clients' information.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {portalUsers.map((user) => (
-              <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
-                <TableCell className="font-medium text-foreground" data-testid={`text-name-${user.id}`}>{user.full_name}</TableCell>
-                <TableCell className="text-muted-foreground" data-testid={`text-email-${user.id}`}>{user.email}</TableCell>
-                <TableCell className="text-foreground" data-testid={`text-client-${user.id}`}>{user.client?.name}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleUserStatus(user)}
-                    className="p-0 h-auto"
-                    data-testid={`button-toggle-status-${user.id}`}
-                  >
-                    {user.is_active ? (
-                      <Badge variant="secondary" className="no-default-active-elevate">
-                        <Eye className="h-3 w-3 mr-1" />
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="no-default-active-elevate">
-                        <EyeOff className="h-3 w-3 mr-1" />
-                        Inactive
-                      </Badge>
-                    )}
-                  </Button>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(user.id)}
-                    data-testid={`button-delete-user-${user.id}`}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {portalUsers.length === 0 && (
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
-                  No portal users yet. Add your first portal user to get started.
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+            </TableHeader>
+            <TableBody>
+              {portalUsers.map((user) => (
+                <TableRow key={user.id} className="hover:bg-muted/50 transition-colors" data-testid={`row-user-${user.id}`}>
+                  <TableCell className="font-medium text-foreground" data-testid={`text-name-${user.id}`}>{user.full_name}</TableCell>
+                  <TableCell className="text-muted-foreground" data-testid={`text-email-${user.id}`}>{user.email}</TableCell>
+                  <TableCell className="text-foreground" data-testid={`text-client-${user.id}`}>{user.client?.name}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleUserStatus(user)}
+                      className="p-0 h-auto"
+                      data-testid={`button-toggle-status-${user.id}`}
+                    >
+                      {user.is_active ? (
+                        <Badge variant="secondary" className="no-default-active-elevate">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="no-default-active-elevate">
+                          <EyeOff className="h-3 w-3 mr-1" />
+                          Inactive
+                        </Badge>
+                      )}
+                    </Button>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(user.id)}
+                      data-testid={`button-delete-user-${user.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {portalUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-12">
+                    <Users className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No portal users yet. Add your first portal user to get started.</p>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>

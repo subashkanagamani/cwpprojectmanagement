@@ -193,11 +193,11 @@ export function GoalsPage() {
     : goals.filter(g => g.status === filterStatus);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Goals</h1>
-          <p className="text-sm text-muted-foreground">Track client objectives and milestones</p>
+          <h1 className="text-2xl font-bold text-foreground">Goals</h1>
+          <p className="text-muted-foreground mt-1">Track client objectives and milestones</p>
         </div>
         <Button onClick={() => openModal()} data-testid="button-add-goal">
           <Plus className="h-4 w-4 mr-2" />
@@ -205,7 +205,7 @@ export function GoalsPage() {
         </Button>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap animate-fade-up" style={{ animationDelay: "100ms" }}>
         {['all', 'active', 'completed', 'on_hold', 'cancelled'].map(status => (
           <Button
             key={status}
@@ -219,7 +219,7 @@ export function GoalsPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 max-h-[600px] overflow-y-auto">
+      <div className="grid gap-6 max-h-[600px] overflow-y-auto animate-fade-up" style={{ animationDelay: "200ms" }}>
         {filteredGoals.map(goal => (
           <Card key={goal.id} data-testid={`card-goal-${goal.id}`}>
             <CardContent className="p-6">
@@ -312,9 +312,9 @@ export function GoalsPage() {
         {filteredGoals.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
-              <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No goals found</h3>
-              <p className="text-muted-foreground">Create your first goal to start tracking progress</p>
+              <Target className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No goals found</p>
+              <p className="text-sm text-muted-foreground mt-1">Create your first goal to start tracking progress</p>
             </CardContent>
           </Card>
         )}

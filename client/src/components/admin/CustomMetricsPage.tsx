@@ -210,11 +210,11 @@ export function CustomMetricsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Custom Metrics</h1>
-          <p className="text-sm text-muted-foreground">Define custom KPIs for each service</p>
+          <h1 className="text-2xl font-bold text-foreground">Custom Metrics</h1>
+          <p className="text-muted-foreground mt-1">Define custom KPIs for each service</p>
         </div>
         <Button data-testid="button-add-metric" onClick={() => openModal()}>
           <Plus className="w-4 h-4 mr-2" />
@@ -222,125 +222,129 @@ export function CustomMetricsPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <Input
-                data-testid="input-search-metrics"
-                placeholder="Search metrics..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select
-              value={filterService}
-              onValueChange={(value) => setFilterService(value === 'all' ? '' : value)}
-            >
-              <SelectTrigger data-testid="select-filter-service" className="w-full md:w-[200px]">
-                <SelectValue placeholder="All Services" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Services</SelectItem>
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-5">
-                <div className="space-y-3">
-                  <Skeleton className="h-5 w-48" />
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-64" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredMetrics.length === 0 ? (
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <Card>
-          <CardContent className="p-12 text-center">
-            <Sliders className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-lg">No custom metrics found</p>
-            <p className="text-sm text-muted-foreground mt-1">Add your first custom metric to start tracking</p>
+          <CardContent className="p-5">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Input
+                  data-testid="input-search-metrics"
+                  placeholder="Search metrics..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select
+                value={filterService}
+                onValueChange={(value) => setFilterService(value === 'all' ? '' : value)}
+              >
+                <SelectTrigger data-testid="select-filter-service" className="w-full md:w-[200px]">
+                  <SelectValue placeholder="All Services" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Services</SelectItem>
+                  {services.map((service) => (
+                    <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid gap-4">
-          {filteredMetrics.map((metric) => (
-            <Card key={metric.id} data-testid={`card-metric-${metric.id}`}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {metric.metric_name}
-                      </h3>
-                      <Badge variant={getMetricTypeBadgeVariant(metric.metric_type)} data-testid={`badge-type-${metric.id}`}>
-                        {getMetricTypeLabel(metric.metric_type)}
-                      </Badge>
-                      <Badge variant={metric.is_active ? 'default' : 'secondary'} data-testid={`badge-status-${metric.id}`}>
-                        {metric.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <span className="font-medium">Service:</span> {metric.service?.name}
-                    </p>
-                    {metric.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {metric.description}
+      </div>
+
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <div className="space-y-3">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : filteredMetrics.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Sliders className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No custom metrics found</p>
+              <p className="text-sm text-muted-foreground mt-1">Add your first custom metric to start tracking</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-5">
+            {filteredMetrics.map((metric) => (
+              <Card key={metric.id} data-testid={`card-metric-${metric.id}`} className="hover:bg-muted/50 transition-colors">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {metric.metric_name}
+                        </h3>
+                        <Badge variant={getMetricTypeBadgeVariant(metric.metric_type)} data-testid={`badge-type-${metric.id}`}>
+                          {getMetricTypeLabel(metric.metric_type)}
+                        </Badge>
+                        <Badge variant={metric.is_active ? 'default' : 'secondary'} data-testid={`badge-status-${metric.id}`}>
+                          {metric.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        <span className="font-medium">Service:</span> {metric.service?.name}
                       </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleToggleActive(metric)}
-                      aria-label={metric.is_active ? 'Deactivate metric' : 'Activate metric'}
-                      data-testid={`button-toggle-${metric.id}`}
-                    >
-                      {metric.is_active ? (
-                        <ToggleRight className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <ToggleLeft className="w-5 h-5 text-muted-foreground" />
+                      {metric.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {metric.description}
+                        </p>
                       )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openModal(metric)}
-                      aria-label="Edit metric"
-                      data-testid={`button-edit-${metric.id}`}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(metric.id)}
-                      aria-label="Delete metric"
-                      data-testid={`button-delete-${metric.id}`}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleToggleActive(metric)}
+                        aria-label={metric.is_active ? 'Deactivate metric' : 'Activate metric'}
+                        data-testid={`button-toggle-${metric.id}`}
+                      >
+                        {metric.is_active ? (
+                          <ToggleRight className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <ToggleLeft className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openModal(metric)}
+                        aria-label="Edit metric"
+                        data-testid={`button-edit-${metric.id}`}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(metric.id)}
+                        aria-label="Delete metric"
+                        data-testid={`button-delete-${metric.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">

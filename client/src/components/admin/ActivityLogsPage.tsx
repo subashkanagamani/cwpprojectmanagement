@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ActivityLog, Profile } from '../../lib/database.types';
-import { Clock, User, FileText, Download } from 'lucide-react';
+import { Clock, User, FileText, Download, Activity } from 'lucide-react';
 import { exportToCSV } from '../../utils/exportData';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -97,14 +97,14 @@ export function ActivityLogsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-72" />
         </div>
         <Card>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <Skeleton className="h-9 w-full" />
               <Skeleton className="h-9 w-full" />
               <Skeleton className="h-9 w-full" />
@@ -125,124 +125,129 @@ export function ActivityLogsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Activity Logs</h1>
-          <p className="text-sm text-muted-foreground">Audit trail of all system activities</p>
+          <h1 className="text-2xl font-bold text-foreground">Activity Logs</h1>
+          <p className="text-muted-foreground mt-1">Audit trail of all system activities</p>
         </div>
         <Button data-testid="button-export-logs" onClick={handleExport}>
-          <Download className="h-4 w-4" />
+          <Download className="h-4 w-4 mr-2" />
           Export Logs
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label className="mb-2 block">Search</Label>
-              <Input
-                data-testid="input-search-logs"
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search logs..."
-              />
-            </div>
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <Label className="mb-2 block">Search</Label>
+                <Input
+                  data-testid="input-search-logs"
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search logs..."
+                />
+              </div>
 
-            <div>
-              <Label className="mb-2 block">Action</Label>
-              <Select value={filterAction} onValueChange={setFilterAction}>
-                <SelectTrigger data-testid="select-filter-action">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  <SelectItem value="INSERT">Create</SelectItem>
-                  <SelectItem value="UPDATE">Update</SelectItem>
-                  <SelectItem value="DELETE">Delete</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div>
+                <Label className="mb-2 block">Action</Label>
+                <Select value={filterAction} onValueChange={setFilterAction}>
+                  <SelectTrigger data-testid="select-filter-action">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="INSERT">Create</SelectItem>
+                    <SelectItem value="UPDATE">Update</SelectItem>
+                    <SelectItem value="DELETE">Delete</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <Label className="mb-2 block">Entity Type</Label>
-              <Select value={filterEntity} onValueChange={setFilterEntity}>
-                <SelectTrigger data-testid="select-filter-entity">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="clients">Clients</SelectItem>
-                  <SelectItem value="profiles">Employees</SelectItem>
-                  <SelectItem value="client_assignments">Assignments</SelectItem>
-                  <SelectItem value="weekly_reports">Reports</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <Label className="mb-2 block">Entity Type</Label>
+                <Select value={filterEntity} onValueChange={setFilterEntity}>
+                  <SelectTrigger data-testid="select-filter-entity">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="clients">Clients</SelectItem>
+                    <SelectItem value="profiles">Employees</SelectItem>
+                    <SelectItem value="client_assignments">Assignments</SelectItem>
+                    <SelectItem value="weekly_reports">Reports</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="max-h-[600px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-muted z-10">
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Entity</TableHead>
-                  <TableHead>IP Address</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLogs.map((log) => (
-                  <TableRow key={log.id} data-testid={`row-log-${log.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        {new Date(log.created_at).toLocaleString()}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        {log.user?.full_name || 'System'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getActionBadgeVariant(log.action)} className="no-default-hover-elevate no-default-active-elevate">
-                        {log.action}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        {log.entity_type}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {log.ip_address || '-'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredLogs.length === 0 && (
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <CardContent className="p-0">
+            <div className="max-h-[600px] overflow-y-auto">
+              <Table>
+                <TableHeader className="sticky top-0 bg-muted z-10">
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                      No activity logs found
-                    </TableCell>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Entity</TableHead>
+                    <TableHead>IP Address</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.map((log) => (
+                    <TableRow key={log.id} className="hover:bg-muted/50 transition-colors" data-testid={`row-log-${log.id}`}>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          {new Date(log.created_at).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          {log.user?.full_name || 'System'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getActionBadgeVariant(log.action)} className="no-default-hover-elevate no-default-active-elevate">
+                          {log.action}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          {log.entity_type}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {log.ip_address || '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredLogs.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <Activity className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">No activity logs found</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <p className="text-sm text-muted-foreground text-center" data-testid="text-log-count">
+      <p className="text-sm text-muted-foreground text-center animate-fade-up" style={{ animationDelay: "300ms" }} data-testid="text-log-count">
         Showing {filteredLogs.length} of {logs.length} logs
       </p>
     </div>

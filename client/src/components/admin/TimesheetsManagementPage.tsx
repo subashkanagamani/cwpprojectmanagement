@@ -200,7 +200,7 @@ export default function TimesheetsManagementPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <Skeleton className="h-8 w-64 mb-2" />
@@ -219,164 +219,168 @@ export default function TimesheetsManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Timesheet Management</h1>
-          <p className="text-sm text-muted-foreground">Review and approve employee timesheets</p>
+          <h1 className="text-2xl font-bold text-foreground">Timesheet Management</h1>
+          <p className="text-muted-foreground mt-1">Review and approve employee timesheets</p>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={statusFilter} onValueChange={setStatusFilter} data-testid="select-status-filter">
-              <SelectTrigger className="w-[160px]" data-testid="trigger-status-filter">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedTimesheets.size > 0 && (
-            <Button
-              onClick={handleBulkApprove}
-              data-testid="button-bulk-approve"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Approve Selected ({selectedTimesheets.size})
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedTimesheets.size === timesheets.length && timesheets.length > 0}
-                    onCheckedChange={selectAll}
-                    data-testid="checkbox-select-all"
-                  />
-                </TableHead>
-                <TableHead>Employee</TableHead>
-                <TableHead>Week</TableHead>
-                <TableHead className="text-right">Hours</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {timesheets.map((timesheet) => (
-                <TableRow key={timesheet.id} data-testid={`row-timesheet-${timesheet.id}`}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedTimesheets.has(timesheet.id)}
-                      onCheckedChange={() => toggleTimesheetSelection(timesheet.id)}
-                      data-testid={`checkbox-timesheet-${timesheet.id}`}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium text-foreground">
-                      {timesheet.profiles.full_name}
-                    </div>
-                    <div className="text-sm text-muted-foreground">{timesheet.profiles.email}</div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(timesheet.week_start), 'MMM dd, yyyy')}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">{timesheet.total_hours}h</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(timesheet.status)} className="no-default-active-elevate">
-                      {timesheet.status.charAt(0).toUpperCase() + timesheet.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2 flex-wrap">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleTimesheetClick(timesheet)}
-                        data-testid={`button-view-timesheet-${timesheet.id}`}
-                      >
-                        View
-                      </Button>
-                      {timesheet.status === 'submitted' && (
-                        <>
-                          <Button
-                            size="icon"
-                            variant="default"
-                            onClick={() => handleApprove(timesheet.id)}
-                            data-testid={`button-approve-timesheet-${timesheet.id}`}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={() => handleReject(timesheet.id)}
-                            data-testid={`button-reject-timesheet-${timesheet.id}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {timesheets.length === 0 && (
-            <div className="p-12 text-center text-muted-foreground">
-              <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p>No timesheets found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {selectedTimesheet && (
+      <div className="animate-fade-up" style={{ animationDelay: "100ms" }}>
         <Card>
-          <CardHeader>
-            <CardTitle>Time Entries</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {timeEntries.map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center gap-4 p-3 border border-border rounded-md flex-wrap"
-                data-testid={`row-time-entry-${entry.id}`}
+          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={statusFilter} onValueChange={setStatusFilter} data-testid="select-status-filter">
+                <SelectTrigger className="w-[160px]" data-testid="trigger-status-filter">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedTimesheets.size > 0 && (
+              <Button
+                onClick={handleBulkApprove}
+                data-testid="button-bulk-approve"
               >
-                <div className="w-32 text-sm text-muted-foreground">
-                  {format(new Date(entry.date), 'EEE, MMM dd')}
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">
-                    {entry.clients.name} - {entry.services.name}
-                  </div>
-                  <div className="text-sm text-muted-foreground">{entry.description}</div>
-                </div>
-                <div className="w-20 text-right font-medium">{entry.hours}h</div>
-                <div className="w-20">
-                  {entry.is_billable && (
-                    <Badge variant="secondary" className="no-default-active-elevate">
-                      Billable
-                    </Badge>
-                  )}
-                </div>
+                <Check className="h-4 w-4 mr-2" />
+                Approve Selected ({selectedTimesheets.size})
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedTimesheets.size === timesheets.length && timesheets.length > 0}
+                      onCheckedChange={selectAll}
+                      data-testid="checkbox-select-all"
+                    />
+                  </TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Week</TableHead>
+                  <TableHead className="text-right">Hours</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {timesheets.map((timesheet) => (
+                  <TableRow key={timesheet.id} data-testid={`row-timesheet-${timesheet.id}`} className="hover:bg-muted/50 transition-colors cursor-pointer group">
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedTimesheets.has(timesheet.id)}
+                        onCheckedChange={() => toggleTimesheetSelection(timesheet.id)}
+                        data-testid={`checkbox-timesheet-${timesheet.id}`}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium text-foreground">
+                        {timesheet.profiles.full_name}
+                      </div>
+                      <div className="text-sm text-muted-foreground">{timesheet.profiles.email}</div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {format(new Date(timesheet.week_start), 'MMM dd, yyyy')}
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-foreground">{timesheet.total_hours}h</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(timesheet.status)} className="no-default-active-elevate">
+                        {timesheet.status.charAt(0).toUpperCase() + timesheet.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTimesheetClick(timesheet)}
+                          data-testid={`button-view-timesheet-${timesheet.id}`}
+                        >
+                          View
+                        </Button>
+                        {timesheet.status === 'submitted' && (
+                          <>
+                            <Button
+                              size="icon"
+                              variant="default"
+                              onClick={() => handleApprove(timesheet.id)}
+                              data-testid={`button-approve-timesheet-${timesheet.id}`}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() => handleReject(timesheet.id)}
+                              data-testid={`button-reject-timesheet-${timesheet.id}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            {timesheets.length === 0 && (
+              <div className="p-12 text-center">
+                <Clock className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No timesheets found</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
+      </div>
+
+      {selectedTimesheet && (
+        <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Entries</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {timeEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-4 p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group flex-wrap"
+                  data-testid={`row-time-entry-${entry.id}`}
+                >
+                  <div className="w-32 text-sm text-muted-foreground">
+                    {format(new Date(entry.date), 'EEE, MMM dd')}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground">
+                      {entry.clients.name} - {entry.services.name}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{entry.description}</div>
+                  </div>
+                  <div className="w-20 text-right font-medium text-foreground">{entry.hours}h</div>
+                  <div className="w-20">
+                    {entry.is_billable && (
+                      <Badge variant="secondary" className="no-default-active-elevate">
+                        Billable
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

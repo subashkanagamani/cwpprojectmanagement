@@ -251,26 +251,29 @@ export function AccountManagerDailyView() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-daily-view-title">
-            Account Manager Daily View
-          </h1>
-          <p className="text-sm text-muted-foreground">Track team progress and balance workload</p>
+    <div className="space-y-8">
+      <div className="animate-fade-up">
+        <div className="flex justify-between items-center gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground" data-testid="text-daily-view-title">
+              Account Manager Daily View
+            </h1>
+            <p className="text-muted-foreground mt-1">Track team progress and balance workload</p>
+          </div>
+          <Button variant="outline" onClick={loadDashboardData} data-testid="button-refresh-daily">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
         </div>
-        <Button variant="outline" onClick={loadDashboardData} data-testid="button-refresh-daily">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {statCards.map((stat) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        {statCards.map((stat, index) => {
           const Icon = stat.icon;
+          const colors = ['blue', 'green', 'purple', 'orange'];
           return (
-            <Card key={stat.label} data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
-              <CardContent className="p-6">
+            <Card key={stat.label} className={`stat-card-gradient ${colors[index]}`} data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
+              <CardContent className="p-5">
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className={`rounded-lg p-2.5 ${stat.bg}`}>
                     <Icon className={`h-5 w-5 ${stat.color}`} />
@@ -287,7 +290,7 @@ export function AccountManagerDailyView() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up" style={{ animationDelay: "200ms" }}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
@@ -298,14 +301,14 @@ export function AccountManagerDailyView() {
           <CardContent className="space-y-4">
             {teamMembers.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground">No team members found</p>
+                <Users className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                <p className="text-sm text-muted-foreground">No team members found</p>
               </div>
             ) : (
               teamMembers.map((member) => (
                 <div
                   key={member.employee_id}
-                  className="rounded-md border p-4 space-y-3"
+                  className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group space-y-3 border"
                   data-testid={`card-member-${member.employee_id}`}
                 >
                   <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -377,8 +380,8 @@ export function AccountManagerDailyView() {
           <CardContent className="space-y-3">
             {availableMembers.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground">No team members available</p>
+                <Users className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                <p className="text-sm text-muted-foreground">No team members available</p>
               </div>
             ) : (
               availableMembers.slice(0, 10).map((member) => {
@@ -388,7 +391,7 @@ export function AccountManagerDailyView() {
                 return (
                   <div
                     key={member.employee_id}
-                    className="flex items-center justify-between gap-3 flex-wrap p-3 rounded-md border"
+                    className="p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group flex items-center justify-between gap-3 flex-wrap border"
                     data-testid={`card-available-${member.employee_id}`}
                   >
                     <div className="flex items-center gap-3 flex-wrap flex-1 min-w-0">

@@ -216,15 +216,15 @@ export function ReportApprovalsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Report Approvals</h1>
-          <p className="text-sm text-muted-foreground">Review and approve submitted weekly reports</p>
+          <h1 className="text-2xl font-bold text-foreground">Report Approvals</h1>
+          <p className="text-muted-foreground mt-1">Review and approve submitted weekly reports</p>
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap animate-fade-up" style={{ animationDelay: "100ms" }}>
         {(['all', 'submitted', 'approved', 'revision_requested'] as const).map((status) => (
           <Button
             key={status}
@@ -238,7 +238,7 @@ export function ReportApprovalsPage() {
         ))}
       </div>
 
-      <div className="space-y-4 max-h-[700px] overflow-y-auto">
+      <div className="space-y-4 max-h-[700px] overflow-y-auto animate-fade-up" style={{ animationDelay: "200ms" }}>
         {approvals.map((approval) => (
           <Card key={approval.id} data-testid={`card-approval-${approval.id}`}>
             <CardContent className="p-6">
@@ -333,8 +333,8 @@ export function ReportApprovalsPage() {
         {approvals.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
-              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No reports found for this filter</p>
+              <Clock className="h-8 w-8 opacity-40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No reports found for this filter</p>
             </CardContent>
           </Card>
         )}

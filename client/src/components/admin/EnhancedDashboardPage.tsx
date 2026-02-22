@@ -247,7 +247,8 @@ export function EnhancedDashboardPage() {
       sub: `${stats.activeClients} active`,
       icon: Briefcase,
       color: "text-blue-600 dark:text-blue-400",
-      bg: "bg-blue-50 dark:bg-blue-950/40",
+      bg: "bg-blue-50 dark:bg-blue-950/30",
+      gradient: "blue",
       href: "/clients",
     },
     {
@@ -256,7 +257,8 @@ export function EnhancedDashboardPage() {
       sub: `${stats.activeEmployees} active`,
       icon: Users,
       color: "text-emerald-600 dark:text-emerald-400",
-      bg: "bg-emerald-50 dark:bg-emerald-950/40",
+      bg: "bg-emerald-50 dark:bg-emerald-950/30",
+      gradient: "green",
       href: "/employees",
     },
     {
@@ -265,7 +267,8 @@ export function EnhancedDashboardPage() {
       sub: `${stats.pendingReports} pending`,
       icon: FileText,
       color: "text-amber-600 dark:text-amber-400",
-      bg: "bg-amber-50 dark:bg-amber-950/40",
+      bg: "bg-amber-50 dark:bg-amber-950/30",
+      gradient: "orange",
       href: "/reports",
     },
     {
@@ -274,7 +277,8 @@ export function EnhancedDashboardPage() {
       sub: stats.totalBudget > 0 ? `$${(stats.totalSpending / 1000).toFixed(1)}k of $${(stats.totalBudget / 1000).toFixed(1)}k` : "of monthly budget",
       icon: DollarSign,
       color: "text-violet-600 dark:text-violet-400",
-      bg: "bg-violet-50 dark:bg-violet-950/40",
+      bg: "bg-violet-50 dark:bg-violet-950/30",
+      gradient: "purple",
       href: "/budget",
     },
   ];
@@ -341,26 +345,26 @@ export function EnhancedDashboardPage() {
 
   return (
     <div className="space-y-8" data-testid="dashboard-page">
-      <div>
-        <h1 className="text-2xl font-semibold" data-testid="text-page-title">
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-foreground" data-testid="text-page-title">
           {getGreeting()}, {firstName}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-1">
           Stay on top of your tasks, monitor progress, and track status.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card
               key={stat.label}
-              className="hover-elevate cursor-pointer transition-shadow"
+              className={`stat-card-gradient ${stat.gradient} hover-elevate cursor-pointer transition-shadow`}
               onClick={() => setLocation(stat.href)}
               data-testid={`card-stat-${stat.label.toLowerCase().replace(/\s/g, "-")}`}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div>
                     <p className="text-[13px] font-medium text-muted-foreground">{stat.label}</p>
@@ -380,7 +384,7 @@ export function EnhancedDashboardPage() {
       </div>
 
       {stats.clientsNeedingAttention > 0 && (
-        <Card className="border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20">
+        <Card className="border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/20 animate-fade-up" style={{ animationDelay: "200ms" }}>
           <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-amber-100 dark:bg-amber-900/40 p-2">
@@ -408,12 +412,12 @@ export function EnhancedDashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "300ms" }}>
         {isWidgetVisible('client_health') && (
         <Card data-testid="card-health-distribution">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <CardTitle className="text-[15px] font-semibold">Client Health</CardTitle>
+              <CardTitle className="text-base">Client Health</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
@@ -479,7 +483,7 @@ export function EnhancedDashboardPage() {
         <Card className="lg:col-span-2" data-testid="card-team-workload">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <CardTitle className="text-[15px] font-semibold">Team Workload</CardTitle>
+              <CardTitle className="text-base">Team Workload</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
@@ -493,7 +497,8 @@ export function EnhancedDashboardPage() {
           </CardHeader>
           <CardContent>
             {topWorkloads.length === 0 ? (
-              <div className="flex items-center justify-center h-32">
+              <div className="flex flex-col items-center justify-center h-32">
+                <Users className="h-8 w-8 opacity-40 mb-2" />
                 <p className="text-sm text-muted-foreground">No assignments yet</p>
               </div>
             ) : (
@@ -528,9 +533,9 @@ export function EnhancedDashboardPage() {
         )}
       </div>
 
-      <div>
+      <div className="animate-fade-up" style={{ animationDelay: "400ms" }}>
         <h2 className="text-sm font-medium text-muted-foreground mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           <Card
             className="hover-elevate cursor-pointer"
             onClick={() => setLocation("/reports")}
@@ -583,10 +588,10 @@ export function EnhancedDashboardPage() {
       </div>
 
       {isWidgetVisible('active_clients') && priorityClients.length > 0 && (
-        <Card data-testid="card-priority-clients">
+        <Card data-testid="card-priority-clients" className="animate-fade-up" style={{ animationDelay: "500ms" }}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <CardTitle className="text-[15px] font-semibold">Priority Clients</CardTitle>
+              <CardTitle className="text-base">Priority Clients</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
@@ -603,7 +608,7 @@ export function EnhancedDashboardPage() {
               {priorityClients.map((client, idx) => (
                 <div
                   key={client.id}
-                  className="flex items-center justify-between gap-3 flex-wrap p-3 rounded-md border hover-elevate cursor-pointer"
+                  className="flex items-center justify-between gap-3 flex-wrap p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group border"
                   onClick={() => setLocation(`/clients/${client.id}`)}
                   data-testid={`priority-client-${client.id}`}
                 >
@@ -630,11 +635,11 @@ export function EnhancedDashboardPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-up" style={{ animationDelay: "600ms" }}>
         {isWidgetVisible('recent_activity') && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-[15px] font-semibold">Recent Activity</CardTitle>
+            <CardTitle className="text-base">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[300px]">
@@ -642,7 +647,7 @@ export function EnhancedDashboardPage() {
                 {activityLogs.map((log, i) => (
                   <div
                     key={log.id}
-                    className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0"
+                    className="flex items-start gap-3 p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                     data-testid={`activity-log-${i}`}
                   >
                     <div className="rounded-md bg-muted p-1.5 mt-0.5">
@@ -657,7 +662,8 @@ export function EnhancedDashboardPage() {
                   </div>
                 ))}
                 {activityLogs.length === 0 && (
-                  <div className="flex items-center justify-center h-32">
+                  <div className="flex flex-col items-center justify-center h-32">
+                    <Clock className="h-8 w-8 opacity-40 mb-2" />
                     <p className="text-sm text-muted-foreground">No recent activity</p>
                   </div>
                 )}
@@ -670,7 +676,7 @@ export function EnhancedDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <CardTitle className="text-[15px] font-semibold">Recent Clients</CardTitle>
+              <CardTitle className="text-base">Recent Clients</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
@@ -687,7 +693,7 @@ export function EnhancedDashboardPage() {
               {recentClients.map((client, idx) => (
                 <div
                   key={client.id}
-                  className="flex items-center justify-between gap-3 flex-wrap py-3 border-b border-border/50 last:border-0 hover-elevate rounded-md px-2 -mx-2 cursor-pointer"
+                  className="flex items-center justify-between gap-3 flex-wrap p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
                   onClick={() => setLocation(`/clients/${client.id}`)}
                   data-testid={`client-${client.id}`}
                 >
@@ -711,6 +717,7 @@ export function EnhancedDashboardPage() {
               ))}
               {recentClients.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-32 space-y-3">
+                  <Briefcase className="h-8 w-8 opacity-40" />
                   <p className="text-sm text-muted-foreground">No clients yet</p>
                   <Button
                     variant="outline"

@@ -123,7 +123,7 @@ export function TimeTrackingPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex justify-between items-center gap-4 flex-wrap">
           <div>
             <Skeleton className="h-8 w-48 mb-2" />
@@ -131,7 +131,7 @@ export function TimeTrackingPage() {
           </div>
           <Skeleton className="h-9 w-28" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Skeleton className="h-24" />
           <Skeleton className="h-24" />
         </div>
@@ -141,11 +141,11 @@ export function TimeTrackingPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="animate-fade-up flex justify-between items-center gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Time Tracking</h1>
-          <p className="text-sm text-muted-foreground">Log and track time spent on client work</p>
+          <h1 className="text-2xl font-bold text-foreground">Time Tracking</h1>
+          <p className="text-muted-foreground mt-1">Log and track time spent on client work</p>
         </div>
         <Button onClick={() => setShowModal(true)} data-testid="button-log-time">
           <Plus className="h-4 w-4 mr-2" />
@@ -153,94 +153,96 @@ export function TimeTrackingPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-6">
+      <div className="animate-fade-up grid grid-cols-1 md:grid-cols-2 gap-6" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Total Hours</p>
-                <p className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-total-hours">{getTotalHours().toFixed(1)}</p>
+                <p className="text-2xl font-bold text-foreground" data-testid="text-total-hours">{getTotalHours().toFixed(1)}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/40">
+              <div className="rounded-lg p-2.5 bg-blue-50 dark:bg-blue-950/30">
                 <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Billable Revenue</p>
-                <p className="text-2xl font-semibold tracking-tight text-foreground" data-testid="text-total-revenue">${getTotalRevenue().toLocaleString()}</p>
+                <p className="text-2xl font-bold text-foreground" data-testid="text-total-revenue">${getTotalRevenue().toLocaleString()}</p>
               </div>
-              <div className="rounded-lg p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
-                <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="rounded-lg p-2.5 bg-green-50 dark:bg-green-950/30">
+                <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Employee</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Hours</TableHead>
-                <TableHead>Billable</TableHead>
-                <TableHead>Description</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.length === 0 ? (
+      <div className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12">
-                    <Clock className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-muted-foreground text-lg">No time entries yet</p>
-                    <p className="text-sm text-muted-foreground mt-2">Log your first time entry to get started</p>
-                  </TableCell>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Billable</TableHead>
+                  <TableHead>Description</TableHead>
                 </TableRow>
-              ) : (
-                entries.map(entry => (
-                  <TableRow key={entry.id} data-testid={`row-time-entry-${entry.id}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-foreground">{format(new Date(entry.date), 'MMM d, yyyy')}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium text-foreground">{entry.profiles?.full_name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-foreground">{entry.clients?.name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-foreground">{entry.services?.name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-semibold text-foreground">{entry.hours}h</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={entry.is_billable ? 'default' : 'secondary'} className="text-xs">
-                        {entry.is_billable ? 'Billable' : 'Non-billable'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-muted-foreground">{entry.description || '-'}</span>
+              </TableHeader>
+              <TableBody>
+                {entries.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12">
+                      <Clock className="h-8 w-8 opacity-40 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No time entries yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Log your first time entry to get started</p>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                ) : (
+                  entries.map(entry => (
+                    <TableRow key={entry.id} data-testid={`row-time-entry-${entry.id}`} className="hover:bg-muted/50 transition-colors cursor-pointer group">
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground">{format(new Date(entry.date), 'MMM d, yyyy')}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm font-medium text-foreground">{entry.profiles?.full_name}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-foreground">{entry.clients?.name}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-foreground">{entry.services?.name}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm font-semibold text-foreground">{entry.hours}h</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={entry.is_billable ? 'default' : 'secondary'} className="text-xs">
+                          {entry.is_billable ? 'Billable' : 'Non-billable'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">{entry.description || '-'}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl">

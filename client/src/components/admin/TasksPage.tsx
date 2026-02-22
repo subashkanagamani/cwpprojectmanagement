@@ -284,11 +284,11 @@ export function TasksPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Task Management</h1>
-          <p className="text-sm text-muted-foreground">Assign and manage daily tasks for employees</p>
+          <h1 className="text-2xl font-bold text-foreground">Task Management</h1>
+          <p className="text-muted-foreground mt-1">Assign and manage daily tasks for employees</p>
         </div>
         <Button onClick={openAddModal} data-testid="button-create-task">
           <Plus className="h-4 w-4 mr-2" />
@@ -296,9 +296,9 @@ export function TasksPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-up" style={{ animationDelay: "100ms" }}>
+        <Card className="stat-card-gradient orange">
+          <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Pending Tasks</p>
@@ -311,8 +311,8 @@ export function TasksPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="stat-card-gradient blue">
+          <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Overdue Tasks</p>
@@ -325,8 +325,8 @@ export function TasksPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="stat-card-gradient green">
+          <CardContent className="p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Completed Tasks</p>
@@ -340,7 +340,7 @@ export function TasksPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <CardContent className="p-4">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -434,23 +434,23 @@ export function TasksPage() {
       </Card>
 
       {tasks.length === 0 ? (
-        <Card>
+        <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
           <CardContent className="p-12 text-center">
-            <ClipboardList className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg">No tasks yet</p>
-            <p className="text-sm text-muted-foreground mt-2">Create your first task to get started</p>
+            <ClipboardList className="h-8 w-8 opacity-40 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No tasks yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Create your first task to get started</p>
           </CardContent>
         </Card>
       ) : sortedTasks.length === 0 ? (
-        <Card>
+        <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
           <CardContent className="p-12 text-center">
-            <Filter className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg">No tasks match your filters</p>
-            <p className="text-sm text-muted-foreground mt-2">Try adjusting your search or filters</p>
+            <Filter className="h-8 w-8 opacity-40 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No tasks match your filters</p>
+            <p className="text-sm text-muted-foreground mt-1">Try adjusting your search or filters</p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
           <CardContent className="p-0">
             <Table>
               <TableHeader>

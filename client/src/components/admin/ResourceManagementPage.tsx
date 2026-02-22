@@ -260,15 +260,15 @@ export function ResourceManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center gap-4 flex-wrap animate-fade-up">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Resource Management</h1>
-          <p className="text-sm text-muted-foreground">Manage capacity, time off, and skills</p>
+          <h1 className="text-2xl font-bold text-foreground">Resource Management</h1>
+          <p className="text-muted-foreground mt-1">Manage capacity, time off, and skills</p>
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap animate-fade-up" style={{ animationDelay: "100ms" }}>
         <Button
           data-testid="tab-capacity"
           variant={activeTab === 'capacity' ? 'default' : 'outline'}
@@ -294,7 +294,7 @@ export function ResourceManagementPage() {
 
       {activeTab === 'capacity' && (
         <>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-4 flex-wrap animate-fade-up" style={{ animationDelay: "200ms" }}>
             <Button
               data-testid="button-prev-week"
               variant="outline"
@@ -325,7 +325,7 @@ export function ResourceManagementPage() {
             </Button>
           </div>
 
-          <Card>
+          <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
             <CardContent className="p-0">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
@@ -378,7 +378,7 @@ export function ResourceManagementPage() {
 
       {activeTab === 'timeoff' && (
         <>
-          <div className="flex justify-end">
+          <div className="flex justify-end animate-fade-up" style={{ animationDelay: "200ms" }}>
             <Button
               data-testid="button-request-timeoff"
               onClick={() => setShowTimeOffModal(true)}
@@ -388,7 +388,7 @@ export function ResourceManagementPage() {
             </Button>
           </div>
 
-          <div className="space-y-4 max-h-[600px] overflow-y-auto">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto animate-fade-up" style={{ animationDelay: "300ms" }}>
             {timeOffRequests.map(request => (
               <Card key={request.id} data-testid={`card-timeoff-${request.id}`}>
                 <CardContent className="p-6">
@@ -445,7 +445,7 @@ export function ResourceManagementPage() {
 
       {activeTab === 'skills' && (
         <>
-          <div className="flex justify-end">
+          <div className="flex justify-end animate-fade-up" style={{ animationDelay: "200ms" }}>
             <Button
               data-testid="button-add-skill"
               onClick={() => setShowSkillModal(true)}
@@ -455,7 +455,7 @@ export function ResourceManagementPage() {
             </Button>
           </div>
 
-          <Card>
+          <Card className="animate-fade-up" style={{ animationDelay: "300ms" }}>
             <CardContent className="p-0">
               <div className="max-h-[600px] overflow-y-auto">
                 <Table>
