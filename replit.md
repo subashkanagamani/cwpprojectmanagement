@@ -93,7 +93,12 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - **Modals**: shadcn `Dialog` system - never custom Modal components
 - **Layout rules**: All `justify-between` flex rows must include `gap-*` AND `flex-wrap`
 - **Interactions**: Never add custom `hover:bg-*` to Button or Badge (they handle it automatically)
-- **Spacing**: `space-y-6` for page-level sections, `p-6` for card content
+- **Spacing**: `space-y-8` for page-level sections, `p-5` for card content, `gap-5` for grids
+- **Animations**: `animate-fade-up` on major sections with staggered `animationDelay` (100ms increments)
+- **Stat cards**: `stat-card-gradient {color}` class with colored top border accents (blue/green/purple/orange)
+- **Lists**: `p-3.5 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group` with ChevronRight hover indicators
+- **Empty states**: Centered icon (h-8 w-8 opacity-40) with text-sm text-muted-foreground
+- **CSS utilities**: `glass-card`, `stat-card-gradient`, `animate-fade-up`, `hover-elevate`
 
 ## Recent Changes
 - Migrated from Express+Drizzle to Supabase client-side SDK
@@ -121,3 +126,4 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Updated database.types.ts and shared/schema.ts with complete type definitions for all tables
 - Feb 2026: Removed hardcoded encryption key fallback for security
 - Feb 2026: Migration file: supabase/migrations/20260222_add_missing_tables_and_columns.sql (must be run in Supabase dashboard)
+- Feb 2026: Complete UI revamp - applied modern design system to ALL 45+ admin and employee pages with stat-card-gradient borders, animate-fade-up animations, hover effects, and consistent semantic tokens
