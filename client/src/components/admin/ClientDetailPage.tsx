@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { ClientLogo } from '../ProfileImage';
 
 interface ClientDetailPageProps {
   clientId: string;
@@ -86,6 +87,7 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
   const [loading, setLoading] = useState(true);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [clientLogoUrl, setClientLogoUrl] = useState<string | null>(null);
   const [assignFormData, setAssignFormData] = useState({
     employee_id: '',
     service_id: '',
@@ -133,6 +135,10 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
 
       if (clientRes.data) {
         setClient(clientRes.data);
+        const cf = clientRes.data.custom_fields;
+        if (cf && typeof cf === 'object' && (cf as any).logo) {
+          setClientLogoUrl((cf as any).logo);
+        }
         setEditFormData({
           name: clientRes.data.name,
           industry: clientRes.data.industry || '',
@@ -174,6 +180,22 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
       showToast('Failed to load client data', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClientLogoUploaded = async (objectPath: string) => {
+    if (!client) return;
+    try {
+      const existingFields = (client.custom_fields && typeof client.custom_fields === 'object') ? (client.custom_fields as Record<string, any>) : {};
+      const updatedFields = { ...existingFields, logo: objectPath };
+      const { error } = await (supabase.from('clients') as any)
+        .update({ custom_fields: updatedFields })
+        .eq('id', client.id);
+      if (error) throw error;
+      setClientLogoUrl(objectPath);
+      showToast('Client logo updated', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save logo', 'error');
     }
   };
 
@@ -339,6 +361,13 @@ export function ClientDetailPage({ clientId, onBack }: ClientDetailPageProps) {
           <Button variant="ghost" size="icon" onClick={onBack} data-testid="button-back-to-clients">
             <ArrowLeft className="h-4 w-4" />
           </Button>
+          <ClientLogo
+            src={clientLogoUrl}
+            name={client.name}
+            size="lg"
+            editable={true}
+            onImageUploaded={handleClientLogoUploaded}
+          />
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-foreground" data-testid="text-client-name">

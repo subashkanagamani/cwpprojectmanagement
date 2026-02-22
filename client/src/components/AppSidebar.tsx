@@ -16,7 +16,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Building2,
   LayoutDashboard,
@@ -180,6 +180,12 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
     return false;
   };
 
+  const profileImageUrl = (() => {
+    const cf = (profile as any)?.custom_fields;
+    if (cf && typeof cf === 'object' && cf.profile_image) return cf.profile_image;
+    return null;
+  })();
+
   const initials = profile?.full_name
     ? profile.full_name
         .split(" ")
@@ -238,6 +244,7 @@ export function AppSidebar({ isAdmin }: AppSidebarProps) {
       <SidebarFooter className="p-3">
         <div className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
           <Avatar className="h-8 w-8">
+            {profileImageUrl && <AvatarImage src={profileImageUrl} alt={profile?.full_name || 'User'} />}
             <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-indigo-500 text-white font-semibold">
               {initials}
             </AvatarFallback>

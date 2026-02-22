@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, User, Bell, Globe, Clock, Lock, Edit, X } from 'lucide-react';
+import { Settings, Save, User, Bell, Globe, Clock, Lock, Edit, X, Camera } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { ProfileImage } from '../ProfileImage';
 
 interface UserPreference {
   theme: string;
@@ -27,6 +28,7 @@ export function SettingsPage() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [passwordData, setPasswordData] = useState({ new_password: '', confirm_password: '' });
   const [changingPassword, setChangingPassword] = useState(false);
   const [preferences, setPreferences] = useState<UserPreference>({
@@ -50,8 +52,29 @@ export function SettingsPage() {
         full_name: profile.full_name || '',
         phone: (profile as any).phone || '',
       });
+      const cf = (profile as any).custom_fields;
+      if (cf && typeof cf === 'object' && cf.profile_image) {
+        setProfileImageUrl(cf.profile_image);
+      }
     }
   }, [profile]);
+
+  const handleProfileImageUploaded = async (objectPath: string) => {
+    if (!profile) return;
+    try {
+      const existingFields = ((profile as any).custom_fields && typeof (profile as any).custom_fields === 'object') ? (profile as any).custom_fields : {};
+      const updatedFields = { ...existingFields, profile_image: objectPath };
+      const { error } = await supabase
+        .from('profiles')
+        .update({ custom_fields: updatedFields } as any)
+        .eq('id', profile.id);
+      if (error) throw error;
+      setProfileImageUrl(objectPath);
+      showToast('Profile picture updated', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save profile picture', 'error');
+    }
+  };
 
   async function loadPreferences() {
     if (!user) return;
@@ -233,6 +256,20 @@ export function SettingsPage() {
                 )}
               </div>
               <div className="space-y-4 pl-7">
+                <div className="flex items-center gap-4 mb-2">
+                  <ProfileImage
+                    src={profileImageUrl}
+                    name={profile?.full_name || 'User'}
+                    size="xl"
+                    editable={true}
+                    onImageUploaded={handleProfileImageUploaded}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{profile?.full_name}</p>
+                    <p className="text-xs text-muted-foreground">{profile?.email}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Click the photo to change</p>
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="full-name">Full Name</Label>
                   <Input
