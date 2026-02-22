@@ -127,3 +127,9 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Removed hardcoded encryption key fallback for security
 - Feb 2026: Migration file: supabase/migrations/20260222_add_missing_tables_and_columns.sql (must be run in Supabase dashboard)
 - Feb 2026: Complete UI revamp - applied modern design system to ALL 45+ admin and employee pages with stat-card-gradient borders, animate-fade-up animations, hover effects, and consistent semantic tokens
+- Feb 2026: Built RevenueDashboardPage - client revenue/cost tracking with editable financials stored in custom_fields JSON, div-based bar charts
+- Feb 2026: Built PerformanceScoringPage - auto-calculated employee scores from report timeliness (30%), task completion (30%), quality (20%), consistency (20%)
+- Feb 2026: Built ReportPDFPage - branded PDF generation with jsPDF + jspdf-autotable, client/date/section selection
+- Feb 2026: Enhanced CalendarPage with HTML5 drag-and-drop event rescheduling (preserves time/duration)
+- Feb 2026: Enhanced SettingsPage with profile editing (name, phone) and password change
+- Feb 2026: Built ClientOnboardingPage - 8-step checklist tracked in clients.custom_fields.onboarding JSON
