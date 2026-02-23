@@ -150,12 +150,12 @@ export function CommunicationHubPage() {
         body: JSON.stringify({ to: emailTo, subject: emailSubject, body: emailBody }),
       });
 
+      const resData = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to send email');
+        throw new Error(resData.error || 'Failed to send email');
       }
 
-      showToast('Email sent successfully', 'success');
+      showToast(resData.message || 'Email sent successfully', 'success');
       setShowEmailModal(false);
       setEmailTo('');
       setEmailSubject('');

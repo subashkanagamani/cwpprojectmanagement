@@ -96,12 +96,12 @@ export default function EmailLogsPage() {
         body: JSON.stringify({ to: composeTo, subject: composeSubject, body: composeBody }),
       });
 
+      const resData = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to send email');
+        throw new Error(resData.error || 'Failed to send email');
       }
 
-      showToast('Email sent successfully', 'success');
+      showToast(resData.message || 'Email sent successfully', 'success');
       setIsComposeOpen(false);
       setComposeTo('');
       setComposeSubject('');

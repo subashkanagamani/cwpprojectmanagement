@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createClient } from "@supabase/supabase-js";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { Resend } from "resend";
 
 let supabaseUrl = process.env.VITE_SUPABASE_URL?.trim();
 if (supabaseUrl && supabaseUrl.startsWith('//')) {
@@ -137,7 +138,7 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // Email sending endpoint
+  // Email sending endpoint (via Resend)
   app.post("/api/email/send", async (req: Request, res: Response) => {
     const userId = await verifyAuth(req, res);
     if (!userId) return;
@@ -147,20 +148,51 @@ export function registerRoutes(app: Express) {
         return res.status(500).json({ error: "Supabase not configured" });
       }
 
-      const { to, subject, body, template_id } = req.body;
+      const { to, subject, body, template_id, from_name } = req.body;
       if (!to || !subject || !body) {
         return res.status(400).json({ error: "to, subject, and body are required" });
       }
 
-      // Log the email to email_logs table
+      let emailStatus = "logged";
+      let resendId: string | null = null;
+      let sendError: string | null = null;
+
+      const resendApiKey = process.env.RESEND_API_KEY;
+      const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
+      if (resendApiKey) {
+        try {
+          const resend = new Resend(resendApiKey);
+          const { data, error } = await resend.emails.send({
+            from: from_name ? `${from_name} <${fromEmail}>` : `ClientFlow <${fromEmail}>`,
+            to: Array.isArray(to) ? to : [to],
+            subject,
+            html: body,
+          });
+
+          if (error) {
+            console.error("Resend error:", error);
+            emailStatus = "failed";
+            sendError = error.message;
+          } else {
+            emailStatus = "sent";
+            resendId = data?.id || null;
+          }
+        } catch (resendErr: any) {
+          console.error("Resend send failed:", resendErr.message);
+          emailStatus = "failed";
+          sendError = resendErr.message;
+        }
+      }
+
       const { error: logError } = await (supabaseAdmin.from("email_logs") as any).insert({
-        recipient_email: to,
+        recipient_email: Array.isArray(to) ? to.join(", ") : to,
         subject,
         body,
         template_id: template_id || null,
         sent_by: userId,
-        status: 'sent',
-        sent_at: new Date().toISOString(),
+        status: emailStatus,
+        sent_at: emailStatus === "sent" ? new Date().toISOString() : null,
         created_at: new Date().toISOString(),
       });
 
@@ -168,7 +200,22 @@ export function registerRoutes(app: Express) {
         console.error("Email log error:", logError);
       }
 
-      res.json({ success: true, message: "Email logged successfully" });
+      if (emailStatus === "failed") {
+        return res.status(502).json({
+          success: false,
+          message: "Email delivery failed",
+          error: sendError,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: emailStatus === "sent"
+          ? "Email sent successfully"
+          : "Email logged (no email service configured)",
+        status: emailStatus,
+        resendId,
+      });
     } catch (error: any) {
       console.error("Email send error:", error.message);
       res.status(500).json({ error: error.message });
