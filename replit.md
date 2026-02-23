@@ -144,3 +144,10 @@ Enterprise client management and weekly reporting platform for marketing agencie
 - Feb 2026: Added admin role check to /api/credentials/decrypt endpoint for security
 - Feb 2026: Added allowedHosts: true to vite.config.ts for Replit iframe proxy compatibility
 - Feb 2026: Production build verified - Vite + esbuild bundle succeeds (2.4MB JS, 90KB CSS)
+- Feb 2026: Removed 5 duplicate page components (ModernDashboard, ModernClientsPage, BudgetTrackingPage, MyTasksPage, EnhancedEmployeeDashboard)
+- Feb 2026: Consolidated routes: EnhancedDashboardPage as admin dashboard, ClientsPage for /clients, BudgetsManagementPage for /budget
+- Feb 2026: Added React.lazy code splitting for all 40+ route components - initial bundle reduced from 2.4MB to 640KB (73% reduction)
+- Feb 2026: Enhanced ClientPortalView with dashboard KPI cards, greeting header, modern report cards, and detail view
+- Feb 2026: Added profile picture display to EmployeesPage, TeamMonitoringPage, and client logos to ClientsPage
+- Feb 2026: Added pro-rata billing calculation to RevenueDashboardPage for mid-month client onboarding
+- Feb 2026: Added email service status indicator in EmailLogsPage compose dialog (log-only notice)

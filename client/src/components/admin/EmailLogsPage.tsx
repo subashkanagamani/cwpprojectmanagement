@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Search, ExternalLink, CheckCircle, XCircle, Send, MousePointerClick } from 'lucide-react';
+import { Mail, Search, ExternalLink, CheckCircle, XCircle, Send, MousePointerClick, Info } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { format } from 'date-fns';
@@ -428,22 +428,28 @@ export default function EmailLogsPage() {
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsComposeOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSendEmail}
-              disabled={isSending}
-              className="gap-2"
-            >
-              <Send className="h-4 w-4" />
-              {isSending ? 'Sending...' : 'Send Email'}
-            </Button>
+          <DialogFooter className="flex-col gap-2">
+            <div className="flex justify-end gap-2 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsComposeOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSendEmail}
+                disabled={isSending}
+                className="gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {isSending ? 'Sending...' : 'Send Email'}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center w-full flex items-center justify-center gap-1">
+              <Info className="h-3 w-3 shrink-0" />
+              Emails are logged for tracking. Connect an email service to enable sending.
+            </p>
           </DialogFooter>
         </DialogContent>
       </Dialog>

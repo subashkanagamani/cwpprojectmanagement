@@ -133,6 +133,20 @@ function generateMonthlySchedule(
   return schedule.reverse();
 }
 
+function calculateProRata(monthlyAmount: number, startDate: string, targetMonth: Date): number {
+  const start = new Date(startDate);
+  const monthStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+  const monthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+  const daysInMonth = monthEnd.getDate();
+
+  if (start < monthStart) return monthlyAmount;
+
+  if (start > monthEnd) return 0;
+
+  const activeDays = daysInMonth - start.getDate() + 1;
+  return Math.round((monthlyAmount * activeDays / daysInMonth) * 100) / 100;
+}
+
 function HorizontalBarChart({ data, label, formatValue }: {
   data: { name: string; value: number }[];
   label: string;
@@ -503,6 +517,111 @@ export function RevenueDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {(() => {
+        const now = new Date();
+        const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const proRataClients = clients.filter(c => {
+          if (!c.start_date) return false;
+          const sd = new Date(c.start_date);
+          return sd.getFullYear() === currentMonth.getFullYear() &&
+            sd.getMonth() === currentMonth.getMonth() &&
+            sd.getDate() > 1;
+        });
+
+        if (proRataClients.length === 0) return null;
+
+        const totalFullBilling = proRataClients.reduce((s, c) => s + c.financials.monthly_revenue, 0);
+        const totalProrated = proRataClients.reduce((s, c) => s + calculateProRata(c.financials.monthly_revenue, c.start_date, currentMonth), 0);
+        const totalSavings = totalFullBilling - totalProrated;
+
+        return (
+          <Card className="animate-fade-up" style={{ animationDelay: "150ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-lg p-2 bg-blue-50 dark:bg-blue-950/30">
+                    <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-[15px] font-semibold">Pro-Rata Billing</CardTitle>
+                    <p className="text-xs text-muted-foreground mt-0.5">Clients onboarded mid-month in {format(currentMonth, 'MMMM yyyy')}</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="gap-1.5 text-[11px]">
+                  <Info className="h-3 w-3" />
+                  {proRataClients.length} prorated client{proRataClients.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 mb-5 p-3 rounded-lg bg-muted/50">
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Full Billing</p>
+                  <p className="text-lg font-semibold mt-0.5">{formatCurrency(totalFullBilling)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Prorated Amount</p>
+                  <p className="text-lg font-semibold mt-0.5 text-blue-600">{formatCurrency(totalProrated)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Adjustment</p>
+                  <p className="text-lg font-semibold mt-0.5 text-orange-600">-{formatCurrency(totalSavings)}</p>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead className="text-right">Monthly Rate</TableHead>
+                      <TableHead className="text-right">Active Days</TableHead>
+                      <TableHead className="text-right">Prorated Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {proRataClients.map(client => {
+                      const proratedAmount = calculateProRata(client.financials.monthly_revenue, client.start_date, currentMonth);
+                      const sd = new Date(client.start_date);
+                      const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+                      const daysInMonth = monthEnd.getDate();
+                      const activeDays = daysInMonth - sd.getDate() + 1;
+
+                      return (
+                        <TableRow key={client.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                {client.name.charAt(0).toUpperCase()}
+                              </div>
+                              <p className="text-sm font-medium truncate">{client.name}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {format(parseISO(client.start_date), 'MMM d, yyyy')}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-medium">
+                            {formatCurrency(client.financials.monthly_revenue)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="outline" className="text-[11px]">
+                              {activeDays}/{daysInMonth} days
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-semibold text-blue-600">
+                            {formatCurrency(proratedAmount)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <Tabs defaultValue="monthly" className="animate-fade-up" style={{ animationDelay: "200ms" }}>
         <TabsList className="mb-4">

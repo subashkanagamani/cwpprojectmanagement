@@ -603,6 +603,13 @@ function registerRoutes(app2) {
     const userId = await verifyAuth(req, res);
     if (!userId) return;
     try {
+      if (!supabaseAdmin) {
+        return res.status(500).json({ error: "Supabase not configured" });
+      }
+      const { data: requestingUser } = await supabaseAdmin.from("profiles").select("role").eq("id", userId).maybeSingle();
+      if (!requestingUser || requestingUser.role !== "admin") {
+        return res.status(403).json({ error: "Only admins can decrypt credentials" });
+      }
       const { encrypted_password } = req.body;
       if (!encrypted_password) {
         return res.status(400).json({ error: "Missing encrypted_password" });

@@ -572,11 +572,12 @@ export function EmployeesPage() {
                   <TableRow key={employee.id} data-testid={`row-employee-${employee.id}`}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar data-testid={`avatar-employee-${employee.id}`}>
-                          <AvatarImage
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.email}`}
-                            alt={employee.full_name}
-                          />
+                        <Avatar className="h-8 w-8" data-testid={`avatar-employee-${employee.id}`}>
+                          {(() => {
+                            const cf = employee.custom_fields;
+                            const imgUrl = cf && typeof cf === 'object' && (cf as any).profile_image ? (cf as any).profile_image : null;
+                            return imgUrl ? <AvatarImage src={imgUrl} alt={employee.full_name} className="object-cover" /> : null;
+                          })()}
                           <AvatarFallback className={`${avatarColor} text-white text-xs font-medium`}>
                             {getInitials(employee.full_name)}
                           </AvatarFallback>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -25,157 +25,164 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-import { EnhancedDashboardPage } from "./components/admin/EnhancedDashboardPage";
-import { ModernDashboard } from "./components/admin/ModernDashboard";
-import { ModernProjectsPage } from "./components/admin/ModernProjectsPage";
-import { EnhancedAnalyticsPage } from "./components/admin/EnhancedAnalyticsPage";
-import { ClientsPage } from "./components/admin/ClientsPage";
-import { ModernClientsPage } from "./components/admin/ModernClientsPage";
-import { ClientDetailPage } from "./components/admin/ClientDetailPage";
-import { EmployeesPage } from "./components/admin/EmployeesPage";
-import { AssignmentsPage } from "./components/admin/AssignmentsPage";
-import EnhancedAssignmentsPage from "./components/admin/EnhancedAssignmentsPage";
-import { ReportsPage } from "./components/admin/ReportsPage";
-import ConsolidatedReportsPage from "./components/admin/ConsolidatedReportsPage";
-import DealsPage from "./components/admin/DealsPage";
-import { BudgetTrackingPage } from "./components/admin/BudgetTrackingPage";
-import BudgetsManagementPage from "./components/admin/BudgetsManagementPage";
-import { BulkOperationsPage } from "./components/admin/BulkOperationsPage";
-import { ClientPortalPage } from "./components/admin/ClientPortalPage";
-import { ActivityLogsPage } from "./components/admin/ActivityLogsPage";
-import { CalendarPage } from "./components/admin/CalendarPage";
-import { GoalsPage } from "./components/admin/GoalsPage";
-import { TimeTrackingPage } from "./components/admin/TimeTrackingPage";
-import { CommunicationHubPage } from "./components/admin/CommunicationHubPage";
-import { ResourceManagementPage } from "./components/admin/ResourceManagementPage";
-import { ReportApprovalsPage } from "./components/admin/ReportApprovalsPage";
-import { EmailTemplatesPage } from "./components/admin/EmailTemplatesPage";
-import { DashboardCustomizationPage } from "./components/admin/DashboardCustomizationPage";
-import { BulkImportPage } from "./components/admin/BulkImportPage";
-import { PerformanceBenchmarksPage } from "./components/admin/PerformanceBenchmarksPage";
-import { CustomMetricsPage } from "./components/admin/CustomMetricsPage";
-import { TasksPage } from "./components/admin/TasksPage";
-import { SettingsPage } from "./components/admin/SettingsPage";
-import { ClientHealthDashboard } from "./components/admin/ClientHealthDashboard";
-import { EmployeeWorkloadDashboard } from "./components/admin/EmployeeWorkloadDashboard";
-import { AccountManagerDailyView } from "./components/admin/AccountManagerDailyView";
-import EnhancedDailyViewPage from "./components/admin/EnhancedDailyViewPage";
-import { TeamMonitoringPage } from "./components/admin/TeamMonitoringPage";
-import { ClientCredentialsPage } from "./components/admin/ClientCredentialsPage";
-import { EnhancedEmployeeDashboard } from "./components/employee/EnhancedEmployeeDashboard";
-import { ModernEmployeeDashboard } from "./components/employee/ModernEmployeeDashboard";
-import { EnhancedReportSubmissionPage } from "./components/employee/EnhancedReportSubmissionPage";
-import { MyTasksPage } from "./components/employee/MyTasksPage";
-import UnifiedTasksPage from "./components/employee/UnifiedTasksPage";
-import { TeamProgressTracker } from "./components/employee/TeamProgressTracker";
-import TimeEntryPage from "./components/employee/TimeEntryPage";
-import { FeedbackPage } from "./components/admin/FeedbackPage";
-import { TimeOffPage } from "./components/admin/TimeOffPage";
-import TimesheetsManagementPage from "./components/admin/TimesheetsManagementPage";
-import SharedDocumentsPage from "./components/admin/SharedDocumentsPage";
-import EmailLogsPage from "./components/admin/EmailLogsPage";
-import ReportTemplatesPage from "./components/admin/ReportTemplatesPage";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { GlobalSearch } from "./components/GlobalSearch";
-import { ClientOnboardingPage } from "./components/admin/ClientOnboardingPage";
-import { RevenueDashboardPage } from "./components/admin/RevenueDashboardPage";
-import { PerformanceScoringPage } from "./components/admin/PerformanceScoringPage";
-import { ReportPDFPage } from "./components/admin/ReportPDFPage";
+
+const EnhancedDashboardPage = lazy(() => import("./components/admin/EnhancedDashboardPage").then(m => ({ default: m.EnhancedDashboardPage })));
+const ModernProjectsPage = lazy(() => import("./components/admin/ModernProjectsPage").then(m => ({ default: m.ModernProjectsPage })));
+const EnhancedAnalyticsPage = lazy(() => import("./components/admin/EnhancedAnalyticsPage").then(m => ({ default: m.EnhancedAnalyticsPage })));
+const ClientsPage = lazy(() => import("./components/admin/ClientsPage").then(m => ({ default: m.ClientsPage })));
+const ClientDetailPage = lazy(() => import("./components/admin/ClientDetailPage").then(m => ({ default: m.ClientDetailPage })));
+const EmployeesPage = lazy(() => import("./components/admin/EmployeesPage").then(m => ({ default: m.EmployeesPage })));
+const EnhancedAssignmentsPage = lazy(() => import("./components/admin/EnhancedAssignmentsPage"));
+const ReportsPage = lazy(() => import("./components/admin/ReportsPage").then(m => ({ default: m.ReportsPage })));
+const ConsolidatedReportsPage = lazy(() => import("./components/admin/ConsolidatedReportsPage"));
+const DealsPage = lazy(() => import("./components/admin/DealsPage"));
+const BudgetsManagementPage = lazy(() => import("./components/admin/BudgetsManagementPage"));
+const BulkOperationsPage = lazy(() => import("./components/admin/BulkOperationsPage").then(m => ({ default: m.BulkOperationsPage })));
+const ClientPortalPage = lazy(() => import("./components/admin/ClientPortalPage").then(m => ({ default: m.ClientPortalPage })));
+const ActivityLogsPage = lazy(() => import("./components/admin/ActivityLogsPage").then(m => ({ default: m.ActivityLogsPage })));
+const CalendarPage = lazy(() => import("./components/admin/CalendarPage").then(m => ({ default: m.CalendarPage })));
+const GoalsPage = lazy(() => import("./components/admin/GoalsPage").then(m => ({ default: m.GoalsPage })));
+const TimeTrackingPage = lazy(() => import("./components/admin/TimeTrackingPage").then(m => ({ default: m.TimeTrackingPage })));
+const CommunicationHubPage = lazy(() => import("./components/admin/CommunicationHubPage").then(m => ({ default: m.CommunicationHubPage })));
+const ResourceManagementPage = lazy(() => import("./components/admin/ResourceManagementPage").then(m => ({ default: m.ResourceManagementPage })));
+const ReportApprovalsPage = lazy(() => import("./components/admin/ReportApprovalsPage").then(m => ({ default: m.ReportApprovalsPage })));
+const EmailTemplatesPage = lazy(() => import("./components/admin/EmailTemplatesPage").then(m => ({ default: m.EmailTemplatesPage })));
+const DashboardCustomizationPage = lazy(() => import("./components/admin/DashboardCustomizationPage").then(m => ({ default: m.DashboardCustomizationPage })));
+const BulkImportPage = lazy(() => import("./components/admin/BulkImportPage").then(m => ({ default: m.BulkImportPage })));
+const PerformanceBenchmarksPage = lazy(() => import("./components/admin/PerformanceBenchmarksPage").then(m => ({ default: m.PerformanceBenchmarksPage })));
+const CustomMetricsPage = lazy(() => import("./components/admin/CustomMetricsPage").then(m => ({ default: m.CustomMetricsPage })));
+const TasksPage = lazy(() => import("./components/admin/TasksPage").then(m => ({ default: m.TasksPage })));
+const SettingsPage = lazy(() => import("./components/admin/SettingsPage").then(m => ({ default: m.SettingsPage })));
+const ClientHealthDashboard = lazy(() => import("./components/admin/ClientHealthDashboard").then(m => ({ default: m.ClientHealthDashboard })));
+const EmployeeWorkloadDashboard = lazy(() => import("./components/admin/EmployeeWorkloadDashboard").then(m => ({ default: m.EmployeeWorkloadDashboard })));
+const AccountManagerDailyView = lazy(() => import("./components/admin/AccountManagerDailyView").then(m => ({ default: m.AccountManagerDailyView })));
+const EnhancedDailyViewPage = lazy(() => import("./components/admin/EnhancedDailyViewPage"));
+const TeamMonitoringPage = lazy(() => import("./components/admin/TeamMonitoringPage").then(m => ({ default: m.TeamMonitoringPage })));
+const ClientCredentialsPage = lazy(() => import("./components/admin/ClientCredentialsPage").then(m => ({ default: m.ClientCredentialsPage })));
+const FeedbackPage = lazy(() => import("./components/admin/FeedbackPage").then(m => ({ default: m.FeedbackPage })));
+const TimeOffPage = lazy(() => import("./components/admin/TimeOffPage").then(m => ({ default: m.TimeOffPage })));
+const TimesheetsManagementPage = lazy(() => import("./components/admin/TimesheetsManagementPage"));
+const SharedDocumentsPage = lazy(() => import("./components/admin/SharedDocumentsPage"));
+const EmailLogsPage = lazy(() => import("./components/admin/EmailLogsPage"));
+const ReportTemplatesPage = lazy(() => import("./components/admin/ReportTemplatesPage"));
+const ClientOnboardingPage = lazy(() => import("./components/admin/ClientOnboardingPage").then(m => ({ default: m.ClientOnboardingPage })));
+const RevenueDashboardPage = lazy(() => import("./components/admin/RevenueDashboardPage").then(m => ({ default: m.RevenueDashboardPage })));
+const PerformanceScoringPage = lazy(() => import("./components/admin/PerformanceScoringPage").then(m => ({ default: m.PerformanceScoringPage })));
+const ReportPDFPage = lazy(() => import("./components/admin/ReportPDFPage").then(m => ({ default: m.ReportPDFPage })));
+
+const ModernEmployeeDashboard = lazy(() => import("./components/employee/ModernEmployeeDashboard").then(m => ({ default: m.ModernEmployeeDashboard })));
+const EnhancedReportSubmissionPage = lazy(() => import("./components/employee/EnhancedReportSubmissionPage").then(m => ({ default: m.EnhancedReportSubmissionPage })));
+const UnifiedTasksPage = lazy(() => import("./components/employee/UnifiedTasksPage"));
+const TeamProgressTracker = lazy(() => import("./components/employee/TeamProgressTracker").then(m => ({ default: m.TeamProgressTracker })));
+const TimeEntryPage = lazy(() => import("./components/employee/TimeEntryPage"));
+
+function PageLoader() {
+  return (
+    <div className="space-y-6 animate-fade-up">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-72" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[1, 2, 3, 4].map(i => (
+          <Card key={i}><CardContent className="p-5"><Skeleton className="h-4 w-24 mb-3" /><Skeleton className="h-8 w-16 mb-2" /><Skeleton className="h-3 w-20" /></CardContent></Card>
+        ))}
+      </div>
+      <Card><CardContent className="p-6"><Skeleton className="h-[200px]" /></CardContent></Card>
+    </div>
+  );
+}
 
 function AdminRoutes() {
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [, setLocation] = useLocation();
 
-  const handleViewClient = (clientId: string) => {
-    setSelectedClientId(clientId);
-    setLocation("/clients/" + clientId);
-  };
-
   const handleBackToClients = () => {
-    setSelectedClientId(null);
     setLocation("/clients");
   };
 
   return (
-    <Switch>
-      <Route path="/" component={ModernDashboard} />
-      <Route path="/dashboard" component={ModernDashboard} />
-      <Route path="/projects" component={ModernProjectsPage} />
-      <Route path="/overview" component={EnhancedDashboardPage} />
-      <Route path="/analytics" component={EnhancedAnalyticsPage} />
-      <Route path="/clients">
-        <ModernClientsPage />
-      </Route>
-      <Route path="/clients/:id">
-        {(params) => (
-          <ClientDetailPage clientId={params.id} onBack={handleBackToClients} />
-        )}
-      </Route>
-      <Route path="/client-health" component={ClientHealthDashboard} />
-      <Route path="/deals" component={DealsPage} />
-      <Route path="/employees" component={EmployeesPage} />
-      <Route path="/workload" component={EmployeeWorkloadDashboard} />
-      <Route path="/daily-view" component={EnhancedDailyViewPage} />
-      <Route path="/team-monitoring" component={TeamMonitoringPage} />
-      <Route path="/assignments" component={EnhancedAssignmentsPage} />
-      <Route path="/reports" component={ReportsPage} />
-      <Route path="/consolidated-reports" component={ConsolidatedReportsPage} />
-      <Route path="/calendar" component={CalendarPage} />
-      <Route path="/goals" component={GoalsPage} />
-      <Route path="/tasks" component={TasksPage} />
-      <Route path="/feedback" component={FeedbackPage} />
-      <Route path="/time-off" component={TimeOffPage} />
-      <Route path="/timesheets" component={TimesheetsManagementPage} />
-      <Route path="/time-tracking" component={TimeTrackingPage} />
-      <Route path="/documents" component={SharedDocumentsPage} />
-      <Route path="/email-logs" component={EmailLogsPage} />
-      <Route path="/report-templates" component={ReportTemplatesPage} />
-      <Route path="/communications" component={CommunicationHubPage} />
-      <Route path="/resources" component={ResourceManagementPage} />
-      <Route path="/budget" component={BudgetTrackingPage} />
-      <Route path="/budgets" component={BudgetsManagementPage} />
-      <Route path="/benchmarks" component={PerformanceBenchmarksPage} />
-      <Route path="/metrics" component={CustomMetricsPage} />
-      <Route path="/approvals" component={ReportApprovalsPage} />
-      <Route path="/templates" component={EmailTemplatesPage} />
-      <Route path="/customize" component={DashboardCustomizationPage} />
-      <Route path="/import" component={BulkImportPage} />
-      <Route path="/bulk" component={BulkOperationsPage} />
-      <Route path="/portal" component={ClientPortalPage} />
-      <Route path="/credentials" component={ClientCredentialsPage} />
-      <Route path="/logs" component={ActivityLogsPage} />
-      <Route path="/settings" component={SettingsPage} />
-      <Route path="/onboarding" component={ClientOnboardingPage} />
-      <Route path="/revenue" component={RevenueDashboardPage} />
-      <Route path="/performance" component={PerformanceScoringPage} />
-      <Route path="/report-pdf" component={ReportPDFPage} />
-      <Route>
-        <Redirect to="/dashboard" />
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={EnhancedDashboardPage} />
+        <Route path="/dashboard" component={EnhancedDashboardPage} />
+        <Route path="/projects" component={ModernProjectsPage} />
+        <Route path="/analytics" component={EnhancedAnalyticsPage} />
+        <Route path="/clients">
+          {() => <ClientsPage />}
+        </Route>
+        <Route path="/clients/:id">
+          {(params) => (
+            <ClientDetailPage clientId={params.id} onBack={handleBackToClients} />
+          )}
+        </Route>
+        <Route path="/client-health" component={ClientHealthDashboard} />
+        <Route path="/deals" component={DealsPage} />
+        <Route path="/employees" component={EmployeesPage} />
+        <Route path="/workload" component={EmployeeWorkloadDashboard} />
+        <Route path="/daily-view" component={EnhancedDailyViewPage} />
+        <Route path="/team-monitoring" component={TeamMonitoringPage} />
+        <Route path="/assignments" component={EnhancedAssignmentsPage} />
+        <Route path="/reports" component={ReportsPage} />
+        <Route path="/consolidated-reports" component={ConsolidatedReportsPage} />
+        <Route path="/calendar" component={CalendarPage} />
+        <Route path="/goals" component={GoalsPage} />
+        <Route path="/tasks" component={TasksPage} />
+        <Route path="/feedback" component={FeedbackPage} />
+        <Route path="/time-off" component={TimeOffPage} />
+        <Route path="/timesheets" component={TimesheetsManagementPage} />
+        <Route path="/time-tracking" component={TimeTrackingPage} />
+        <Route path="/documents" component={SharedDocumentsPage} />
+        <Route path="/email-logs" component={EmailLogsPage} />
+        <Route path="/report-templates" component={ReportTemplatesPage} />
+        <Route path="/communications" component={CommunicationHubPage} />
+        <Route path="/resources" component={ResourceManagementPage} />
+        <Route path="/budget" component={BudgetsManagementPage} />
+        <Route path="/benchmarks" component={PerformanceBenchmarksPage} />
+        <Route path="/metrics" component={CustomMetricsPage} />
+        <Route path="/approvals" component={ReportApprovalsPage} />
+        <Route path="/templates" component={EmailTemplatesPage} />
+        <Route path="/customize" component={DashboardCustomizationPage} />
+        <Route path="/import" component={BulkImportPage} />
+        <Route path="/bulk" component={BulkOperationsPage} />
+        <Route path="/portal" component={ClientPortalPage} />
+        <Route path="/credentials" component={ClientCredentialsPage} />
+        <Route path="/logs" component={ActivityLogsPage} />
+        <Route path="/settings" component={SettingsPage} />
+        <Route path="/onboarding" component={ClientOnboardingPage} />
+        <Route path="/revenue" component={RevenueDashboardPage} />
+        <Route path="/performance" component={PerformanceScoringPage} />
+        <Route path="/report-pdf" component={ReportPDFPage} />
+        <Route>
+          <Redirect to="/dashboard" />
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 
 function EmployeeRoutes() {
   return (
-    <Switch>
-      <Route path="/" component={ModernEmployeeDashboard} />
-      <Route path="/dashboard" component={ModernEmployeeDashboard} />
-      <Route path="/reports" component={EnhancedReportSubmissionPage} />
-      <Route path="/tasks" component={UnifiedTasksPage} />
-      <Route path="/time-entry" component={TimeEntryPage} />
-      <Route path="/account-manager" component={AccountManagerDailyView} />
-      <Route path="/team-progress" component={TeamProgressTracker} />
-      <Route path="/feedback" component={FeedbackPage} />
-      <Route path="/time-off" component={TimeOffPage} />
-      <Route path="/credentials" component={ClientCredentialsPage} />
-      <Route path="/calendar" component={CalendarPage} />
-      <Route path="/documents" component={SharedDocumentsPage} />
-      <Route path="/settings" component={SettingsPage} />
-      <Route>
-        <Redirect to="/dashboard" />
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={ModernEmployeeDashboard} />
+        <Route path="/dashboard" component={ModernEmployeeDashboard} />
+        <Route path="/reports" component={EnhancedReportSubmissionPage} />
+        <Route path="/tasks" component={UnifiedTasksPage} />
+        <Route path="/time-entry" component={TimeEntryPage} />
+        <Route path="/account-manager" component={AccountManagerDailyView} />
+        <Route path="/team-progress" component={TeamProgressTracker} />
+        <Route path="/feedback" component={FeedbackPage} />
+        <Route path="/time-off" component={TimeOffPage} />
+        <Route path="/credentials" component={ClientCredentialsPage} />
+        <Route path="/calendar" component={CalendarPage} />
+        <Route path="/documents" component={SharedDocumentsPage} />
+        <Route path="/settings" component={SettingsPage} />
+        <Route>
+          <Redirect to="/dashboard" />
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 

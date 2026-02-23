@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface ClientWithDetails extends Client {
   assignmentCount?: number;
@@ -571,7 +571,12 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
                   <TableRow key={client.id} data-testid={`row-client-${client.id}`}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar data-testid={`avatar-client-${client.id}`}>
+                        <Avatar className="h-8 w-8" data-testid={`avatar-client-${client.id}`}>
+                          {(() => {
+                            const cf = client.custom_fields;
+                            const logoUrl = cf && typeof cf === 'object' && (cf as any).logo ? (cf as any).logo : null;
+                            return logoUrl ? <AvatarImage src={logoUrl} alt={client.name} className="object-cover" /> : null;
+                          })()}
                           <AvatarFallback className={`${AVATAR_COLORS[index % AVATAR_COLORS.length]} text-white text-xs font-medium`}>
                             {getInitials(client.name)}
                           </AvatarFallback>

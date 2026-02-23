@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -43,6 +43,7 @@ interface TeamMember {
   role: string;
   status: string;
   level: number;
+  custom_fields?: Record<string, any>;
 }
 
 interface TeamMemberStats {
@@ -127,6 +128,21 @@ export function TeamMonitoringPage() {
       );
 
       if (membersError) throw membersError;
+
+      if (members && members.length > 0) {
+        const memberIds = members.map((m: TeamMember) => m.id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, custom_fields')
+          .in('id', memberIds);
+
+        const cfMap = new Map<string, any>();
+        profilesData?.forEach((p: any) => cfMap.set(p.id, p.custom_fields));
+
+        members.forEach((m: any) => {
+          m.custom_fields = cfMap.get(m.id) || null;
+        });
+      }
 
       setTeamMembers(members || []);
 
@@ -411,6 +427,11 @@ export function TeamMonitoringPage() {
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
+                              {(() => {
+                                const cf = member?.custom_fields;
+                                const imgUrl = cf && typeof cf === 'object' && cf.profile_image ? cf.profile_image : null;
+                                return imgUrl ? <AvatarImage src={imgUrl} alt={stats.employee_name} className="object-cover" /> : null;
+                              })()}
                               <AvatarFallback className="bg-blue-600 text-white font-medium">
                                 {stats.employee_name.charAt(0).toUpperCase()}
                               </AvatarFallback>
