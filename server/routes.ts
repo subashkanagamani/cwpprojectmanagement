@@ -235,7 +235,7 @@ export function registerRoutes(app: Express) {
       const { data: profile, error } = await (supabaseAdmin
         .from("profiles") as any)
         .select("*")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (error) throw error;
@@ -303,7 +303,7 @@ export function registerRoutes(app: Express) {
 
       const { data: requestingUser } = await (supabaseAdmin.from("profiles") as any)
         .select("role")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (!requestingUser || requestingUser.role !== 'admin') {
@@ -415,7 +415,7 @@ export function registerRoutes(app: Express) {
       // Verify requesting user is admin
       const { data: requestingUser } = await (supabaseAdmin.from("profiles") as any)
         .select("role")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (!requestingUser || requestingUser.role !== 'admin') {
@@ -470,7 +470,7 @@ export function registerRoutes(app: Express) {
       // Verify requesting user is admin
       const { data: requestingUser } = await (supabaseAdmin.from("profiles") as any)
         .select("role")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (!requestingUser || requestingUser.role !== 'admin') {
@@ -496,7 +496,7 @@ export function registerRoutes(app: Express) {
 
       // Create profile (trigger should handle this, but we'll insert directly for reliability)
       const { error: profileError } = await (supabaseAdmin.from("profiles") as any).insert({
-        id: authData.user.id,
+        user_id: authData.user.id,
         email,
         full_name,
         role,
