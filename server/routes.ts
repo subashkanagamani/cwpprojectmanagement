@@ -229,8 +229,11 @@ export function registerRoutes(app: Express) {
 
     try {
       if (!supabaseAdmin) {
+        console.error("Supabase admin client not initialized");
         return res.status(500).json({ error: "Supabase not configured" });
       }
+
+      console.log("Fetching profile for user_id:", userId);
 
       const { data: profile, error } = await (supabaseAdmin
         .from("profiles") as any)
@@ -238,7 +241,12 @@ export function registerRoutes(app: Express) {
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Profile query error:", error);
+        throw error;
+      }
+
+      console.log("Profile found:", profile ? "yes" : "no");
 
       if (profile) {
         return res.json(profile);
@@ -257,9 +265,10 @@ export function registerRoutes(app: Express) {
       }
 
       // Profile should have been auto-created by trigger, but if not, return error
+      console.error("No profile or portal user found for user_id:", userId);
       return res.status(404).json({ error: "No profile found. Please contact administrator." });
     } catch (error: any) {
-      console.error("Profile endpoint error:", error.message);
+      console.error("Profile endpoint error:", error.message, error);
       res.status(500).json({ error: error.message });
     }
   });
