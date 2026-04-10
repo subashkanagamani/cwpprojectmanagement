@@ -85,9 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         if (event === 'INITIAL_SESSION') {
           hasInitialized = true;
-          if (session?.user && session?.access_token) {
+          if (session?.user) {
             setUser(session.user);
-            await loadProfile(session.access_token);
+            await loadProfile(session.user.id);
           } else {
             setUser(null);
             setLoading(false);
@@ -95,8 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (event === 'SIGNED_IN') {
           hasInitialized = true;
           setUser(session?.user ?? null);
-          if (session?.user && session?.access_token) {
-            await loadProfile(session.access_token);
+          if (session?.user) {
+            await loadProfile(session.user.id);
           }
           setSessionExpired(false);
         } else if (event === 'SIGNED_OUT') {
@@ -110,8 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSessionExpired(false);
         } else if (event === 'USER_UPDATED') {
           setUser(session?.user ?? null);
-          if (session?.user && session?.access_token) {
-            await loadProfile(session.access_token);
+          if (session?.user) {
+            await loadProfile(session.user.id);
           }
         }
       } catch (error) {
@@ -135,40 +135,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const loadProfile = async (accessToken: string) => {
+  const loadProfile = async (userId: string) => {
     try {
-      console.log('Loading profile with token...');
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      // Use our server endpoint which bypasses RLS
-      const response = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      if (error) throw error;
 
-      console.log('Profile response status:', response.status);
-
-      if (response.status === 401) {
-        setSessionExpired(true);
-        await supabase.auth.signOut();
+      if (profileData) {
+        setProfile(profileData as Profile);
+        setIsPortalUser(false);
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(`Profile load failed: ${response.status}`);
-      }
+      const { data: portalUser } = await supabase
+        .from('client_portal_users')
+        .select('*')
+        .eq('auth_user_id', userId)
+        .eq('is_active', true)
+        .maybeSingle();
 
-      const profileData = await response.json();
-      console.log('Profile loaded:', profileData);
-
-      if (profileData._portalUser) {
+      if (portalUser) {
         setIsPortalUser(true);
         setProfile(null);
-      } else {
-        setProfile(profileData);
-        setIsPortalUser(false);
+        return;
       }
+
+      console.warn('No profile found for user:', userId);
     } catch (error: any) {
       console.error('Error loading profile:', error?.message || error);
       if (isAuthError(error)) {
@@ -178,7 +174,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { await supabase.auth.signOut(); } catch {}
       }
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
