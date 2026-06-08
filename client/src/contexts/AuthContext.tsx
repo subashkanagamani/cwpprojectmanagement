@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: portalUser } = await supabase
         .from('client_portal_users')
         .select('*')
-        .eq('auth_user_id', userId)
+        .eq('user_id', userId)
         .eq('is_active', true)
         .maybeSingle();
 
