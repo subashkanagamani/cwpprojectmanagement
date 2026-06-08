@@ -1,0 +1,22 @@
+-- Insert employee users into auth.users so profiles FK is satisfied
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role)
+VALUES
+  ('22222222-0000-0000-0000-000000000001', 'meenakshi@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Meenakshi"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000002', 'naren@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Naren"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000003', 'ganesh@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Ganesh"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000004', 'roopesh@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Roopesh"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000005', 'manikandan@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Manikandan"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000006', 'gokul@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Gokul"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000007', 'manoj@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Manoj"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000008', 'divya@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Divya"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000009', 'mohan@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Mohan"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000010', 'kavya@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Kavya"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000011', 'vasu@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Vasu"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000012', 'ali@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Md Ali"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000013', 'bharani@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Bharani"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000014', 'nilavan@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Nilavan"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000015', 'raj@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Raj"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000016', 'shatabdi@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Shatabdi"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000017', 'subash@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Subash"}', 'authenticated', 'authenticated'),
+  ('22222222-0000-0000-0000-000000000018', 'banasree@clientflow.local', crypt('Welcome@123', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Banasree"}', 'authenticated', 'authenticated')
+ON CONFLICT (id) DO NOTHING;
