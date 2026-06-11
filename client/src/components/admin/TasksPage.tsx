@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePagination } from '../../hooks/usePagination';
+import { PaginationControls } from '../PaginationControls';
 
 interface Task {
   id: string;
@@ -264,6 +266,8 @@ export function TasksPage() {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
+  const taskPagination = usePagination(sortedTasks, 20);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -466,7 +470,7 @@ export function TasksPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedTasks.map((task) => {
+                {taskPagination.paginatedData.map((task) => {
                   const overdue = isOverdue(task);
 
                   return (
@@ -569,6 +573,18 @@ export function TasksPage() {
               </TableBody>
             </Table>
           </CardContent>
+          {taskPagination.totalPages > 1 && (
+            <div className="px-4 py-4 border-t">
+              <PaginationControls
+                currentPage={taskPagination.currentPage}
+                totalPages={taskPagination.totalPages}
+                totalItems={taskPagination.totalItems}
+                pageSize={taskPagination.pageSize}
+                onPageChange={taskPagination.goToPage}
+                onPageSizeChange={taskPagination.setPageSize}
+              />
+            </div>
+          )}
         </Card>
       )}
 

@@ -10,6 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePagination } from '../../hooks/usePagination';
+import { PaginationControls } from '../PaginationControls';
 
 interface Timesheet {
   id: string;
@@ -47,6 +49,8 @@ export default function TimesheetsManagementPage() {
   const [selectedTimesheets, setSelectedTimesheets] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState('submitted');
   const [weekFilter, setWeekFilter] = useState('');
+
+  const timesheetPagination = usePagination(timesheets, 20);
 
   useEffect(() => {
     fetchTimesheets();
@@ -280,7 +284,7 @@ export default function TimesheetsManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {timesheets.map((timesheet) => (
+                {timesheetPagination.paginatedData.map((timesheet) => (
                   <TableRow key={timesheet.id} data-testid={`row-timesheet-${timesheet.id}`} className="hover:bg-muted/50 transition-colors cursor-pointer group">
                     <TableCell>
                       <Checkbox
@@ -345,6 +349,19 @@ export default function TimesheetsManagementPage() {
               <div className="p-12 text-center">
                 <Clock className="h-8 w-8 opacity-40 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No timesheets found</p>
+              </div>
+            )}
+
+            {timesheetPagination.totalPages > 1 && (
+              <div className="p-4 border-t">
+                <PaginationControls
+                  currentPage={timesheetPagination.currentPage}
+                  totalPages={timesheetPagination.totalPages}
+                  totalItems={timesheets.length}
+                  pageSize={timesheetPagination.pageSize}
+                  onPageChange={timesheetPagination.goToPage}
+                  onPageSizeChange={timesheetPagination.setPageSize}
+                />
               </div>
             )}
           </CardContent>

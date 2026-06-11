@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'wouter';
 import { supabase } from '../../lib/supabase';
 import { Profile, Client, ClientAssignment, Service } from '../../lib/database.types';
-import { Plus, CreditCard as Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3, Trash2 } from 'lucide-react';
+import { Plus, CreditCard as Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3, Trash2, ExternalLink } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { usePagination } from '../../hooks/usePagination';
+import { PaginationControls } from '../PaginationControls';
 
 interface EmployeeWithDetails extends Profile {
   assignmentCount?: number;
@@ -54,6 +57,7 @@ function getWorkloadBadge(count: number, capacity: number) {
 
 export function EmployeesPage() {
   const { showToast } = useToast();
+  const [, setLocation] = useLocation();
   const [employees, setEmployees] = useState<EmployeeWithDetails[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -337,6 +341,8 @@ export function EmployeesPage() {
     });
   }, [employees, searchTerm, roleFilter, statusFilter]);
 
+  const employeePagination = usePagination(filteredEmployees, 15);
+
   const statCards = [
     {
       label: 'Total Team Members',
@@ -548,7 +554,7 @@ export function EmployeesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEmployees.map((employee, index) => {
+              {employeePagination.paginatedData.map((employee, index) => {
                 const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
                 const capacityPct = getCapacityPercentage(employee.assignmentCount || 0, employee.max_capacity || 5);
                 const workload = getWorkloadBadge(employee.assignmentCount || 0, employee.max_capacity || 5);
@@ -654,6 +660,15 @@ export function EmployeesPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => setLocation(`/employees/${employee.id}`)}
+                          data-testid={`button-view-employee-${employee.id}`}
+                          title="View Profile"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => openModal(employee)}
                           data-testid={`button-edit-employee-${employee.id}`}
                         >
@@ -685,6 +700,18 @@ export function EmployeesPage() {
             </TableBody>
           </Table>
         </CardContent>
+        {employeePagination.totalPages > 1 && (
+          <div className="px-4 py-4 border-t">
+            <PaginationControls
+              currentPage={employeePagination.currentPage}
+              totalPages={employeePagination.totalPages}
+              totalItems={employeePagination.totalItems}
+              pageSize={employeePagination.pageSize}
+              onPageChange={employeePagination.goToPage}
+              onPageSizeChange={employeePagination.setPageSize}
+            />
+          </div>
+        )}
       </Card>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>

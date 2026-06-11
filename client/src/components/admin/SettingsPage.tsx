@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Save, User, Bell, Globe, Clock, Lock, Edit, X, Camera } from 'lucide-react';
+import { Settings, Save, User, Bell, Globe, Clock, Lock, CreditCard as Edit, X, Camera } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -134,6 +134,21 @@ export function SettingsPage() {
 
     if (passwordData.new_password.length < 8) {
       showToast('Password must be at least 8 characters', 'error');
+      return;
+    }
+
+    if (!/[A-Z]/.test(passwordData.new_password)) {
+      showToast('Password must contain at least one uppercase letter', 'error');
+      return;
+    }
+
+    if (!/[0-9]/.test(passwordData.new_password)) {
+      showToast('Password must contain at least one number', 'error');
+      return;
+    }
+
+    if (!/[^A-Za-z0-9]/.test(passwordData.new_password)) {
+      showToast('Password must contain at least one special character', 'error');
       return;
     }
 
@@ -443,9 +458,23 @@ export function SettingsPage() {
                     type="password"
                     value={passwordData.new_password}
                     onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                    placeholder="Enter new password (min 8 characters)"
+                    placeholder="Min 8 chars, uppercase, number, special char"
                     className="mt-1"
                   />
+                  {passwordData.new_password.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {[
+                        { ok: passwordData.new_password.length >= 8, label: 'At least 8 characters' },
+                        { ok: /[A-Z]/.test(passwordData.new_password), label: 'One uppercase letter' },
+                        { ok: /[0-9]/.test(passwordData.new_password), label: 'One number' },
+                        { ok: /[^A-Za-z0-9]/.test(passwordData.new_password), label: 'One special character' },
+                      ].map(({ ok, label }) => (
+                        <p key={label} className={`text-xs flex items-center gap-1.5 ${ok ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                          <span>{ok ? '✓' : '✗'}</span> {label}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -461,9 +490,6 @@ export function SettingsPage() {
                 </div>
                 {passwordData.new_password && passwordData.confirm_password && passwordData.new_password !== passwordData.confirm_password && (
                   <p className="text-sm text-red-500">Passwords do not match</p>
-                )}
-                {passwordData.new_password && passwordData.new_password.length > 0 && passwordData.new_password.length < 8 && (
-                  <p className="text-sm text-red-500">Password must be at least 8 characters</p>
                 )}
                 <div className="flex justify-end">
                   <Button

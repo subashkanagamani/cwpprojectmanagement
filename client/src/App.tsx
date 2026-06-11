@@ -35,6 +35,7 @@ const EnhancedAnalyticsPage = lazy(() => import("./components/admin/EnhancedAnal
 const ClientsPage = lazy(() => import("./components/admin/ClientsPage").then(m => ({ default: m.ClientsPage })));
 const ClientDetailPage = lazy(() => import("./components/admin/ClientDetailPage").then(m => ({ default: m.ClientDetailPage })));
 const EmployeesPage = lazy(() => import("./components/admin/EmployeesPage").then(m => ({ default: m.EmployeesPage })));
+const EmployeeDetailPage = lazy(() => import("./components/admin/EmployeeDetailPage").then(m => ({ default: m.EmployeeDetailPage })));
 const EnhancedAssignmentsPage = lazy(() => import("./components/admin/EnhancedAssignmentsPage"));
 const ReportsPage = lazy(() => import("./components/admin/ReportsPage").then(m => ({ default: m.ReportsPage })));
 const ConsolidatedReportsPage = lazy(() => import("./components/admin/ConsolidatedReportsPage"));
@@ -101,6 +102,10 @@ function AdminRoutes() {
     setLocation("/clients");
   };
 
+  const handleBackToEmployees = () => {
+    setLocation("/employees");
+  };
+
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -119,6 +124,11 @@ function AdminRoutes() {
         <Route path="/client-health" component={ClientHealthDashboard} />
         <Route path="/deals" component={DealsPage} />
         <Route path="/employees" component={EmployeesPage} />
+        <Route path="/employees/:id">
+          {(params) => (
+            <EmployeeDetailPage employeeId={params.id} onBack={handleBackToEmployees} />
+          )}
+        </Route>
         <Route path="/workload" component={EmployeeWorkloadDashboard} />
         <Route path="/daily-view" component={EnhancedDailyViewPage} />
         <Route path="/team-monitoring" component={TeamMonitoringPage} />

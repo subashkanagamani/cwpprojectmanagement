@@ -13,6 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { usePagination } from '../../hooks/usePagination';
+import { PaginationControls } from '../PaginationControls';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -375,6 +377,8 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
     });
   }, [clients, searchTerm, statusFilter]);
 
+  const clientPagination = usePagination(filteredClients, 15);
+
   const statusFilterOptions = [
     { value: 'all' as const, label: 'All' },
     { value: 'active' as const, label: 'Active' },
@@ -535,7 +539,7 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredClients.map((client, index) => (
+                {clientPagination.paginatedData.map((client, index) => (
                   <TableRow key={client.id} data-testid={`row-client-${client.id}`}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -668,6 +672,18 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
               </TableBody>
             </Table>
           </CardContent>
+          {clientPagination.totalPages > 1 && (
+            <div className="px-4 py-4 border-t">
+              <PaginationControls
+                currentPage={clientPagination.currentPage}
+                totalPages={clientPagination.totalPages}
+                totalItems={clientPagination.totalItems}
+                pageSize={clientPagination.pageSize}
+                onPageChange={clientPagination.goToPage}
+                onPageSizeChange={clientPagination.setPageSize}
+              />
+            </div>
+          )}
         </Card>
       )}
 
