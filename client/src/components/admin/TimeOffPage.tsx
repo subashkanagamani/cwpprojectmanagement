@@ -172,7 +172,6 @@ export function TimeOffPage() {
         .update({
           status: 'rejected',
           approved_by: profile.id,
-          approved_at: new Date().toISOString(),
         })
         .eq('id', requestId);
 

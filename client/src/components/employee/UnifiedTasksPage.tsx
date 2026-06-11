@@ -73,6 +73,7 @@ export default function UnifiedTasksPage() {
           clients(name)
         `)
         .eq("assigned_to", profile.id)
+        .is("deleted_at", null)
         .order("due_date", { ascending: true });
 
       if (filterStatus !== "all") {
@@ -85,7 +86,7 @@ export default function UnifiedTasksPage() {
 
       const tasksWithType = (data || []).map((task: any) => ({
         ...task,
-        task_type: task.is_daily_task ? "daily" : "assigned",
+        task_type: "assigned",
       }));
 
       setTasks(tasksWithType);
@@ -136,7 +137,6 @@ export default function UnifiedTasksPage() {
         due_date: formData.due_date,
         status: formData.status,
         assigned_to: profile?.id,
-        is_daily_task: false,
       };
 
       if (editingTask) {

@@ -83,10 +83,10 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
   const loadData = async () => {
     try {
       const [clientsRes, servicesRes, employeesRes, assignmentsRes, budgetsRes] = await Promise.all([
-        supabase.from('clients').select('*').order('created_at', { ascending: false }),
+        supabase.from('clients').select('*').is('deleted_at', null).order('created_at', { ascending: false }),
         supabase.from('services').select('*').eq('is_active', true),
         supabase.from('profiles').select('*').eq('role', 'employee').eq('status', 'active'),
-        supabase.from('client_assignments').select('*, profiles(*), services(*)'),
+        supabase.from('client_assignments').select('*, profiles(*), services(*)').is('deleted_at', null),
         supabase.from('client_budgets').select('client_id, monthly_budget'),
       ]);
 
@@ -250,7 +250,7 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
 
         if (error) throw error;
 
-        await supabase.from('client_assignments').delete().eq('client_id', editingClient.id);
+        await supabase.from('client_assignments').update({ deleted_at: new Date().toISOString() }).eq('client_id', editingClient.id);
 
         if (formData.selectedEmployees.length > 0) {
           const assignments = formData.selectedEmployees.map((emp) => ({
@@ -329,7 +329,7 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
     if (!confirm('Are you sure you want to delete this client? This will also remove all related assignments and data.')) return;
 
     try {
-      const { error } = await supabase.from('clients').delete().eq('id', id);
+      const { error } = await supabase.from('clients').update({ deleted_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
       loadData();
     } catch (error) {

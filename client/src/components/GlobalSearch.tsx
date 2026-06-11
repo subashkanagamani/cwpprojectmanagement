@@ -85,7 +85,7 @@ export function GlobalSearch({ compact = false }: { compact?: boolean }) {
         supabase
           .from('weekly_reports')
           .select('id, week_start_date, status, client:clients(name)')
-          .or(`status.ilike.${searchTerm},week_start_date.ilike.${searchTerm}`)
+          .ilike('status', searchTerm)
           .limit(5) as any,
         supabase
           .from('tasks')

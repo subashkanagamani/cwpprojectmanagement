@@ -88,7 +88,7 @@ export function EmployeesPage() {
   const loadEmployees = async () => {
     try {
       const [employeesRes, clientsRes, servicesRes, assignmentsRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').is('deleted_at', null).order('created_at', { ascending: false }),
         supabase.from('clients').select('*').eq('status', 'active'),
         supabase.from('services').select('*').eq('is_active', true),
         supabase.from('client_assignments').select('*, clients(*), services(*)'),
@@ -268,7 +268,7 @@ export function EmployeesPage() {
     try {
       const { error } = await supabase
         .from('profiles')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', employee.id);
 
       if (error) throw error;

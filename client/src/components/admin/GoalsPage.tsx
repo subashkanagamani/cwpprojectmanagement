@@ -65,6 +65,7 @@ export function GoalsPage() {
     const { data, error } = await supabase
       .from('goals')
       .select('*, clients(name), services(name)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -164,6 +165,21 @@ export function GoalsPage() {
     }
   };
 
+  const handleDelete = async (goalId: string) => {
+    if (!confirm('Are you sure you want to delete this goal?')) return;
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', goalId);
+      if (error) throw error;
+      showToast('Goal deleted', 'success');
+      loadGoals();
+    } catch {
+      showToast('Failed to delete goal', 'error');
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
@@ -257,6 +273,15 @@ export function GoalsPage() {
                     data-testid={`button-edit-goal-${goal.id}`}
                   >
                     Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(goal.id)}
+                    data-testid={`button-delete-goal-${goal.id}`}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Delete
                   </Button>
                 </div>
               </div>

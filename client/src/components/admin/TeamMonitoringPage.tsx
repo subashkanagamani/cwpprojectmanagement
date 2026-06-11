@@ -534,8 +534,7 @@ export function TeamMonitoringPage() {
                                 {report.profiles.full_name}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {format(new Date(report.week_start), 'MMM d')} -{' '}
-                                {format(new Date(report.week_end), 'MMM d, yyyy')}
+                                Week of {format(new Date(report.week_start_date), 'MMM d, yyyy')}
                               </div>
                             </div>
                           </div>

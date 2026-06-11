@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Plus, Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle, Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle, Search, Filter, ArrowUpDown } from 'lucide-react';
 import { format, parseISO, isPast, isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -86,6 +86,7 @@ export function TasksPage() {
             profiles!tasks_assigned_to_fkey(full_name, email),
             clients(name)
           `)
+          .is('deleted_at', null)
           .order('due_date', { ascending: true }),
         supabase
           .from('profiles')
@@ -184,7 +185,7 @@ export function TasksPage() {
     try {
       const { error } = await supabase
         .from('tasks')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) throw error;

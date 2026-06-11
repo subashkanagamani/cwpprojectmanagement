@@ -118,17 +118,40 @@ export default function TimeEntryPage() {
         return;
       }
 
-      const entriesToUpsert = validEntries.map(e => ({
-        ...e,
+      const toInsert = validEntries.filter(e => !e.id).map(e => ({
+        date: e.date,
+        client_id: e.client_id,
+        service_id: e.service_id,
+        hours: e.hours,
+        description: e.description,
+        is_billable: e.is_billable,
         employee_id: user?.id,
-        id: e.id || undefined
       }));
 
-      const { error } = await (supabase
-        .from('time_entries') as any)
-        .upsert(entriesToUpsert, { onConflict: 'id' });
+      const toUpdate = validEntries.filter(e => !!e.id).map(e => ({
+        id: e.id,
+        date: e.date,
+        client_id: e.client_id,
+        service_id: e.service_id,
+        hours: e.hours,
+        description: e.description,
+        is_billable: e.is_billable,
+        employee_id: user?.id,
+      }));
 
-      if (error) throw error;
+      const ops: Promise<any>[] = [];
+      if (toInsert.length > 0) {
+        ops.push((supabase.from('time_entries') as any).insert(toInsert));
+      }
+      for (const entry of toUpdate) {
+        ops.push(
+          (supabase.from('time_entries') as any).update(entry).eq('id', entry.id)
+        );
+      }
+      const results = await Promise.all(ops);
+      for (const { error } of results) {
+        if (error) throw error;
+      }
 
       showToast('Time entries saved successfully', 'success');
       loadData();

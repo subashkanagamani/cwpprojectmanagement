@@ -18,10 +18,14 @@ interface Timesheet {
   status: 'draft' | 'submitted' | 'approved' | 'rejected';
   total_hours: number;
   submitted_at: string;
+  approved_by: string | null;
   profiles: {
     full_name: string;
     email: string;
   };
+  approver?: {
+    full_name: string;
+  } | null;
 }
 
 interface TimeEntry {
@@ -55,7 +59,8 @@ export default function TimesheetsManagementPage() {
         .from('timesheets')
         .select(`
           *,
-          profiles:employee_id(full_name, email)
+          profiles:employee_id(full_name, email),
+          approver:approved_by(full_name)
         `)
         .order('week_start', { ascending: false });
 

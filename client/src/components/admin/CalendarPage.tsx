@@ -118,7 +118,6 @@ export function CalendarPage() {
       end_time: formData.end_time || null,
       location: formData.location || null,
       created_by: user.id,
-      attendees: [],
     };
 
     try {
