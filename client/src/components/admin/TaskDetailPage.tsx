@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, User, Building2, Clock, CheckCircle2, Circle, AlertTriangle, Edit2, Trash2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Building2, Clock, CheckCircle2, Circle, AlertTriangle, CreditCard as Edit2, Trash2, MessageSquare } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
