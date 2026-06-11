@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Plus, CreditCard as Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle, Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, CheckCircle2, Circle, Building2, Calendar, User, ClipboardList, AlertTriangle, Search, Filter, ArrowUpDown, ExternalLink } from 'lucide-react';
 import { format, parseISO, isPast, isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,6 +54,7 @@ interface Client {
 export function TasksPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const [, setLocation] = useLocation();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -536,6 +538,15 @@ export function TasksPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 flex-wrap">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setLocation(`/tasks/${task.id}`)}
+                            data-testid={`button-view-task-${task.id}`}
+                            title="View details"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"

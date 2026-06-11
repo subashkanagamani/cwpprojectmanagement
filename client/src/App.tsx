@@ -56,6 +56,7 @@ const BulkImportPage = lazy(() => import("./components/admin/BulkImportPage").th
 const PerformanceBenchmarksPage = lazy(() => import("./components/admin/PerformanceBenchmarksPage").then(m => ({ default: m.PerformanceBenchmarksPage })));
 const CustomMetricsPage = lazy(() => import("./components/admin/CustomMetricsPage").then(m => ({ default: m.CustomMetricsPage })));
 const TasksPage = lazy(() => import("./components/admin/TasksPage").then(m => ({ default: m.TasksPage })));
+const TaskDetailPage = lazy(() => import("./components/admin/TaskDetailPage").then(m => ({ default: m.TaskDetailPage })));
 const SettingsPage = lazy(() => import("./components/admin/SettingsPage").then(m => ({ default: m.SettingsPage })));
 const ClientHealthDashboard = lazy(() => import("./components/admin/ClientHealthDashboard").then(m => ({ default: m.ClientHealthDashboard })));
 const EmployeeWorkloadDashboard = lazy(() => import("./components/admin/EmployeeWorkloadDashboard").then(m => ({ default: m.EmployeeWorkloadDashboard })));
@@ -106,6 +107,10 @@ function AdminRoutes() {
     setLocation("/employees");
   };
 
+  const handleBackToTasks = () => {
+    setLocation("/tasks");
+  };
+
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -138,6 +143,11 @@ function AdminRoutes() {
         <Route path="/calendar" component={CalendarPage} />
         <Route path="/goals" component={GoalsPage} />
         <Route path="/tasks" component={TasksPage} />
+        <Route path="/tasks/:id">
+          {(params) => (
+            <TaskDetailPage taskId={params.id} onBack={handleBackToTasks} />
+          )}
+        </Route>
         <Route path="/feedback" component={FeedbackPage} />
         <Route path="/time-off" component={TimeOffPage} />
         <Route path="/timesheets" component={TimesheetsManagementPage} />
