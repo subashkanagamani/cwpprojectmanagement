@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Profile, Client, ClientAssignment, Service } from '../../lib/database.types';
-import { Plus, Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3, Trash2 } from 'lucide-react';
+import { Plus, CreditCard as Edit2, X, CheckCircle, XCircle, Search, Briefcase, Users, UserCheck, AlertTriangle, BarChart3, Trash2 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -112,7 +112,7 @@ export function EmployeesPage() {
       if (clientsRes.data) setClients(clientsRes.data);
       if (servicesRes.data) setServices(servicesRes.data);
     } catch (error) {
-      console.error('Error loading employees:', error);
+      showToast('Failed to load employees', 'error');
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,6 @@ export function EmployeesPage() {
       setShowModal(false);
       loadEmployees();
     } catch (error: any) {
-      console.error('Error saving employee:', error);
       showToast(error.message || 'Failed to save employee', 'error');
     }
   };
@@ -218,22 +217,10 @@ export function EmployeesPage() {
     if (!selectedEmployee) return;
 
     try {
-      const { data: clientServices } = await supabase
-        .from('client_services')
-        .select('service_id')
-        .eq('client_id', assignFormData.client_id)
-        .eq('service_id', assignFormData.service_id)
-        .maybeSingle();
-
-      if (!clientServices) {
-        showToast('This service is not enabled for this client. Please enable it first.', 'error');
-        return;
-      }
-
       const { error } = await supabase.from('client_assignments').insert({
         client_id: assignFormData.client_id,
         employee_id: selectedEmployee.id,
-        service_id: assignFormData.service_id,
+        service_id: assignFormData.service_id || null,
       });
 
       if (error) {
@@ -264,7 +251,7 @@ export function EmployeesPage() {
       if (error) throw error;
       loadEmployees();
     } catch (error) {
-      console.error('Error updating employee status:', error);
+      showToast('Failed to update employee status', 'error');
     }
   };
 
@@ -289,7 +276,6 @@ export function EmployeesPage() {
       showToast(`${employee.full_name} deleted successfully`, 'success');
       loadEmployees();
     } catch (error: any) {
-      console.error('Error deleting employee:', error);
       showToast(error.message || 'Failed to delete employee', 'error');
     }
   };

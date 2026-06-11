@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { supabase } from '../../lib/supabase';
 import { Client, Service, Profile, ClientAssignment } from '../../lib/database.types';
-import { Plus, Edit2, Trash2, Users, Search, DollarSign, AlertCircle, Eye, X, Briefcase, Activity, UserCheck } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Users, Search, DollarSign, AlertCircle, Eye, X, Briefcase, Activity, UserCheck } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { ClientHealthIndicator } from '../ClientHealthIndicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -112,7 +112,7 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
       if (servicesRes.data) setServices(servicesRes.data);
       if (employeesRes.data) setEmployees(employeesRes.data);
     } catch (error) {
-      console.error('Error loading data:', error);
+      showToast('Failed to load data', 'error');
     } finally {
       setLoading(false);
     }
@@ -164,10 +164,10 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
   const openModal = async (client?: Client) => {
     if (client) {
       setEditingClient(client);
-      const [{ data: clientServices }, { data: clientAssignments }] = await Promise.all([
-        supabase.from('client_services').select('service_id').eq('client_id', client.id),
-        supabase.from('client_assignments').select('employee_id, service_id').eq('client_id', client.id),
-      ]);
+      const { data: clientAssignments } = await supabase
+        .from('client_assignments')
+        .select('employee_id, service_id')
+        .eq('client_id', client.id);
 
       setFormData({
         name: client.name,
@@ -183,7 +183,7 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
         website: client.website || '',
         weekly_meeting_day: client.weekly_meeting_day?.toString() || '',
         meeting_time: client.meeting_time || '10:00',
-        selectedServices: clientServices?.map((cs) => cs.service_id) || [],
+        selectedServices: [...new Set((clientAssignments || []).map((ca) => ca.service_id).filter(Boolean))],
         selectedEmployees: clientAssignments || [],
       });
     } else {
@@ -250,24 +250,13 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
 
         if (error) throw error;
 
-        await Promise.all([
-          supabase.from('client_services').delete().eq('client_id', editingClient.id),
-          supabase.from('client_assignments').delete().eq('client_id', editingClient.id),
-        ]);
-
-        if (formData.selectedServices.length > 0) {
-          const clientServices = formData.selectedServices.map((serviceId) => ({
-            client_id: editingClient.id,
-            service_id: serviceId,
-          }));
-          await supabase.from('client_services').insert(clientServices);
-        }
+        await supabase.from('client_assignments').delete().eq('client_id', editingClient.id);
 
         if (formData.selectedEmployees.length > 0) {
           const assignments = formData.selectedEmployees.map((emp) => ({
             client_id: editingClient.id,
             employee_id: emp.employee_id,
-            service_id: emp.service_id,
+            service_id: emp.service_id || null,
           }));
           await supabase.from('client_assignments').insert(assignments);
         }
@@ -281,19 +270,11 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
         if (error) throw error;
 
         if (newClient) {
-          if (formData.selectedServices.length > 0) {
-            const clientServices = formData.selectedServices.map((serviceId) => ({
-              client_id: newClient.id,
-              service_id: serviceId,
-            }));
-            await supabase.from('client_services').insert(clientServices);
-          }
-
           if (formData.selectedEmployees.length > 0) {
             const assignments = formData.selectedEmployees.map((emp) => ({
               client_id: newClient.id,
               employee_id: emp.employee_id,
-              service_id: emp.service_id,
+              service_id: emp.service_id || null,
             }));
             await supabase.from('client_assignments').insert(assignments);
           }
@@ -304,7 +285,6 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
       showToast(editingClient ? 'Client updated successfully' : 'Client created successfully', 'success');
       loadData();
     } catch (error) {
-      console.error('Error saving client:', error);
       showToast('Failed to save client', 'error');
     }
   };
@@ -319,22 +299,10 @@ export function ClientsPage({ onViewClient }: ClientsPageProps = {}) {
     }
 
     try {
-      const { data: clientServices } = await supabase
-        .from('client_services')
-        .select('service_id')
-        .eq('client_id', selectedClient.id)
-        .eq('service_id', assignFormData.service_id)
-        .maybeSingle();
-
-      if (!clientServices) {
-        showToast('This service is not enabled for this client. Please enable it first.', 'error');
-        return;
-      }
-
       const assignments = assignFormData.employee_ids.map(employee_id => ({
         client_id: selectedClient.id,
         employee_id: employee_id,
-        service_id: assignFormData.service_id,
+        service_id: assignFormData.service_id || null,
       }));
 
       const { error } = await supabase.from('client_assignments').insert(assignments);

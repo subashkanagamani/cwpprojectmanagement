@@ -60,8 +60,7 @@ interface TeamMemberStats {
 interface WeeklyReport {
   id: string;
   employee_id: string;
-  week_start: string;
-  week_end: string;
+  week_start_date: string;
   work_summary: string;
   challenges: string;
   next_week_plan: string;
@@ -196,8 +195,8 @@ export function TeamMonitoringPage() {
           .from('weekly_reports')
           .select('*, profiles:employee_id(full_name, email)')
           .in('employee_id', memberIds)
-          .gte('week_start', weekStart.toISOString())
-          .lte('week_end', weekEnd.toISOString())
+          .gte('week_start_date', weekStart.toISOString().split('T')[0])
+          .lte('week_start_date', weekEnd.toISOString().split('T')[0])
           .order('created_at', { ascending: false });
 
         if (reportsError) throw reportsError;
