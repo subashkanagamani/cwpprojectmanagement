@@ -29,7 +29,7 @@ export function SettingsPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [passwordData, setPasswordData] = useState({ new_password: '', confirm_password: '' });
+  const [passwordData, setPasswordData] = useState({ current_password: '', new_password: '', confirm_password: '' });
   const [changingPassword, setChangingPassword] = useState(false);
   const [preferences, setPreferences] = useState<UserPreference>({
     theme: 'light',
@@ -127,6 +127,11 @@ export function SettingsPage() {
   }
 
   async function handleChangePassword() {
+    if (!passwordData.current_password) {
+      showToast('Please enter your current password', 'error');
+      return;
+    }
+
     if (passwordData.new_password !== passwordData.confirm_password) {
       showToast('Passwords do not match', 'error');
       return;
@@ -154,6 +159,15 @@ export function SettingsPage() {
 
     setChangingPassword(true);
     try {
+      const { error: reAuthError } = await supabase.auth.signInWithPassword({
+        email: user!.email!,
+        password: passwordData.current_password,
+      });
+      if (reAuthError) {
+        showToast('Current password is incorrect', 'error');
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: passwordData.new_password,
       });
@@ -161,7 +175,7 @@ export function SettingsPage() {
       if (error) throw error;
 
       showToast('Password changed successfully', 'success');
-      setPasswordData({ new_password: '', confirm_password: '' });
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
     } catch (error: any) {
       showToast(error.message || 'Failed to change password', 'error');
     } finally {
@@ -451,6 +465,18 @@ export function SettingsPage() {
               </h2>
               <div className="space-y-4 pl-7">
                 <div>
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <Input
+                    id="current-password"
+                    data-testid="input-current-password"
+                    type="password"
+                    value={passwordData.current_password}
+                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                    placeholder="Enter your current password"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="new-password">New Password</Label>
                   <Input
                     id="new-password"
@@ -494,7 +520,7 @@ export function SettingsPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleChangePassword}
-                    disabled={changingPassword || !passwordData.new_password || !passwordData.confirm_password}
+                    disabled={changingPassword || !passwordData.current_password || !passwordData.new_password || !passwordData.confirm_password}
                     variant="destructive"
                   >
                     <Lock className="w-4 h-4 mr-2" />

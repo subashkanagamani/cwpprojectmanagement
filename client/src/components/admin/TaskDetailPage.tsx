@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, User, Building2, Clock, CheckCircle2, Circle, AlertTriangle, CreditCard as Edit2, Trash2, MessageSquare } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../contexts/ToastContext';
-import { useAuth } from '../../contexts/AuthContext';
 import { format, isPast, isToday, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,7 +63,6 @@ function getDueBadge(dueDate: string, status: string) {
 
 export function TaskDetailPage({ taskId, onBack }: Props) {
   const { showToast } = useToast();
-  const { user } = useAuth();
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
